@@ -1,13 +1,13 @@
+import Map from './components/map';
+
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className="flex flex-1 items-center justify-center p-4">
-        <div className="text-center select-none">
-          <div className="flex items-baseline justify-center">
-            <h1 className="font-serif text-4xl">PM25 Forecast</h1>
-          </div>
-        </div>
-      </main>
+    <div className="relative h-screen w-full">
+      <Map />
+      <div className="bg-foreground/30 absolute top-4 left-4 z-10 max-w-[400px] rounded-lg px-4 py-2 backdrop-blur-sm select-none">
+        <h1 className="text-background font-mono text-xl">Air Quality Forecast</h1>
+        <p className="text-background/70 font-mono text-xs">Forecast for the next seven days.</p>
+      </div>
     </div>
   );
 }
