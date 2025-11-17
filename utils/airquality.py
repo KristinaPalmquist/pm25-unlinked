@@ -4,6 +4,8 @@ import time
 import requests
 import pandas as pd
 import json
+import numpy as np
+from math import radians, cos, sin, asin, sqrt
 from geopy.geocoders import Nominatim
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
@@ -14,6 +16,7 @@ from retry_requests import retry
 import hopsworks
 import hsfs
 from pathlib import Path
+
 
 def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     # latitude, longitude = get_city_coordinates(city)
@@ -37,10 +40,10 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
 
     # Process first location. Add a for-loop for multiple locations or weather models
     response = responses[0]
-    print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    print(f"Elevation {response.Elevation()} m asl")
-    print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-    print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
+    # print(f"Elevation {response.Elevation()} m asl")
+    # print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
     # Process daily data. The order of variables needs to be the same as requested.
     daily = response.Daily()
@@ -65,6 +68,7 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
     daily_dataframe['city'] = city
     return daily_dataframe
 
+
 def get_hourly_weather_forecast(city, latitude, longitude):
 
     # latitude, longitude = get_city_coordinates(city)
@@ -86,10 +90,10 @@ def get_hourly_weather_forecast(city, latitude, longitude):
 
     # Process first location. Add a for-loop for multiple locations or weather models
     response = responses[0]
-    print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    print(f"Elevation {response.Elevation()} m asl")
-    print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-    print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
+    # print(f"Elevation {response.Elevation()} m asl")
+    # print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
     # Process hourly data. The order of variables needs to be the same as requested.
 
@@ -115,7 +119,6 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     return hourly_dataframe
 
 
-
 def get_city_coordinates(city_name: str):
     """
     Takes city name and returns its latitude and longitude (rounded to 2 digits after dot).
@@ -128,6 +131,7 @@ def get_city_coordinates(city_name: str):
     longitude = round(city.longitude, 2)
 
     return latitude, longitude
+
 
 def trigger_request(url:str):
     response = requests.get(url)
@@ -238,6 +242,7 @@ def delete_feature_groups(fs, name):
     except hsfs.client.exceptions.RestAPIError:
         print(f"No {name} feature group found")
 
+
 def delete_feature_views(fs, name):
     try:
         for fv in fs.get_feature_views(name):
@@ -245,6 +250,7 @@ def delete_feature_views(fs, name):
             print(f"Deleted {fv.name}/{fv.version}")
     except hsfs.client.exceptions.RestAPIError:
         print(f"No {name} feature view found")
+
 
 def delete_models(mr, name):
     models = mr.get_models(name)
@@ -254,6 +260,7 @@ def delete_models(mr, name):
         model.delete()
         print(f"Deleted model {model.name}/{model.version}")
 
+
 def delete_secrets(proj, name):
     secrets = secrets_api(proj.name)
     try:
@@ -262,6 +269,7 @@ def delete_secrets(proj, name):
         print(f"Deleted secret {name}")
     except hopsworks.client.exceptions.RestAPIError:
         print(f"No {name} secret found")
+
 
 # WARNING - this will wipe out all your feature data and models
 def purge_project(proj):
@@ -280,12 +288,14 @@ def purge_project(proj):
     delete_models(mr, "air_quality_xgboost_model")
     delete_secrets(proj, "SENSOR_LOCATION_JSON")
 
+
 def check_file_path(file_path):
     my_file = Path(file_path)
     if my_file.is_file() == False:
         print(f"Error. File not found at the path: {file_path} ")
     else:
         print(f"File successfully found at the path: {file_path}")
+
 
 def backfill_predictions_for_monitoring(weather_fg, air_quality_df, monitor_fg, model):
     features_df = weather_fg.read()
@@ -298,3 +308,85 @@ def backfill_predictions_for_monitoring(weather_fg, air_quality_df, monitor_fg, 
     df = df.drop('pm25', axis=1)
     monitor_fg.insert(df, write_options={"wait_for_job": True})
     return hindcast_df
+
+
+def read_sensor_data(file_path):
+    """
+    Reads the sensor data from the CSV file. The first three rows contains metadata.
+    """
+    with open(file_path, "r", encoding="utf-8") as f:
+        street, city, country = [
+            s.strip()
+            for s in f.readline()
+            .strip()
+            .lstrip("# Sensor ")
+            .split("(")[0]
+            .strip()
+            .split(",")
+        ]
+        url_line = f.readline().strip().lstrip("# ").strip()
+        sensor_id = url_line.split("@")[1].split("/")[0]
+        _ = f.readline().strip()
+    df = pd.read_csv(file_path, skiprows=3)
+    feed_url = f"https://api.waqi.info/feed/A{sensor_id}/"
+    return df, street, city, country, feed_url, sensor_id
+
+
+def add_rolling_window_feature(df, window_days=3, column="pm25", new_column="pm25_rolling_3d"):
+    df = df.sort_values(["sensor_id", "date"]).copy()
+    
+    df_indexed = df.set_index("date", append=False)
+    df_indexed[f"{column}_shifted"] = df_indexed.groupby("sensor_id")[column].shift(1)
+    
+    df[new_column] = (
+        df_indexed.groupby("sensor_id")[f"{column}_shifted"]
+        .rolling(window=f"{window_days}D", min_periods=1)
+        .mean()
+        .reset_index(level=0, drop=True)
+        .values
+    )
+    return df
+
+
+def add_lagged_features(df, column="pm25", lags=[1, 2, 3]):
+    df = df.sort_values(["sensor_id", "date"]).copy()
+    
+    for lag in lags:
+        new_column = f"{column}_lag_{lag}d"
+        df[new_column] = df.groupby("sensor_id")[column].shift(lag)
+    return df
+
+
+def add_nearby_sensor_feature(df, locations, column="pm25_lag_1d", n_closest=3, new_column="pm25_nearby_avg"):
+    """
+    Adds a feature by averaging the specified column from the n_closest sensors.
+    """
+    def haversine(lat1, lon1, lat2, lon2):
+        # Function to calculate the distance between two points on the Earth's surface
+        R = 6371
+        dlat, dlon = radians(lat2 - lat1), radians(lon2 - lon1)
+        a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
+        return 2 * R * asin(sqrt(a))
+    
+    closest_map = {}
+    for sid, loc in locations.items():
+        distances = [
+            (oid, haversine(loc['latitude'], loc['longitude'], 
+                           locations[oid]['latitude'], locations[oid]['longitude']))
+            for oid in locations.keys() if oid != sid and 'latitude' in locations[oid]
+        ]
+        closest_map[sid] = [oid for oid, _ in sorted(distances, key=lambda x: x[1])[:n_closest]]
+    
+    df = df.copy()
+    df[new_column] = np.nan
+    
+    for sensor_id in df['sensor_id'].unique():
+        if sensor_id not in closest_map:
+            continue
+        nearby_ids = closest_map[sensor_id]
+        nearby_data = df[df['sensor_id'].isin(nearby_ids)][['date', column]].groupby('date')[column].mean()
+        mask = df['sensor_id'] == sensor_id
+        df.loc[mask, new_column] = df.loc[mask, 'date'].map(nearby_data)
+    
+    return df.sort_values(['sensor_id', 'date'])
+
