@@ -73,65 +73,51 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
 
 
 def get_hourly_weather_forecast(city, latitude, longitude):
-    """
-    Fetch hourly weather data with explicit timeouts and cache-aware retries to avoid
-    GitHub Actions timeouts when Open-Meteo is slow to respond.
-    """
-    url = "https://api.open-meteo.com/v1/forecast"
-    hourly_variables = ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"]
+
+    # latitude, longitude = get_city_coordinates(city)
+
+    # Setup the Open-Meteo API client with cache and retry on error
+    cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
+    retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
+    openmeteo = openmeteo_requests.Client(session = retry_session)
+
+    # Make sure all required weather variables are listed here
+    # The order of variables in hourly or daily is important to assign them correctly below
+    url = "https://api.open-meteo.com/v1/ecmwf"
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "hourly": hourly_variables,
-        "forecast_days": 3,
-        "timezone": "UTC",
-        "format": "json"
+        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"]
     }
+    responses = openmeteo.weather_api(url, params=params)
 
-    cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
-    retry_settings = Retry(
-        total=5,
-        connect=5,
-        read=5,
-        backoff_factor=0.5,
-        status_forcelist=[429, 500, 502, 503, 504],
-        allowed_methods=frozenset({"GET"}),
-        raise_on_status=False,
-    )
-    adapter = HTTPAdapter(max_retries=retry_settings)
-    cache_session.mount("https://", adapter)
-    cache_session.mount("http://", adapter)
+    # Process first location. Add a for-loop for multiple locations or weather models
+    response = responses[0]
+    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
+    # print(f"Elevation {response.Elevation()} m asl")
+    # print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
-    response = None
-    for attempt in range(5):
-        try:
-            response = cache_session.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            hourly = response.json().get("hourly")
-            if not hourly:
-                raise ValueError("Open-Meteo response did not include 'hourly' data.")
-            break
-        except (requests_exceptions.RequestException, json.JSONDecodeError, ValueError) as exc:
-            if response is not None and getattr(response, "from_cache", False):
-                cache_session.cache.delete_url(response.url)
-            if attempt == 4:
-                raise RuntimeError(
-                    f"Failed to fetch hourly weather forecast for {city} "
-                    f"({latitude}, {longitude}) after multiple attempts."
-                ) from exc
-            # Exponential backoff with an upper bound so CI does not hang indefinitely
-            time.sleep(min(2 ** attempt, 30))
-            response = None
+    # Process hourly data. The order of variables needs to be the same as requested.
 
-    hourly_dataframe = pd.DataFrame(
-        {
-            "date": pd.to_datetime(hourly["time"], utc=True),
-            "temperature_2m_mean": hourly["temperature_2m"],
-            "precipitation_sum": hourly["precipitation"],
-            "wind_speed_10m_max": hourly["wind_speed_10m"],
-            "wind_direction_10m_dominant": hourly["wind_direction_10m"],
-        }
-    )
+    hourly = response.Hourly()
+    hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
+    hourly_precipitation = hourly.Variables(1).ValuesAsNumpy()
+    hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
+    hourly_wind_direction_10m = hourly.Variables(3).ValuesAsNumpy()
+
+    hourly_data = {"date": pd.date_range(
+        start = pd.to_datetime(hourly.Time(), unit = "s"),
+        end = pd.to_datetime(hourly.TimeEnd(), unit = "s"),
+        freq = pd.Timedelta(seconds = hourly.Interval()),
+        inclusive = "left"
+    )}
+    hourly_data["temperature_2m_mean"] = hourly_temperature_2m
+    hourly_data["precipitation_sum"] = hourly_precipitation
+    hourly_data["wind_speed_10m_max"] = hourly_wind_speed_10m
+    hourly_data["wind_direction_10m_dominant"] = hourly_wind_direction_10m
+
+    hourly_dataframe = pd.DataFrame(data = hourly_data)
     hourly_dataframe = hourly_dataframe.dropna()
     return hourly_dataframe
 
