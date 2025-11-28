@@ -26,6 +26,7 @@ trail_url = f"/map/bounds/?token={api_key}&latlng={latlngbox}"
 try:
     my_data = pd.read_json(base_url + trail_url)
     print('columns->', my_data.columns)
+    print(my_data['data'])
 
     # Build a dataframe from the json file 
     all_rows = []
@@ -41,8 +42,8 @@ try:
     df['aqi'] = pd.to_numeric(df.aqi, errors='coerce')
     df1 = df.dropna(subset=['aqi'])
     
-    print("Data fetched successfully:")
-    print(df1)
+    # print("Data fetched successfully:")
+    # print(df1)
     
 except Exception as e:
     print(f"Error: {e}")
