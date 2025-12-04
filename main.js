@@ -3,9 +3,9 @@ const config = {
   interpolationBase: './models/interpolation',
   interpolationTemplate: 'forecast_interpolation_{day}d.png',
   predictionsCsv: './models/predictions.csv',
-  mapBounds: [17.80, 59.20, 18.30, 59.45],
-  mapCenter: [18.0200, 59.3110],
-  mapZoom: 10,
+  mapBounds: [-7.602536,50.862218,36.738284,69.923179],
+  mapCenter: [17.5, 62.5],
+  mapZoom: 3,
 };
 
 const AQI_COLORS = ['#00e400', '#ffff00', '#ff7e00', '#ff0000'];

@@ -12,7 +12,10 @@ if not api_key:
 url1 = 'https://api.waqi.info'
 
 # Original bounding box covering Scandinavia
-lat_min, lon_min, lat_max, lon_max = 54.891, 10.849, 69.058, 24.174
+# lat_min, lon_min, lat_max, lon_max = 54.891, 10.849, 69.058, 24.174
+
+
+lat_min, lon_min, lat_max, lon_max = 50.862218,-7.602536,69.923179,36.738284
 
 # Split into 10x5 = 50 boxes
 rows, cols = 10, 5
