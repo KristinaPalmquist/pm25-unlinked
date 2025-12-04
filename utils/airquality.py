@@ -43,10 +43,6 @@ def get_historical_weather(city, start_date,  end_date, latitude, longitude):
 
     # Process first location. Add a for-loop for multiple locations or weather models
     response = responses[0]
-    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    # print(f"Elevation {response.Elevation()} m asl")
-    # print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
     # Process daily data. The order of variables needs to be the same as requested.
     daily = response.Daily()
@@ -83,20 +79,17 @@ def get_hourly_weather_forecast(city, latitude, longitude):
 
     # Make sure all required weather variables are listed here
     # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://api.open-meteo.com/v1/ecmwf"
+    url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"]
+        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"],
+        "forecast_days": 7
     }
     responses = openmeteo.weather_api(url, params=params)
 
     # Process first location. Add a for-loop for multiple locations or weather models
     response = responses[0]
-    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    # print(f"Elevation {response.Elevation()} m asl")
-    # print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
-    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
     # Process hourly data. The order of variables needs to be the same as requested.
 
@@ -148,6 +141,61 @@ def trigger_request(url:str):
     return data
 
 
+def get_sensor_coordinates_with_fallback(sensor_id, aqicn_api_key):
+    """
+    Try to get sensor coordinates using @ format first, then A format as fallback.
+    Returns (latitude, longitude, working_feed_url) or raises an exception.
+    """
+    feed_url_at = f"https://api.waqi.info/feed/@{sensor_id}/"
+    feed_url_a = f"https://api.waqi.info/feed/A{sensor_id}/"
+    
+    urls_to_try = [feed_url_at, feed_url_a]
+    
+    error_details = []
+    
+    for feed_url in urls_to_try:
+        try:
+            response = requests.get(f"{feed_url}?token={aqicn_api_key}")
+            response.raise_for_status()
+            data = response.json()
+            
+            # Check if the response has valid structure
+            if "data" not in data:
+                error_details.append(f"{feed_url}: Missing 'data' field in response")
+                continue
+            
+            if isinstance(data["data"], str):
+                # API returned error message like "Unknown station"
+                error_details.append(f"{feed_url}: API error - {data['data']}")
+                continue
+            
+            if "city" not in data["data"]:
+                error_details.append(f"{feed_url}: Missing 'city' field in response")
+                continue
+                
+            if "geo" not in data["data"]["city"]:
+                error_details.append(f"{feed_url}: Missing 'geo' coordinates in city data")
+                continue
+            
+            latitude = data["data"]["city"]["geo"][0]
+            longitude = data["data"]["city"]["geo"][1]
+            return latitude, longitude, feed_url
+            
+        except requests.exceptions.RequestException as e:
+            error_details.append(f"{feed_url}: HTTP error - {e}")
+            continue
+        except json.JSONDecodeError as e:
+            error_details.append(f"{feed_url}: Invalid JSON - {e}")
+            continue
+        except Exception as e:
+            error_details.append(f"{feed_url}: Unexpected error - {e}")
+            continue
+    
+    # If we get here, all URL formats failed
+    detailed_errors = "; ".join(error_details)
+    raise ValueError(f"Failed to get coordinates for sensor {sensor_id}. Details: {detailed_errors}")
+
+
 def get_pm25(aqicn_url: str, country: str, city: str, street: str, day: datetime.date, AQI_API_KEY: str):
     """
     Returns DataFrame with air quality (pm25) as dataframe
@@ -173,7 +221,13 @@ def get_pm25(aqicn_url: str, country: str, city: str, street: str, day: datetime
         # Extract the air quality data
         aqi_data = data['data']
         aq_today_df = pd.DataFrame()
-        aq_today_df['pm25'] = [aqi_data['iaqi'].get('pm25', {}).get('v', None)]
+        
+        # Check if iaqi field exists and contains pm25 data
+        pm25_value = None
+        if 'iaqi' in aqi_data and isinstance(aqi_data['iaqi'], dict):
+            pm25_value = aqi_data['iaqi'].get('pm25', {}).get('v', None)
+        
+        aq_today_df['pm25'] = [pm25_value]
         aq_today_df['pm25'] = aq_today_df['pm25'].astype('float32')
 
         aq_today_df['country'] = country
@@ -183,7 +237,7 @@ def get_pm25(aqicn_url: str, country: str, city: str, street: str, day: datetime
         aq_today_df['date'] = pd.to_datetime(aq_today_df['date'])
         aq_today_df['url'] = aqicn_url
     else:
-        print("Error: There may be an incorrect  URL for your Sensor or it is not contactable right now. The API response does not contain data.  Error message:", data['data'])
+        print("Error: There may be an incorrect URL for your Sensor or it is not contactable right now. The API response does not contain data.  Error message:", data['data'])
         raise requests.exceptions.RequestException(data['data'])
 
     return aq_today_df
@@ -318,7 +372,7 @@ def read_sensor_data(file_path):
     Reads the sensor data from the CSV file. The first three rows contains metadata.
     """
     with open(file_path, "r", encoding="utf-8") as f:
-        street, city, country = [
+        location_parts = [
             s.strip()
             for s in f.readline()
             .strip()
@@ -327,11 +381,22 @@ def read_sensor_data(file_path):
             .strip()
             .split(",")
         ]
+        
+        # Handle different location formats
+        if len(location_parts) == 3:
+            street, city, country = location_parts
+        elif len(location_parts) == 2:
+            # Assume format is "street, country" - use street as city too
+            street, country = location_parts
+            city = street
+        else:
+            raise ValueError(f"Unexpected location format in CSV header. Got {len(location_parts)} parts: {location_parts}")
+        
         url_line = f.readline().strip().lstrip("# ").strip()
         sensor_id = url_line.split("@")[1].split("/")[0]
         _ = f.readline().strip()
     df = pd.read_csv(file_path, skiprows=3)
-    feed_url = f"https://api.waqi.info/feed/A{sensor_id}/"
+    feed_url = f"https://api.waqi.info/feed/@{sensor_id}/"
     return df, street, city, country, feed_url, sensor_id
 
 

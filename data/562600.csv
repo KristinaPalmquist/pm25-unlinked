@@ -1,4 +1,4 @@
-# Sensor Solna Enköpingsvägen, Sweden (Natur Vårdsverket - Swedish Environmental Protection Agency/se428510)
+# Sensor Enköpingsvägen, Solna, Sweden (Natur Vårdsverket - Swedish Environmental Protection Agency/se428510)
 # https://aqicn.org/station/@562600/
 # Daily pm25
 date,min,max,median,q1,q3,stdev,count
