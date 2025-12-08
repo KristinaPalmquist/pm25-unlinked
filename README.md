@@ -82,8 +82,6 @@ Run the notebooks sequentially (`1_backfill` -> `4_batch_inference`) the first t
 5. Uploads forecast/hindcast/interpolation images to Hopsworks Datasets (`Resources/airquality/...`) so they’re centrally stored and accessible.
 6. Hindcast section merges D+1 predictions with actual outcomes from `air_quality_all`.
 
-### `5_function_calling.ipynb` LLM EVALUATION
-1. Spins up LangChain/OpenAI clients and a lightweight retrieval layer so LLMs can fetch station context (city, sensor metadata, last predictions) before answering.
 
 ## Project Structure
 
