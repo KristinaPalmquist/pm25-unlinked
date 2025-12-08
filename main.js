@@ -1,5 +1,5 @@
 const config = {
-  forecastDays: [0, 1, 2, 3, 4, 5, 6, 7],
+  forecastDays: [0, 1, 2, 3, 4, 5, 6],
   interpolationBase: './models/interpolation',
   interpolationTemplate: 'forecast_interpolation_{day}d.png',
   predictionsCsv: './models/predictions.csv',
