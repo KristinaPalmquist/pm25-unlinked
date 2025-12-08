@@ -145,8 +145,19 @@ function populateDropdown() {
 
 function deriveDayDates(rows) {
   const dayDates = {};
+  
+  // Look for actual measurements first, then fall back to using today's date
   const actualDates = rows.filter((r) => r.date && Number.isFinite(Number.parseFloat(r.pm25 ?? ''))).map((r) => r.date).sort();
-  if (actualDates.length) dayDates[0] = actualDates[actualDates.length - 1];
+  
+  // For day 0, use the latest actual measurement date, or today's date if no actuals
+  if (actualDates.length) {
+    dayDates[0] = actualDates[actualDates.length - 1];
+  } else {
+    // Use today's date in YYYY-MM-DD format
+    const today = new Date();
+    dayDates[0] = today.toISOString().split('T')[0];
+  }
+  
   rows.forEach((row) => {
     if (!row.date) return;
     const offset = Number(row.days_before_forecast_day ?? row.daysBeforeForecastDay);
@@ -239,8 +250,10 @@ async function loadCsvMarkers() {
     state.markers = [];
     state.sensorData = {};
     clearFocus();
+    
     rows.forEach((row) => ingestRow(row));
     state.markers = Object.values(state.sensorData).map(createMarker);
+    
     populateDropdown();
     if (ui.dayDropdown) ui.dayDropdown.value = String(state.currentDay);
   } catch (error) {
@@ -252,6 +265,7 @@ function ingestRow(row) {
   const sensorId = row.sensor_id || row.sensorId;
   const lat = parseFloat(row.latitude ?? row.lat);
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
+  
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) return;
 
   const street = row.street || row.location || '';
