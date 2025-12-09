@@ -1,5 +1,6 @@
 const config = {
   forecastDays: [0, 1, 2, 3, 4, 5, 6],
+  // forecastDays: [1, 2, 3, 4, 5, 6],
   interpolationBase: './models/interpolation',
   interpolationTemplate: 'forecast_interpolation_{day}d.png',
   predictionsCsv: './models/predictions.csv',
@@ -121,7 +122,7 @@ function init() {
 
 function formatDateLabel(dateStr) {
   if (!dateStr) return null;
-  const date = new Date(`${dateStr}T00:00:00Z`);
+  const date = new Date(`${dateStr}`);
   return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
@@ -148,22 +149,30 @@ function deriveDayDates(rows) {
   const dayDates = {};
   
   // Look for actual measurements first, then fall back to using today's date
-  const actualDates = rows.filter((r) => r.date && Number.isFinite(Number.parseFloat(r.pm25 ?? ''))).map((r) => r.date).sort();
+  const actualDates = rows
+    .filter((r) => r.date && Number.isFinite(Number.parseFloat(r.pm25 ?? '')))
+    .map((r) => r.date)
+    .sort();
   
   // For day 0, use the latest actual measurement date, or today's date if no actuals
+  let baseDate;
   if (actualDates.length) {
-    dayDates[0] = actualDates[actualDates.length - 1];
+    baseDate = new Date(actualDates[actualDates.length - 1]);
+    dayDates[0] = baseDate.toISOString().split('T')[0];
   } else {
-    // Use today's date in YYYY-MM-DD format
-    const today = new Date();
-    dayDates[0] = today.toISOString().split('T')[0];
+    baseDate = new Date();
+    dayDates[0] = baseDate.toISOString().split('T')[0];
   }
-  
+
   rows.forEach((row) => {
+    const offset = Number(row.days_before_forecast_day);
     if (!row.date) return;
-    const offset = Number(row.days_before_forecast_day ?? row.daysBeforeForecastDay);
-    if (Number.isFinite(offset) && offset >= 1 && !dayDates[offset]) dayDates[offset] = row.date;
-  });
+    if (Number.isFinite(offset) && offset >= 1 && !dayDates[offset]) {
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() + offset);
+      dayDates[offset] = d.toISOString().split('T')[0];
+    }
+ });
   return dayDates;
 }
 
