@@ -52,6 +52,22 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
+  border: 1.5px solid #fff;
+  display: block;
+  box-shadow: 0 2px 4px rgba(65, 38, 38, 0.3);
+  transition: width 0.3s ease, height 0.3s ease, border 0.3s ease;
+}
+
+.sensor-marker.is-active {
+  width: 32px;
+  height: 32px;
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* .sensor-marker {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   border: 2px solid #fff;
   display: block;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -62,7 +78,7 @@ body {
   width: 32px;
   height: 32px;
   border-color: rgba(255, 255, 255, 0.9);
-}
+} */
 
 #focus-panel {
   opacity: 0;
