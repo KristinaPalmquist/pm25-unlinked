@@ -1,12 +1,10 @@
 const config = {
   forecastDays: [0, 1, 2, 3, 4, 5, 6],
-  // forecastDays: [1, 2, 3, 4, 5, 6],
   interpolationBase: './models/interpolation',
   interpolationTemplate: 'forecast_interpolation_{day}d.png',
   predictionsCsv: './models/predictions.csv',
   mapBounds: [-7.602536,50.862218,36.738284,69.923179],
   mapCenter: [14.57, 60.39],
-  // mapCenter: [17.5, 62.5],
   mapZoom: 3,
 };
 
