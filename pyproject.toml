@@ -5,11 +5,16 @@ description = "PM2.5 Forecasting"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "numpy==1.26.4",
+    "pandas==2.0.3",
+    "matplotlib==3.8.3",
+    "scipy>=1.16.3",
+    "scikit-learn==1.2.2",
+    "xgboost==2.0.3",
     "hopsworks[python,polars,great-expectations]>=4.1.2",
     "feldera>=0.33.0",
     "huggingface-hub>=0.33.4",
     "ipykernel>=6.29.5",
-    
     "streamlit==1.28.2",
     "email-validator==2.2.0",
     "pydantic-settings>=2.6.1",
@@ -17,15 +22,10 @@ dependencies = [
     "openmeteo-requests",
     "requests-cache==1.2.0",
     "retry-requests==2.0.0",
-    "xgboost==2.0.3",
-    "scikit-learn==1.2.2",
     "plotly",
     "seaborn",
     "nbformat",
     "Faker",
-    "matplotlib==3.8.3",
-   
-    "scipy>=1.16.3",
-    "modal>=1.2.2",
+    "modal>=1.2.2"
 ]
 
