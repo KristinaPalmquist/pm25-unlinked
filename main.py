@@ -1,6 +1,6 @@
 import modal
-import nbformat
-import nbclient
+# import nbformat
+# import nbclient
 
 import os
 import subprocess
@@ -20,9 +20,11 @@ image = (
 vol = modal.Volume.from_name("id2223-volume", create_if_missing=True)
 
 def push_results():
-    token = os.environ["GITHUB_PAT"]
+    HOPSWORKS_API_KEY = settings.HOPSWORKS_API_KEY.get_secret_value()
+    GITHUB_PAT = settings.GITHUB_PAT.get_secret_value()
+    GITHUB_USERNAME = settings.GITHUB_USERNAME.get_secret_value()
     repo_name = "pm25-forecast-openmeteo-aqicn"
-    repo_url = f"https://{token}:x-oauth-basic@github.com/Tegelstenen/{repo_name}.git"
+    repo_url = f"https://{GITHUB_PAT}:x-oauth-basic@github.com/{GITHUB_USERNAME}/{repo_name}.git"
 
     # Clone the repository
     subprocess.run(["git", "clone", repo_url], check=True)

@@ -32,6 +32,10 @@ class HopsworksSettings(BaseSettings):
     # AQICN_CITY: str | None = None
     # AQICN_STREET: str | None = None
     # AQICN_URL: str | None = None
+
+    # GitHub
+    GITHUB_PAT: SecretStr | None = None
+    GITHUB_USERNAME: SecretStr | None = None
     
     # Other API Keys
     FELDERA_API_KEY: SecretStr | None = None    
@@ -87,6 +91,16 @@ class HopsworksSettings(BaseSettings):
         aqicn_api_key = self.AQICN_API_KEY or os.getenv("AQICN_API_KEY")
         if not aqicn_api_key:
             missing.append("AQICN_API_KEY")
+        # 3. GITHUB_PAT
+        github_pat = self.GITHUB_PAT or os.getenv("GITHUB_PAT")
+        if not github_pat:
+            missing.append("GITHUB_PAT")
+        # 4. GITHUB_USERNAME
+        github_username = self.GITHUB_USERNAME or os.getenv("GITHUB_USERNAME")
+        if not github_username:
+            missing.append("GITHUB_USERNAME")
+
+
         # # 3. AQICN_COUNTRY
         # aqicn_country = self.AQICN_COUNTRY or os.getenv("AQICN_COUNTRY")
         # if not aqicn_country:
@@ -108,4 +122,4 @@ class HopsworksSettings(BaseSettings):
             raise ValueError(
                 "The following required settings are missing from your environment (.env or system):\n  " +
                 "\n  ".join(missing)
-            )    
+            )
