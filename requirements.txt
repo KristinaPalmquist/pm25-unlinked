@@ -10,3 +10,4 @@ seaborn
 nbformat
 matplotlib==3.8.3
 scipy>=1.16.3
+hopsworks[python,polars,great-expectations]>=4.1.2
