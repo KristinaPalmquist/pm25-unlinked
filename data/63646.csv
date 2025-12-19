@@ -1,4 +1,4 @@
-# Sensor x, Växjö, Sweden (Citizen Science project sensor.community/17662)
+# Sensor Växjö, Sweden (Citizen Science project sensor.community/17662)
 # https://aqicn.org/station/@63646/
 # Daily pm25
 date,min,max,median,q1,q3,stdev,count

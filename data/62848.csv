@@ -1,4 +1,4 @@
-# Sensor x, Östersund, Sweden (Citizen Science project sensor.community/16531)
+# Sensor Östersund, Sweden (Citizen Science project sensor.community/16531)
 # https://aqicn.org/station/@62848/
 # Daily pm25
 date,min,max,median,q1,q3,stdev,count

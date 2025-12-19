@@ -1,4 +1,4 @@
-# Sensor x, Acksjön, Sweden (Citizen Science project sensor.community/46216)
+# Sensor Acksjön, Sweden (Citizen Science project sensor.community/46216)
 # https://aqicn.org/station/@121810/
 # Daily pm25
 date,min,max,median,q1,q3,stdev,count

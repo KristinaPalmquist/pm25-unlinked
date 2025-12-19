@@ -1,9 +1,9 @@
-import os
+# import os
 import datetime
-import time
+# import time
 import requests
-from requests import exceptions as requests_exceptions
-from requests.adapters import HTTPAdapter
+# from requests import exceptions as requests_exceptions
+# from requests.adapters import HTTPAdapter
 import pandas as pd
 import json
 import numpy as np
@@ -15,13 +15,13 @@ from matplotlib.ticker import MultipleLocator
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
-from urllib3.util.retry import Retry
+# from urllib3.util.retry import Retry
 import hopsworks
 import hsfs
 from pathlib import Path
 
 
-def get_historical_weather(city, start_date,  end_date, latitude, longitude):
+def get_historical_weather(city, start_date, end_date, latitude, longitude):
     # latitude, longitude = get_city_coordinates(city)
 
     # Setup the Open-Meteo API client with cache and retry on error
@@ -141,59 +141,131 @@ def trigger_request(url:str):
     return data
 
 
-def get_sensor_coordinates_with_fallback(sensor_id, aqicn_api_key):
+import requests
+import json
+
+def get_working_feed_url(sensor_id, aqicn_api_key):
     """
-    Try to get sensor coordinates using @ format first, then A format as fallback.
-    Returns (latitude, longitude, working_feed_url) or raises an exception.
+    Try to resolve a working feed URL for the sensor.
+    Tests both @ and A formats.
+    Returns the working feed_url or raises ValueError if none works.
     """
     feed_url_at = f"https://api.waqi.info/feed/@{sensor_id}/"
     feed_url_a = f"https://api.waqi.info/feed/A{sensor_id}/"
-    
     urls_to_try = [feed_url_at, feed_url_a]
-    
+
     error_details = []
-    
+
     for feed_url in urls_to_try:
         try:
             response = requests.get(f"{feed_url}?token={aqicn_api_key}")
             response.raise_for_status()
             data = response.json()
-            
-            # Check if the response has valid structure
+
             if "data" not in data:
-                error_details.append(f"{feed_url}: Missing 'data' field in response")
+                error_details.append(f"{feed_url}: Missing 'data' field")
                 continue
-            
+
             if isinstance(data["data"], str):
-                # API returned error message like "Unknown station"
                 error_details.append(f"{feed_url}: API error - {data['data']}")
                 continue
-            
+
             if "city" not in data["data"]:
-                error_details.append(f"{feed_url}: Missing 'city' field in response")
+                error_details.append(f"{feed_url}: Missing 'city' field")
                 continue
-                
+
             if "geo" not in data["data"]["city"]:
-                error_details.append(f"{feed_url}: Missing 'geo' coordinates in city data")
+                error_details.append(f"{feed_url}: Missing 'geo' coordinates")
                 continue
-            
-            latitude = data["data"]["city"]["geo"][0]
-            longitude = data["data"]["city"]["geo"][1]
-            return latitude, longitude, feed_url
-            
+
+            # ✅ If we reach here, feed_url works
+            return feed_url
+
         except requests.exceptions.RequestException as e:
             error_details.append(f"{feed_url}: HTTP error - {e}")
-            continue
         except json.JSONDecodeError as e:
             error_details.append(f"{feed_url}: Invalid JSON - {e}")
-            continue
         except Exception as e:
             error_details.append(f"{feed_url}: Unexpected error - {e}")
-            continue
-    
-    # If we get here, all URL formats failed
+
     detailed_errors = "; ".join(error_details)
-    raise ValueError(f"Failed to get coordinates for sensor {sensor_id}. Details: {detailed_errors}")
+    raise ValueError(f"Failed to resolve feed URL for sensor {sensor_id}. Details: {detailed_errors}")
+
+
+def get_sensor_coordinates(feed_url, sensor_id, aqicn_api_key):
+    """
+    Given a sensor_id, return (latitude, longitude, feed_url).
+    Raises ValueError if coordinates cannot be extracted.
+    """
+    try:
+        response = requests.get(f"{feed_url}?token={aqicn_api_key}")
+        response.raise_for_status()
+        data = response.json()
+
+        if "data" not in data or "city" not in data["data"] or "geo" not in data["data"]["city"]:
+            raise ValueError(f"Invalid response structure for {feed_url}: {data}")
+
+        latitude = data["data"]["city"]["geo"][0]
+        longitude = data["data"]["city"]["geo"][1]
+        return latitude, longitude
+
+    except Exception as e:
+        raise ValueError(f"Failed to get coordinates from {feed_url}: {e}")
+
+
+# def get_sensor_coordinates_with_fallback(sensor_id, aqicn_api_key):
+#     """
+#     Try to get sensor coordinates using @ format first, then A format as fallback.
+#     Returns (latitude, longitude, working_feed_url) or raises an exception.
+#     """
+#     feed_url_at = f"https://api.waqi.info/feed/@{sensor_id}/"
+#     feed_url_a = f"https://api.waqi.info/feed/A{sensor_id}/"
+    
+#     urls_to_try = [feed_url_at, feed_url_a]
+    
+#     error_details = []
+    
+#     for feed_url in urls_to_try:
+#         try:
+#             response = requests.get(f"{feed_url}?token={aqicn_api_key}")
+#             response.raise_for_status()
+#             data = response.json()
+            
+#             # Check if the response has valid structure
+#             if "data" not in data:
+#                 error_details.append(f"{feed_url}: Missing 'data' field in response")
+#                 continue
+            
+#             if isinstance(data["data"], str):
+#                 # API returned error message like "Unknown station"
+#                 error_details.append(f"{feed_url}: API error - {data['data']}")
+#                 continue
+            
+#             if "city" not in data["data"]:
+#                 error_details.append(f"{feed_url}: Missing 'city' field in response")
+#                 continue
+                
+#             if "geo" not in data["data"]["city"]:
+#                 error_details.append(f"{feed_url}: Missing 'geo' coordinates in city data")
+#                 continue
+            
+#             latitude = data["data"]["city"]["geo"][0]
+#             longitude = data["data"]["city"]["geo"][1]
+#             return latitude, longitude, feed_url
+            
+#         except requests.exceptions.RequestException as e:
+#             error_details.append(f"{feed_url}: HTTP error - {e}")
+#             continue
+#         except json.JSONDecodeError as e:
+#             error_details.append(f"{feed_url}: Invalid JSON - {e}")
+#             continue
+#         except Exception as e:
+#             error_details.append(f"{feed_url}: Unexpected error - {e}")
+#             continue
+    
+#     # If we get here, all URL formats failed
+#     detailed_errors = "; ".join(error_details)
+#     raise ValueError(f"Failed to get coordinates for sensor {sensor_id}. Details: {detailed_errors}")
 
 
 def get_pm25(aqicn_url: str, country: str, city: str, street: str, day: datetime.date, AQI_API_KEY: str):
@@ -367,7 +439,7 @@ def backfill_predictions_for_monitoring(weather_fg, air_quality_df, monitor_fg, 
     return hindcast_df
 
 
-def read_sensor_data(file_path):
+def read_sensor_data(file_path, aqicn_api_key):
     """
     Reads the sensor data from the CSV file. The first three rows contains metadata.
     """
@@ -396,7 +468,8 @@ def read_sensor_data(file_path):
         sensor_id = url_line.split("@")[1].split("/")[0]
         _ = f.readline().strip()
     df = pd.read_csv(file_path, skiprows=3)
-    feed_url = f"https://api.waqi.info/feed/@{sensor_id}/"
+    feed_url = get_working_feed_url(sensor_id, aqicn_api_key)
+    # feed_url = f"https://api.waqi.info/feed/@{sensor_id}/"
     return df, street, city, country, feed_url, sensor_id
 
 
