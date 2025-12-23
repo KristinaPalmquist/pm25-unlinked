@@ -16,3 +16,7 @@ numpy>=1.26.4
 seaborn
 urllib3>=2.2.2
 hsfs>=3.7.0
+
+# Backend
+fastapi==0.110.0
+uvicorn==0.29.0
