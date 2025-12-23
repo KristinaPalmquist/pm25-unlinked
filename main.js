@@ -1,3 +1,19 @@
+import { HOPSWORKS_API_KEY } from "./config.js";
+
+async function loadFeatures() {
+  const res = await fetch(
+    "https://api.hopsworks.ai/...", // your real Hopsworks endpoint
+    {
+      headers: {
+        "Authorization": `ApiKey ${HOPSWORKS_API_KEY}`,
+      },
+    }
+  );
+
+  const data = await res.json();
+  console.log(data);
+}
+
 
 fetch('./utils/coordinates.json')
   .then(response => response.json())
