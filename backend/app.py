@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import hopsworks
 from dotenv import load_dotenv
 import os
@@ -6,6 +7,22 @@ import math
 import pandas as pd
 
 app = FastAPI()
+
+# Allow Netlify frontend to call this backend
+origins = [
+    "https://pm25-sweden.netlify.app",  # production frontend
+    "http://localhost:5501",            # local dev
+    "http://127.0.0.1:8000"             # local backend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # list of allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],            # allow all HTTP methods
+    allow_headers=["*"],            # allow all headers
+)
+
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path=env_path)
