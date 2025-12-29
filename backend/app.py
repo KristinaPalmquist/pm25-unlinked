@@ -3,12 +3,19 @@ import hopsworks
 from dotenv import load_dotenv
 import os
 import math
+import pandas as pd
+
+app = FastAPI()
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path=env_path)
-
-app = FastAPI()
 api_key=os.environ["HOPSWORKS_API_KEY"]
+
+@app.get("/predictions")
+def get_predictions():
+    df = pd.read_csv("models/predictions.csv")
+    return df.to_dict(orient="records")
+
 
 @app.get("/latest")
 def latest():
@@ -73,18 +80,3 @@ def prediction_history(sensor_id: str):
         raise HTTPException(status_code=404, detail=f"No predictions found for sensor {sensor_id}")
 
     return df_sensor.sort_values("datetime").to_dict(orient="records")
-
-# Return predictions for all sensors
-@app.get("/predictions")
-def all_predictions():
-    fv = load_feature_view()
-    df = fv.get_batch_data()
-
-    latest_per_sensor = (
-        df.sort_values("datetime")
-          .groupby("sensor_id")
-          .tail(1)
-          .to_dict(orient="records")
-    )
-
-    return latest_per_sensor
