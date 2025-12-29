@@ -1,18 +1,11 @@
-import { HOPSWORKS_API_KEY } from "./config.js";
-
-async function loadFeatures() {
-  const res = await fetch(
-    "https://api.hopsworks.ai/...", // your real Hopsworks endpoint
-    {
-      headers: {
-        "Authorization": `ApiKey ${HOPSWORKS_API_KEY}`,
-      },
-    }
-  );
-
-  const data = await res.json();
-  console.log(data);
-}
+const res = await fetch("https://your-backend.up.railway.app/prediction/59893");
+const data = await res.json();
+// async function loadData() {
+//   const res = await fetch("/api/latest");
+//   const data = await res.json();
+//   console.log(data);
+//   return data;
+// }
 
 
 fetch('./utils/coordinates.json')

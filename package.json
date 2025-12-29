@@ -1,0 +1,24 @@
+{
+  "name": "pm25-forecast-openmeteo-aqicn",
+  "version": "1.0.0",
+  "description": "![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)\r ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=111)\r ![Hopsworks](https://img.shields.io/badge/Hopsworks-23B14D?logoColor=white)",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KristinaPalmquist/pm25-forecast-openmeteo-aqicn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KristinaPalmquist/pm25-forecast-openmeteo-aqicn/issues"
+  },
+  "homepage": "https://github.com/KristinaPalmquist/pm25-forecast-openmeteo-aqicn#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}
