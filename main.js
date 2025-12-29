@@ -2,32 +2,6 @@ import {fetchPredictions, fetchLatestBatch} from './frontend/api.js';
 
 const predictions = await fetchPredictions();
 
-async function loadCsvMarkers() {
-  if (!predictions.length) return; // nothing loaded yet
-
-  try {
-    const rows = predictions; // already JSON objects from backend
-
-    state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
-    state.dayDates = deriveDayDates(rows);
-    state.markers.forEach((m) => m.remove());
-    state.markers = [];
-    state.sensorData = {};
-    clearFocus();
-
-    rows.forEach((row) => ingestRow(row));
-    state.markers = Object.values(state.sensorData).map(createMarker);
-
-    populateDropdown();
-    if (ui.dayDropdown) ui.dayDropdown.value = String(state.currentDay);
-  } catch (error) {
-    console.error("Failed to load predictions", error);
-  }
-}
-
-
-
-
 fetch('./utils/coordinates.json')
   .then(response => response.json())
   .then(gridBounds => {
@@ -292,27 +266,50 @@ fetch('./utils/coordinates.json')
   }
 
   async function loadCsvMarkers() {
-    if (!config.predictionsCsv) return;
-    try {
-      const response = await fetch(config.predictionsCsv);
-      if (!response.ok) throw new Error(`Failed to fetch CSV (${response.status})`);
-      const rows = parseCsv(await response.text());
-      state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
-      state.dayDates = deriveDayDates(rows);
-      state.markers.forEach((m) => m.remove());
-      state.markers = [];
-      state.sensorData = {};
-      clearFocus();
-      
-      rows.forEach((row) => ingestRow(row));
-      state.markers = Object.values(state.sensorData).map(createMarker);
-      
-      populateDropdown();
-      if (ui.dayDropdown) ui.dayDropdown.value = String(state.currentDay);
+  if (!predictions.length) return; // nothing loaded yet
+
+  try {
+    const rows = predictions; // already JSON objects from backend
+
+    state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
+    state.dayDates = deriveDayDates(rows);
+    state.markers.forEach((m) => m.remove());
+    state.markers = [];
+    state.sensorData = {};
+    clearFocus();
+
+    rows.forEach((row) => ingestRow(row));
+    state.markers = Object.values(state.sensorData).map(createMarker);
+
+    populateDropdown();
+    if (ui.dayDropdown) ui.dayDropdown.value = String(state.currentDay);
     } catch (error) {
-      console.error('Failed to load predictions CSV', error);
+      console.error("Failed to load predictions", error);
     }
   }
+
+  // async function loadCsvMarkers() {
+  //   if (!config.predictionsCsv) return;
+  //   try {
+  //     const response = await fetch(config.predictionsCsv);
+  //     if (!response.ok) throw new Error(`Failed to fetch CSV (${response.status})`);
+  //     const rows = parseCsv(await response.text());
+  //     state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
+  //     state.dayDates = deriveDayDates(rows);
+  //     state.markers.forEach((m) => m.remove());
+  //     state.markers = [];
+  //     state.sensorData = {};
+  //     clearFocus();
+      
+  //     rows.forEach((row) => ingestRow(row));
+  //     state.markers = Object.values(state.sensorData).map(createMarker);
+      
+  //     populateDropdown();
+  //     if (ui.dayDropdown) ui.dayDropdown.value = String(state.currentDay);
+  //   } catch (error) {
+  //     console.error('Failed to load predictions CSV', error);
+  //   }
+  // }
 
   function ingestRow(row) {
     const sensorId = row.sensor_id || row.sensorId;
