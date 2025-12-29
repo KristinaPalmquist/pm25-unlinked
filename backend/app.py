@@ -9,16 +9,13 @@ import pandas as pd
 
 app = FastAPI()
 
-# Allow Netlify frontend to call this backend
-origins = [
-    "https://pm25-sweden.netlify.app",  # production frontend
-    "http://localhost:5501",            # local dev
-    "http://127.0.0.1:8000"             # local backend
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # list of allowed origins
+    allow_origins=[
+        "https://pm25-sweden.netlify.app",  # production frontend
+        "http://localhost:5501",            # local dev
+        "http://127.0.0.1:8000"             # local backend
+    ],
     allow_credentials=True,
     allow_methods=["*"],            # allow all HTTP methods
     allow_headers=["*"],            # allow all headers
@@ -36,24 +33,16 @@ env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path=env_path)
 api_key=os.environ["HOPSWORKS_API_KEY"]
 
+
 @app.get("/predictions")
 def get_predictions():
-    return [{"sensor_id": "test", "pm25": 12.3, "datetime": "2025-12-29"}]
-
-# @app.get("/predictions")
-# def get_predictions():
-#     project = hopsworks.login()
-#     fs = project.get_feature_store()
-#     fg = fs.get_feature_group("air_quality_predictions", version=1)
-
-#     df = fg.read()  # fetch all predictions
-#     latest_per_sensor = (
-#         df.sort_values("datetime")
-#           .groupby("sensor_id")
-#           .tail(1)
-#           .to_dict(orient="records")
-#     )
-#     return latest_per_sensor
+    try:
+        df = pd.read_csv("models/predictions.csv")
+        return df.to_dict(orient="records")
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="predictions.csv not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/latest")

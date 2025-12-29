@@ -6,6 +6,8 @@ const API_URL =
     ? "http://127.0.0.1:8000"
     : URL;
 
+export const interpolationBase = `${API_URL}/models/interpolation`;
+
 // Fetch predictions
 export async function fetchPredictions() {
   try {
