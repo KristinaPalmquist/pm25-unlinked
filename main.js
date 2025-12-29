@@ -570,3 +570,7 @@ fetch('./utils/coordinates.json')
   init();
 
   });
+
+
+  console.log('PM2.5 Forecast Map initialized');
+  console.log('Predictions loaded:', predictions.length);
