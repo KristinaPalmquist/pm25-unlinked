@@ -9,12 +9,11 @@ plotly
 nbformat
 matplotlib==3.8.3
 scipy>=1.16.3
-hopsworks[python,polars,great-expectations]>=4.1.2
+hopsworks[python,polars,great-expectations]==4.1.2
 requests>=2.31.0
-pandas<2.2.0
+pandas==2.1.4
 sqlalchemy<=1.4.48
 numpy>=1.26.4
 seaborn
 urllib3>=2.2.2
-hsfs>=3.7.0
 python-dotenv

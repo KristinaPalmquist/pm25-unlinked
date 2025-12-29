@@ -3,37 +3,33 @@ import hopsworks
 # import pandas as pd
 from dotenv import load_dotenv
 import os
+import math
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path=env_path)
 
 app = FastAPI()
-
+api_key=os.environ["HOPSWORKS_API_KEY"]
 
 @app.get("/latest")
 def latest():
     try:
-        api_key = os.environ.get("HOPSWORKS_API_KEY")
-        if not api_key:
-            raise HTTPException(status_code=401, detail="Missing HOPSWORKS_API_KEY environment variable")
-
-        try:
-            project = hopsworks.login(api_key=api_key)
-        except Exception as e:
-            raise HTTPException(status_code=403, detail=f"Hopsworks login failed: {str(e)}")
-
-        try:
-            fs = project.get_feature_store(name="new_featurestore")
-            fv = fs.get_feature_view("air_quality_complete_fv", version=1)
-            df = fv.get_batch_data()
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
+        project = hopsworks.login()
+        fs = project.get_feature_store()
+        fv = fs.get_feature_view("air_quality_complete_fv", version=1)
+        df = fv.get_batch_data()
 
         if df.empty:
             raise HTTPException(status_code=404, detail="No data found in feature view")
 
         latest_row = df.tail(1).to_dict(orient="records")[0]
-        return latest_row
+        # Replace NaN/Infinity with None so JSON can handle it
+        safe_row = {
+            k: (None if (isinstance(v, float) and (math.isnan(v) or math.isinf(v))) else v)
+            for k, v in latest_row.items()
+        }
+
+        return safe_row
 
     except HTTPException:
         raise
@@ -42,8 +38,9 @@ def latest():
 
 
 def load_feature_view():
-    project = hopsworks.login(api_key=os.environ["HOPSWORKS_API_KEY"])
-    fs = project.get_feature_store(name="new_featurestore")
+    
+    project = hopsworks.login()
+    fs = project.get_feature_store()
     return fs.get_feature_view("air_quality_complete_fv", version=1)
 
 
