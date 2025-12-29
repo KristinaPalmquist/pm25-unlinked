@@ -4,7 +4,8 @@
   "description": "![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)\r ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=111)\r ![Hopsworks](https://img.shields.io/badge/Hopsworks-23B14D?logoColor=white)",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,10 @@
   "homepage": "https://github.com/KristinaPalmquist/pm25-forecast-openmeteo-aqicn#readme",
   "dependencies": {
     "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
   }
 }
