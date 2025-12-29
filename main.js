@@ -9,10 +9,6 @@ async function loadMarkersFromBackend() {
   });
 }
 
-map.on('load', async () => {
-  await loadRaster(state.currentDay);
-  await loadMarkersFromBackend();
-});
 
 
 fetch('./utils/coordinates.json')
@@ -92,6 +88,12 @@ fetch('./utils/coordinates.json')
       [config.mapBounds[0], config.mapBounds[1]],
       [config.mapBounds[2], config.mapBounds[3]],
     ],
+  });
+
+
+  map.on('load', async () => {
+    await loadRaster(state.currentDay);
+    await loadMarkersFromBackend();
   });
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right');
