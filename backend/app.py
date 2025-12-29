@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import hopsworks
 from dotenv import load_dotenv
 import os
@@ -23,6 +24,13 @@ app.add_middleware(
     allow_headers=["*"],            # allow all headers
 )
 
+app.mount(
+    "/models/interpolation",
+    StaticFiles(directory="models/interpolation"),
+    name="interpolation"
+)
+
+
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path=env_path)
@@ -30,18 +38,22 @@ api_key=os.environ["HOPSWORKS_API_KEY"]
 
 @app.get("/predictions")
 def get_predictions():
-    project = hopsworks.login()
-    fs = project.get_feature_store()
-    fg = fs.get_feature_group("air_quality_predictions", version=1)
+    return [{"sensor_id": "test", "pm25": 12.3, "datetime": "2025-12-29"}]
 
-    df = fg.read()  # fetch all predictions
-    latest_per_sensor = (
-        df.sort_values("datetime")
-          .groupby("sensor_id")
-          .tail(1)
-          .to_dict(orient="records")
-    )
-    return latest_per_sensor
+# @app.get("/predictions")
+# def get_predictions():
+#     project = hopsworks.login()
+#     fs = project.get_feature_store()
+#     fg = fs.get_feature_group("air_quality_predictions", version=1)
+
+#     df = fg.read()  # fetch all predictions
+#     latest_per_sensor = (
+#         df.sort_values("datetime")
+#           .groupby("sensor_id")
+#           .tail(1)
+#           .to_dict(orient="records")
+#     )
+#     return latest_per_sensor
 
 
 @app.get("/latest")
