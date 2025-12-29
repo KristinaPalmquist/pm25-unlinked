@@ -2,6 +2,15 @@ import {fetchPredictions, fetchLatestBatch} from './frontend/api.js';
 
 const predictions = await fetchPredictions();
 
+async function loadMarkersFromBackend() {
+  const rows = await fetchLatestBatch();
+  rows.forEach(row => ingestRow(row)); // reuse your existing ingestRow logic
+  Object.values(state.sensorData).forEach(entry => {
+    const marker = createMarker(entry);
+    marker.addTo(map);
+  });
+}
+
 fetch('./utils/coordinates.json')
   .then(response => response.json())
   .then(gridBounds => {
