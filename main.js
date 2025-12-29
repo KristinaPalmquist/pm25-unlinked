@@ -1,4 +1,4 @@
-import {fetchPredictions, fetchLatestBatch} from './frontend/api.js';
+import {fetchPredictions, fetchLatestBatc, interpolationBase} from './frontend/api.js';
 
 const predictions = await fetchPredictions();
 
@@ -17,8 +17,10 @@ fetch('./utils/coordinates.json')
     // Use gridBounds here to set up your config
     const config = {
       forecastDays: [0, 1, 2, 3, 4, 5, 6],
-      interpolationBase: './models/interpolation',
+      interpolationBase: interpolationBase,
       interpolationTemplate: 'forecast_interpolation_{day}d.png',
+      // interpolationBase: './models/interpolation',
+      // interpolationTemplate: 'forecast_interpolation_{day}d.png',
       predictionsCsv: './models/predictions.csv',
       mapBounds: [
         gridBounds.MIN_LONGITUDE,
