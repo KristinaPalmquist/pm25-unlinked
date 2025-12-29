@@ -1,11 +1,18 @@
-const res = await fetch("https://your-backend.up.railway.app/prediction/59893");
-const data = await res.json();
-// async function loadData() {
-//   const res = await fetch("/api/latest");
-//   const data = await res.json();
-//   console.log(data);
-//   return data;
-// }
+import {fetchLatestBatch} from './frontend/api.js';
+
+async function loadMarkersFromBackend() {
+  const rows = await fetchLatestBatch();
+  rows.forEach(row => ingestRow(row)); // reuse your existing ingestRow logic
+  Object.values(state.sensorData).forEach(entry => {
+    const marker = createMarker(entry);
+    marker.addTo(map);
+  });
+}
+
+map.on('load', async () => {
+  await loadRaster(state.currentDay);
+  await loadMarkersFromBackend();
+});
 
 
 fetch('./utils/coordinates.json')

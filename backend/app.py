@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException
 import hopsworks
-# import pandas as pd
 from dotenv import load_dotenv
 import os
 import math
@@ -22,14 +21,8 @@ def latest():
         if df.empty:
             raise HTTPException(status_code=404, detail="No data found in feature view")
 
-        latest_row = df.tail(1).to_dict(orient="records")[0]
-        # Replace NaN/Infinity with None so JSON can handle it
-        safe_row = {
-            k: (None if (isinstance(v, float) and (math.isnan(v) or math.isinf(v))) else v)
-            for k, v in latest_row.items()
-        }
-
-        return safe_row
+        rows = df.to_dict(orient="records")
+        return rows
 
     except HTTPException:
         raise
@@ -81,7 +74,7 @@ def prediction_history(sensor_id: str):
 
     return df_sensor.sort_values("datetime").to_dict(orient="records")
 
-# return predictions for all sensors
+# Return predictions for all sensors
 @app.get("/predictions")
 def all_predictions():
     fv = load_feature_view()
