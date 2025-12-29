@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import hopsworks
 from dotenv import load_dotenv
 import os
-import math
+# import math
 import pandas as pd
 
 app = FastAPI()
@@ -30,8 +30,18 @@ api_key=os.environ["HOPSWORKS_API_KEY"]
 
 @app.get("/predictions")
 def get_predictions():
-    df = pd.read_csv("models/predictions.csv")
-    return df.to_dict(orient="records")
+    project = hopsworks.login()
+    fs = project.get_feature_store()
+    fg = fs.get_feature_group("air_quality_predictions", version=1)
+
+    df = fg.read()  # fetch all predictions
+    latest_per_sensor = (
+        df.sort_values("datetime")
+          .groupby("sensor_id")
+          .tail(1)
+          .to_dict(orient="records")
+    )
+    return latest_per_sensor
 
 
 @app.get("/latest")
