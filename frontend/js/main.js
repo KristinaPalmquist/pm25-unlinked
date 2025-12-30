@@ -7,7 +7,6 @@ import { loadRaster, removeRasterLayer, loadMarkersFromBackend, updateFocusPanel
 import { formatDayLabel } from './utils/dateUtils.js';
 import { createMarker } from './ui/layers.js';
 import { handleMarkerClick } from './ui/initControls.js';
-import { loadCsvMarkers } from './ui/layers.js';
 import { updateUiAfterCsvLoad } from './ui/initControls.js';
 
 
