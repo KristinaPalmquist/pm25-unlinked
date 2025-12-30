@@ -1,16 +1,15 @@
+import maplibregl from "maplibre-gl";
 import { fetchLatestBatch } from "../api/predictions.js";
 import { getAQIColor } from "../config/mapConfig.js";
 import { deriveDayDates } from "../utils/dateUtils.js";
-import maplibregl from "maplibre-gl";
 
-
-export const sourceId = 'pm25-interpolation';
-export const layerId = 'pm25-interpolation-layer';
+export const sourceId = "pm25-interpolation";
+export const layerId = "pm25-interpolation-layer";
 
 export async function loadMarkersFromBackend(map, state, onClick) {
   const rows = await fetchLatestBatch();
-  rows.forEach(row => ingestRow(row, state));
-  Object.values(state.sensorData).forEach(entry => {
+  rows.forEach((row) => ingestRow(row, state));
+  Object.values(state.sensorData).forEach((entry) => {
     const marker = createMarker(entry, onClick);
     marker.addTo(map);
   });
@@ -23,7 +22,7 @@ export async function loadRaster(map, config, day, state) {
   removeRasterLayer(map);
 
   map.addSource(sourceId, {
-    type: 'image',
+    type: "image",
     url: buildRasterUrl(day, config),
     coordinates: [
       [config.mapBounds[0], config.mapBounds[3]],
@@ -35,9 +34,9 @@ export async function loadRaster(map, config, day, state) {
 
   map.addLayer({
     id: layerId,
-    type: 'raster',
+    type: "raster",
     source: sourceId,
-    paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
+    paint: { "raster-opacity": 0.75, "raster-resampling": "linear" },
   });
 }
 
@@ -47,69 +46,81 @@ function removeRasterLayer(map) {
 }
 
 function buildRasterUrl(day, config) {
-  return `${config.interpolationBase}/${config.interpolationTemplate.replace('{day}', day)}`;
+  return `${config.interpolationBase}/${config.interpolationTemplate.replace("{day}", day)}`;
 }
 
 function waitForStyle(map) {
-  return new Promise((resolve) => (map.isStyleLoaded() ? resolve() : map.once('styledata', resolve)));
+  return new Promise((resolve) =>
+    map.isStyleLoaded() ? resolve() : map.once("styledata", resolve),
+  );
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
   state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
   state.dayDates = deriveDayDates(rows);
 
-  state.markers.forEach(m => m.remove());
+  state.markers.forEach((m) => m.remove());
   state.markers = [];
   state.sensorData = {};
 
-  rows.forEach(row => ingestRow(row, state));
+  rows.forEach((row) => ingestRow(row, state));
 
-  state.markers = Object.values(state.sensorData).map(entry =>
-    createMarker(entry, onClick)
+  state.markers = Object.values(state.sensorData).map((entry) =>
+    createMarker(entry, onClick),
   );
 }
 
 export function ingestRow(row, state) {
-    const sensorId = row.sensor_id || row.sensorId;
-    const lat = parseFloat(row.latitude ?? row.lat);
-    const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
-    
-    if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) return;
+  const sensorId = row.sensor_id || row.sensorId;
+  const lat = parseFloat(row.latitude ?? row.lat);
+  const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
 
-    const street = row.street || row.location || '';
-    const city = row.city_y || row.city_x || '';
+  if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) return;
 
-    if (!state.sensorData[sensorId]) {
-        state.sensorData[sensorId] = { sensorId, lat, lon, city, street, latestValue: null, rows: [] };
-    }
+  const street = row.street || row.location || "";
+  const city = row.city_y || row.city_x || "";
 
-    const entry = state.sensorData[sensorId];
-    if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lon)) {
-        entry.lat = lat;
-        entry.lon = lon;
-    }
-    if (!entry.street && street) entry.street = street;
-    if (!entry.city && city) entry.city = city;
-    entry.rows.push(row);
+  if (!state.sensorData[sensorId]) {
+    state.sensorData[sensorId] = {
+      sensorId,
+      lat,
+      lon,
+      city,
+      street,
+      latestValue: null,
+      rows: [],
+    };
+  }
 
-    const predicted = parseFloat(row.predicted_pm25 ?? row.predicted ?? 'NaN');
-    const actual = parseFloat(row.pm25 ?? 'NaN');
-    if (Number.isFinite(predicted)) entry.latestValue = predicted;
-    else if (Number.isFinite(actual)) entry.latestValue = actual;
+  const entry = state.sensorData[sensorId];
+  if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lon)) {
+    entry.lat = lat;
+    entry.lon = lon;
+  }
+  if (!entry.street && street) entry.street = street;
+  if (!entry.city && city) entry.city = city;
+  entry.rows.push(row);
+
+  const predicted = parseFloat(row.predicted_pm25 ?? row.predicted ?? "NaN");
+  const actual = parseFloat(row.pm25 ?? "NaN");
+  if (Number.isFinite(predicted)) entry.latestValue = predicted;
+  else if (Number.isFinite(actual)) entry.latestValue = actual;
 }
 
 function buildPopupHtml(entry) {
   const name = entry.street || entry.sensorId;
-  const location = entry.city ? `${entry.city}<br/>` : '';
-  const reading = Number.isFinite(entry.latestValue) ? `PM2.5: ${entry.latestValue.toFixed(1)}` : 'No recent value';
+  const location = entry.city ? `${entry.city}<br/>` : "";
+  const reading = Number.isFinite(entry.latestValue)
+    ? `PM2.5: ${entry.latestValue.toFixed(1)}`
+    : "No recent value";
   return `<strong>${name}</strong><br/>${location}${reading}`;
 }
 
 export function createMarker(entry, onClick) {
-  const element = document.createElement('div');
-  element.className = 'sensor-marker';
+  const element = document.createElement("div");
+  element.className = "sensor-marker";
   element.style.background = getAQIColor(entry.latestValue ?? 0);
-  element.addEventListener('click', (e) => {
+  element.addEventListener("click", (e) => {
     e.stopPropagation();
     onClick(entry.sensorId, element);
   });
@@ -117,6 +128,8 @@ export function createMarker(entry, onClick) {
   return new maplibregl.Marker({ element })
     .setLngLat([entry.lon, entry.lat])
     .setPopup(
-        new maplibregl.Popup({ closeButton: false, offset: 12 })
-            .setHTML(buildPopupHtml(entry)));
+      new maplibregl.Popup({ closeButton: false, offset: 12 }).setHTML(
+        buildPopupHtml(entry),
+      ),
+    );
 }

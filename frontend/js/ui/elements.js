@@ -1,25 +1,25 @@
 export const ui = {
-    dayDropdown: document.getElementById('forecast-dropdown'),
-    sensorToggle: document.getElementById('toggle-sensors'),
-    overlayToggle: document.getElementById('toggle-overlay'),
-    focusPanel: document.getElementById('focus-panel'),
-    focusName: document.getElementById('focus-name'),
-    focusMeta: document.getElementById('focus-meta'),
-    focusDetailsBtn: document.getElementById('focus-details-btn'),
-    imageModal: document.getElementById('image-modal'),
-    imageModalImg: document.getElementById('image-modal-img'),
-    imageModalClose: document.getElementById('image-modal-close'),
-    imageModalBackdrop: document.getElementById('image-modal-backdrop'),
-    detailsModal: document.getElementById('details-modal'),
-    detailsModalTitle: document.getElementById('details-modal-title'),
-    detailsModalClose: document.getElementById('details-modal-close'),
-    detailsModalBackdrop: document.getElementById('details-modal-backdrop'),
-    detailsTableHead: document.getElementById('details-table-head'),
-    detailsTableBody: document.getElementById('details-table-body'),
+  dayDropdown: document.getElementById("forecast-dropdown"),
+  sensorToggle: document.getElementById("toggle-sensors"),
+  overlayToggle: document.getElementById("toggle-overlay"),
+  focusPanel: document.getElementById("focus-panel"),
+  focusName: document.getElementById("focus-name"),
+  focusMeta: document.getElementById("focus-meta"),
+  focusDetailsBtn: document.getElementById("focus-details-btn"),
+  imageModal: document.getElementById("image-modal"),
+  imageModalImg: document.getElementById("image-modal-img"),
+  imageModalClose: document.getElementById("image-modal-close"),
+  imageModalBackdrop: document.getElementById("image-modal-backdrop"),
+  detailsModal: document.getElementById("details-modal"),
+  detailsModalTitle: document.getElementById("details-modal-title"),
+  detailsModalClose: document.getElementById("details-modal-close"),
+  detailsModalBackdrop: document.getElementById("details-modal-backdrop"),
+  detailsTableHead: document.getElementById("details-table-head"),
+  detailsTableBody: document.getElementById("details-table-body"),
 };
 export function getCardElements(cardId, thumbId) {
   return {
     cardEl: document.getElementById(cardId),
-    thumbEl: document.getElementById(thumbId)
+    thumbEl: document.getElementById(thumbId),
   };
 }

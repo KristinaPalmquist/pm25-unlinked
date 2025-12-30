@@ -1,14 +1,20 @@
-import { fetchPredictions, interpolationBase } from './api.js';
-import { loadCoordinates } from './utils/coordinates.js';
-import { buildMapConfig } from './config/mapConfig.js';
-import { initMap } from './ui/maps.js';
-import { initControls, state } from './ui/initControls.js';
-import { loadRaster, removeRasterLayer, loadMarkersFromBackend, updateFocusPanelValue, clearFocus, loadCsvMarkers } from './ui/layers.js';
-import { formatDayLabel } from './utils/dateUtils.js';
-import { createMarker } from './ui/layers.js';
-import { handleMarkerClick } from './ui/initControls.js';
-import { updateUiAfterCsvLoad } from './ui/initControls.js';
-
+import { fetchPredictions, interpolationBase } from "./api.js";
+import { buildMapConfig } from "./config/mapConfig.js";
+import {
+  clearFocus,
+  createMarker,
+  handleMarkerClick,
+  initControls,
+  initMap,
+  loadCsvMarkers,
+  loadMarkersFromBackend,
+  loadRaster,
+  removeRasterLayer,
+  state,
+  updateFocusPanelValue,
+  updateUiAfterCsvLoad,
+} from "./ui/index.js";
+import { formatDayLabel, loadCoordinates } from "./utils/index.js";
 
 async function main() {
   //  Fetch predictions and coordinates
@@ -20,25 +26,25 @@ async function main() {
   // Build config
   const config = buildMapConfig(gridBounds, interpolationBase);
 
-  state.currentDay = Number(ui.dayDropdown?.value ?? config.forecastDays[0])
+  state.currentDay = Number(ui.dayDropdown?.value ?? config.forecastDays[0]);
 
   // Initialize map
   initMap({ predictions, config });
 
   // Initialize UI controls
-  initControls(map, config, { 
-    loadRaster, 
-    removeRasterLayer, 
-    updateFocusPanelValue, 
-    clearFocus, 
-    openDetailsModal, 
-    closeImageModal, 
-    closeDetailsModal, 
-    formatDayLabel 
+  initControls(map, config, {
+    loadRaster,
+    removeRasterLayer,
+    updateFocusPanelValue,
+    clearFocus,
+    openDetailsModal,
+    closeImageModal,
+    closeDetailsModal,
+    formatDayLabel,
   });
 
   // Load initial raster and markers
-  map.on('load', async () => {
+  map.on("load", async () => {
     await loadRaster(state.currentDay);
     await loadMarkersFromBackend();
   });
@@ -53,9 +59,8 @@ async function main() {
   loadCsvMarkers(rows, state, ingestRow, createMarker);
   updateUiAfterCsvLoad(ui, state);
 
-  console.log('PM2.5 Forecast Map initialized');
-  console.log('Predictions loaded:', predictions.length);
+  console.log("PM2.5 Forecast Map initialized");
+  console.log("Predictions loaded:", predictions.length);
 }
 
-main()
-
+main();
