@@ -12,7 +12,6 @@ import {
   removeRasterLayer,
   state,
   updateFocusPanelValue,
-  updateUiAfterCsvLoad,
 } from "./ui/index.js";
 import { formatDayLabel, loadCoordinates } from "./utils/index.js";
 
@@ -57,7 +56,6 @@ async function main() {
   const rows = predictions;
 
   loadCsvMarkers(rows, state, ingestRow, createMarker);
-  updateUiAfterCsvLoad(ui, state);
 
   console.log("PM2.5 Forecast Map initialized");
   console.log("Predictions loaded:", predictions.length);

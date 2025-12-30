@@ -106,7 +106,7 @@ export function ingestRow(row, state) {
   else if (Number.isFinite(actual)) entry.latestValue = actual;
 }
 
-function buildPopupHtml(entry) {
+export function buildPopupHtml(entry) {
   const name = entry.street || entry.sensorId;
   const location = entry.city ? `${entry.city}<br/>` : "";
   const reading = Number.isFinite(entry.latestValue)

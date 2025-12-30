@@ -17,6 +17,7 @@ export const ui = {
   detailsTableHead: document.getElementById("details-table-head"),
   detailsTableBody: document.getElementById("details-table-body"),
 };
+
 export function getCardElements(cardId, thumbId) {
   return {
     cardEl: document.getElementById(cardId),
