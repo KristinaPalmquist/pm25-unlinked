@@ -34,8 +34,8 @@ class HopsworksSettings(BaseSettings):
     # AQICN_URL: str | None = None
 
     # GitHub
-    GITHUB_PAT: SecretStr | None = None
-    GITHUB_USERNAME: SecretStr | None = None
+    GH_PAT: SecretStr | None = None
+    GH_USERNAME: SecretStr | None = None
     
     # Other API Keys
     FELDERA_API_KEY: SecretStr | None = None    
@@ -92,31 +92,13 @@ class HopsworksSettings(BaseSettings):
         if not aqicn_api_key:
             missing.append("AQICN_API_KEY")
         # 3. GITHUB_PAT
-        github_pat = self.GITHUB_PAT or os.getenv("GITHUB_PAT")
+        github_pat = self.GH_PAT or os.getenv("GH_PAT")
         if not github_pat:
-            missing.append("GITHUB_PAT")
+            missing.append("GH_PAT")
         # 4. GITHUB_USERNAME
-        github_username = self.GITHUB_USERNAME or os.getenv("GITHUB_USERNAME")
+        github_username = self.GH_USERNAME or os.getenv("GH_USERNAME")
         if not github_username:
-            missing.append("GITHUB_USERNAME")
-
-
-        # # 3. AQICN_COUNTRY
-        # aqicn_country = self.AQICN_COUNTRY or os.getenv("AQICN_COUNTRY")
-        # if not aqicn_country:
-        #     missing.append("AQICN_COUNTRY")
-        # # 4. AQICN_CITY
-        # aqicn_city = self.AQICN_CITY or os.getenv("AQICN_CITY")
-        # if not aqicn_city:
-        #     missing.append("AQICN_CITY")
-        # # 5. AQICN_STREET
-        # aqicn_street = self.AQICN_STREET or os.getenv("AQICN_STREET")
-        # if not aqicn_street:
-        #     missing.append("AQICN_STREET")
-        # # 6. AQICN_URL
-        # aqicn_url = self.AQICN_URL or os.getenv("AQICN_URL")
-        # if not aqicn_url:
-        #     missing.append("AQICN_URL")
+            missing.append("GH_USERNAME")
 
         if missing:
             raise ValueError(
