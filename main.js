@@ -1,4 +1,4 @@
-import {fetchPredictions, fetchLatestBatc, interpolationBase} from './frontend/api.js';
+import {fetchPredictions, fetchLatestBatch, interpolationBase} from './frontend/api.js';
 
 const predictions = await fetchPredictions();
 
