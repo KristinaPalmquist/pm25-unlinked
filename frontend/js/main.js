@@ -11,6 +11,7 @@ import {
   loadRaster,
   removeRasterLayer,
   state,
+  ui,
   updateFocusPanelValue,
 } from "./ui/index.js";
 import { formatDayLabel, loadCoordinates } from "./utils/index.js";
