@@ -39,16 +39,16 @@ export async function loadRaster(map, config, day, state) {
   });
 }
 
-function removeRasterLayer(map) {
+export function removeRasterLayer(map) {
   if (map.getLayer(layerId)) map.removeLayer(layerId);
   if (map.getSource(sourceId)) map.removeSource(sourceId);
 }
 
-function buildRasterUrl(day, config) {
+export function buildRasterUrl(day, config) {
   return `${config.interpolationBase}/${config.interpolationTemplate.replace("{day}", day)}`;
 }
 
-function waitForStyle(map) {
+export function waitForStyle(map) {
   return new Promise((resolve) =>
     map.isStyleLoaded() ? resolve() : map.once("styledata", resolve),
   );
