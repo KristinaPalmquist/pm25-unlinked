@@ -1,6 +1,6 @@
-import { fetchLatestBatch } from "../api/predictions.js";
+import { fetchLatestBatch } from "../api.js";
 import { getAQIColor } from "../config/mapConfig.js";
-import { deriveDayDates } from "../utils/dateUtils.js";
+import { deriveDayDates } from "../utils/index.js";
 
 export const sourceId = "pm25-interpolation";
 export const layerId = "pm25-interpolation-layer";

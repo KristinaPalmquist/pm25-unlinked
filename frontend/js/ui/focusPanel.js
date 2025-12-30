@@ -1,5 +1,5 @@
 import { getValueForDay } from "../utils/index.js";
-import { getCardElements, openImageModal, state, ui } from "./ui/index.js";
+import { getCardElements, openImageModal, state, ui } from "./index.js";
 
 export function showFocusPanel() {
   if (!ui.focusPanel) return;

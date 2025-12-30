@@ -1,5 +1,4 @@
-import { ui } from "./elements.js";
-import { state } from "./state.js";
+import { state, ui } from "./index.js";
 
 export function populateDropdown(config, formatDayLabel) {
   if (!ui.dayDropdown) return;

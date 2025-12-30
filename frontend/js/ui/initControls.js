@@ -1,6 +1,4 @@
-import { populateDropdown } from "./dropdown.js";
-import { ui } from "./elements.js";
-import { state } from "./state.js";
+import { populateDropdown, state, ui } from "./index.js";
 
 export function initControls(
   map,

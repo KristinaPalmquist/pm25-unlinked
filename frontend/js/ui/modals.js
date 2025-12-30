@@ -1,6 +1,5 @@
 import { HIDDEN_COLUMNS } from "../config/mapConfig.js";
-import { ui } from "./elements.js";
-import { state } from "./state.js";
+import { state, ui } from "./index.js";
 
 export function openImageModal(src) {
   if (!ui.imageModal || !ui.imageModalImg) return;
