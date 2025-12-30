@@ -1,5 +1,4 @@
-import { fetchPredictions, fetchLatestBatch, interpolationBase } from './frontend/api.js';
-import { fetchPredictions } from './api/predictions.js';
+import { fetchPredictions, interpolationBase } from './api.js';
 import { loadCoordinates } from './utils/coordinates.js';
 import { buildMapConfig } from './config/mapConfig.js';
 import { initMap } from './ui/maps.js';
