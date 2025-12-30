@@ -26,6 +26,7 @@ dependencies = [
     "seaborn",
     "nbformat",
     "Faker",
-    "modal>=1.2.2"
+    "modal>=1.2.2",
+    "python-dotenv>=1.0.0",
 ]
 
