@@ -12,6 +12,7 @@ mistral/
 models/
 config.local.js
 node_modules/
+not_needed_files/
 
 # env
 .env*
