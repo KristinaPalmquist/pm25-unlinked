@@ -2,14 +2,6 @@ import {fetchPredictions, fetchLatestBatc, interpolationBase} from './frontend/a
 
 const predictions = await fetchPredictions();
 
-async function loadMarkersFromBackend() {
-  const rows = await fetchLatestBatch();
-  rows.forEach(row => ingestRow(row)); // reuse your existing ingestRow logic
-  Object.values(state.sensorData).forEach(entry => {
-    const marker = createMarker(entry);
-    marker.addTo(map);
-  });
-}
 
 fetch('./utils/coordinates.json')
   .then(response => response.json())
@@ -92,6 +84,14 @@ fetch('./utils/coordinates.json')
     ],
   });
 
+  async function loadMarkersFromBackend() {
+    const rows = await fetchLatestBatch();
+    rows.forEach(row => ingestRow(row)); // reuse your existing ingestRow logic
+    Object.values(state.sensorData).forEach(entry => {
+      const marker = createMarker(entry);
+      marker.addTo(map);
+    });
+  }
 
   map.on('load', async () => {
     await loadRaster(state.currentDay);
