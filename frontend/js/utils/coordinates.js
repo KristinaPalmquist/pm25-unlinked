@@ -1,5 +1,5 @@
 export async function loadCoordinates() {
-  const response = await fetch("./utils/coordinates.json");
+  const response = await fetch("../coordinates.json");
   const data = await response.json();
   return data;
 }
