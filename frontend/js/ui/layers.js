@@ -1,4 +1,3 @@
-import maplibregl from "maplibre-gl";
 import { fetchLatestBatch } from "../api/predictions.js";
 import { getAQIColor } from "../config/mapConfig.js";
 import { deriveDayDates } from "../utils/dateUtils.js";
