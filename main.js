@@ -6,13 +6,10 @@ const predictions = await fetchPredictions();
 fetch('./utils/coordinates.json')
   .then(response => response.json())
   .then(gridBounds => {
-    // Use gridBounds here to set up your config
     const config = {
       forecastDays: [0, 1, 2, 3, 4, 5, 6],
       interpolationBase: interpolationBase,
       interpolationTemplate: 'forecast_interpolation_{day}d.png',
-      // interpolationBase: './models/interpolation',
-      // interpolationTemplate: 'forecast_interpolation_{day}d.png',
       predictionsCsv: './models/predictions.csv',
       mapBounds: [
         gridBounds.MIN_LONGITUDE,
@@ -571,8 +568,8 @@ fetch('./utils/coordinates.json')
 
   init();
 
-  });
+});
 
 
-  console.log('PM2.5 Forecast Map initialized');
-  console.log('Predictions loaded:', predictions.length);
+console.log('PM2.5 Forecast Map initialized');
+console.log('Predictions loaded:', predictions.length);
