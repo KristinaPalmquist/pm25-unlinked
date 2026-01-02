@@ -179,8 +179,7 @@ def get_working_feed_url(sensor_id, aqicn_api_key):
                 error_details.append(f"{feed_url}: Missing 'geo' coordinates")
                 continue
 
-            # ✅ If we reach here, feed_url works
-            return feed_url
+            return f"{feed_url}?token={aqicn_api_key}"
 
         except requests.exceptions.RequestException as e:
             error_details.append(f"{feed_url}: HTTP error - {e}")
@@ -401,22 +400,22 @@ def delete_secrets(proj, name):
         print(f"No {name} secret found")
 
 
-# WARNING - this will wipe out all your feature data and models
-def purge_project(proj):
-    fs = proj.get_feature_store()
-    mr = proj.get_model_registry()
+# # WARNING - this will wipe out all your feature data and models
+# def purge_project(proj):
+#     fs = proj.get_feature_store()
+#     mr = proj.get_model_registry()
 
-    # Delete Feature Views before deleting the feature groups
-    delete_feature_views(fs, "air_quality_fv")
+#     # Delete Feature Views before deleting the feature groups
+#     delete_feature_views(fs, "air_quality_fv")
 
-    # Delete ALL Feature Groups
-    delete_feature_groups(fs, "air_quality")
-    delete_feature_groups(fs, "weather")
-    delete_feature_groups(fs, "aq_predictions")
+#     # Delete ALL Feature Groups
+#     delete_feature_groups(fs, "air_quality")
+#     delete_feature_groups(fs, "weather")
+#     delete_feature_groups(fs, "aq_predictions")
 
-    # Delete all Models
-    delete_models(mr, "air_quality_xgboost_model")
-    delete_secrets(proj, "SENSOR_LOCATION_JSON")
+#     # Delete all Models
+#     delete_models(mr, "air_quality_xgboost_model")
+#     delete_secrets(proj, "SENSOR_LOCATION_JSON")
 
 
 def check_file_path(file_path):

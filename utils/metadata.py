@@ -1,27 +1,38 @@
 import os
 import pandas as pd
-from geopy.geocoders import Nominatim
+import requests
 from utils import airquality
 
-geolocator = Nominatim(user_agent="pm25-metadata-builder")
 
 def get_coordinates(city, street, country):
-    """Geocode a sensor location with fallbacks."""
     candidates = []
+
+    # Most specific → least specific
     if street and city:
         candidates.append(f"{street}, {city}, {country}")
     if city:
         candidates.append(f"{city}, {country}")
     if street:
         candidates.append(f"{street}, {country}")
-    candidates.append(country)
+    if country:
+        candidates.append(country)
 
     for query in candidates:
-        loc = geolocator.geocode(query)
-        if loc:
-            return loc.latitude, loc.longitude
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        params = {"name": query, "count": 1, "language": "en"}
+
+        try:
+            r = requests.get(url, params=params, timeout=5)
+            data = r.json()
+
+            if "results" in data and len(data["results"]) > 0:
+                result = data["results"][0]
+                return result["latitude"], result["longitude"]
+        except Exception:
+            pass
 
     return None, None
+
 
 def clean_field(value):
     if value is None:
@@ -33,6 +44,16 @@ def clean_field(value):
         return None
     return value
 
+def validate_aqicn_feed(feed_url):
+    try:
+        r = requests.get(feed_url)
+        data = r.json()
+        return data.get("status") == "ok"
+    except:
+        return False
+    
+def validate_coordinates(lat, lon):
+    return lat is not None and lon is not None
 
 def build_metadata_from_csvs(data_dir, aqicn_api_key):
     rows = []
@@ -52,12 +73,17 @@ def build_metadata_from_csvs(data_dir, aqicn_api_key):
         city = clean_field(city)
         country = clean_field(country)
 
-        # Geocode with fallbacks
+        # Validate feed URL
+        if not validate_aqicn_feed(feed_url):
+            print(f"[SKIP] Sensor {sensor_id}: invalid AQICN feed")
+            continue
+
+        # Geocode
         lat, lon = get_coordinates(city, street, country)
 
-        if lat is None or lon is None:
-            print(f"[WARN] Could not geocode sensor {sensor_id} ({street}, {city}, {country})")
-            continue  # or keep it but mark as invalid?
+        if not validate_coordinates(lat, lon):
+            print(f"[SKIP] Sensor {sensor_id}: cannot geocode location")
+            continue
 
         rows.append({
             "sensor_id": sensor_id,
