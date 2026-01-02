@@ -21,6 +21,7 @@ import hsfs
 from pathlib import Path
 
 
+
 def get_historical_weather(city, start_date, end_date, latitude, longitude):
     # latitude, longitude = get_city_coordinates(city)
 
@@ -531,3 +532,83 @@ def add_nearby_sensor_feature(df, locations, column="pm25_lag_1d", n_closest=3, 
     
     return df.sort_values(['sensor_id', 'date'])
 
+def fetch_latest_aq_data(sensor_id: str, feed_url: str, since: datetime):
+    """
+    Fetch only new AQ measurements for a sensor since the last timestamp
+    stored in Hopsworks.
+
+    Parameters
+    ----------
+    sensor_id : str
+        Unique sensor identifier.
+    feed_url : str
+        AQICN feed URL for this sensor.
+    since : datetime
+        Last timestamp already stored in Hopsworks.
+
+    Returns
+    -------
+    pd.DataFrame
+        New AQ rows (may be empty).
+    """
+
+    # Fetch raw AQICN feed
+    response = requests.get(feed_url)
+    response.raise_for_status()
+    data = response.json()
+
+    # Extract timestamp
+    try:
+        ts_str = data["data"]["time"]["s"]
+        ts = pd.to_datetime(ts_str).tz_localize(None)
+    except Exception:
+        return pd.DataFrame()  # no valid data
+
+    # If the timestamp is not newer than what we already have → nothing to add
+    if ts <= since:
+        return pd.DataFrame()
+
+    # Extract PM2.5 (adapt to your feed structure)
+    pm25 = data["data"]["iaqi"].get("pm25", {}).get("v", None)
+
+    # Build a single-row dataframe
+    df = pd.DataFrame([{
+        "sensor_id": sensor_id,
+        "datetime": ts,
+        "pm25": pm25,
+        "aqicn_url": feed_url
+    }])
+
+    return df
+
+def get_latest_weather(latitude: float, longitude: float, since: datetime):
+    """
+    Fetch only new weather rows since the last timestamp.
+    """
+
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+        "start_date": since.strftime("%Y-%m-%d"),
+        "end_date": datetime.utcnow().strftime("%Y-%m-%d"),
+        "timezone": "UTC"
+    }
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    data = response.json()
+
+    # Convert to dataframe
+    hourly = data["hourly"]
+    df = pd.DataFrame(hourly)
+
+    # Convert time column
+    df["time"] = pd.to_datetime(df["time"]).dt.tz_localize(None)
+
+    # Keep only rows newer than "since"
+    df = df[df["time"] > since]
+
+    return df
