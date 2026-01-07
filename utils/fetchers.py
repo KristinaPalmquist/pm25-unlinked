@@ -1,13 +1,27 @@
 import requests
 import requests_cache
 import openmeteo_requests
-
 import pandas as pd
 import json
 from retry_requests import retry
-import datetime
 import time
+from datetime import datetime, timedelta
+from threading import Lock
 
+
+""" Global rate limiting helper """
+LAST_REQUEST_TIME = 0
+RATE_LIMIT_SECONDS = 1.5   # 1 request every 1.5 seconds ≈ 40 per minute
+LOCK = Lock()
+
+def rate_limited_request():
+    global LAST_REQUEST_TIME
+    with LOCK:
+        now = time.time()
+        elapsed = now - LAST_REQUEST_TIME
+        if elapsed < RATE_LIMIT_SECONDS:
+            time.sleep(RATE_LIMIT_SECONDS - elapsed)
+        LAST_REQUEST_TIME = time.time()
 
 
 """ HTTP request trigger function """
@@ -25,52 +39,126 @@ def trigger_request(url:str):
 
 
 """ Weather data helpers """
+def get_historical_weather(location_id, start_date, end_date, latitude, longitude):
+    # Setup Open-Meteo client with caching + retry
+    cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
+    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+    openmeteo = openmeteo_requests.Client(session=retry_session)
 
-def get_historical_weather(city, start_date, end_date, latitude, longitude):
-    # latitude, longitude = get_city_coordinates(city)
+    # Convert to datetime
+    start_dt = pd.to_datetime(start_date)
+    end_dt = pd.to_datetime(end_date)
 
-    # Setup the Open-Meteo API client with cache and retry on error
-    cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
-    retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
-    openmeteo = openmeteo_requests.Client(session = retry_session)
+    # Generate monthly chunks
+    chunks = pd.date_range(start=start_dt, end=end_dt, freq="MS").tolist()
+    chunks.append(end_dt)
 
-    # Make sure all required weather variables are listed here
-    # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://archive-api.open-meteo.com/v1/archive"
-    params = {
-        "latitude": latitude,
-        "longitude": longitude,
-        "start_date": start_date,
-        "end_date": end_date,
-        "daily": ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max", "wind_direction_10m_dominant"]
-    }
-    responses = openmeteo.weather_api(url, params=params)
+    all_frames = []
 
-    # Process first location. Add a for-loop for multiple locations or weather models
-    response = responses[0]
+    for i in range(len(chunks) - 1):
+        chunk_start = chunks[i].strftime("%Y-%m-%d")
+        chunk_end = chunks[i+1].strftime("%Y-%m-%d")
 
-    # Process daily data. The order of variables needs to be the same as requested.
-    daily = response.Daily()
-    daily_temperature_2m_mean = daily.Variables(0).ValuesAsNumpy()
-    daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
-    daily_wind_speed_10m_max = daily.Variables(2).ValuesAsNumpy()
-    daily_wind_direction_10m_dominant = daily.Variables(3).ValuesAsNumpy()
+        url = "https://archive-api.open-meteo.com/v1/archive"
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "start_date": chunk_start,
+            "end_date": chunk_end,
+            "daily": [
+                "temperature_2m_mean",
+                "precipitation_sum",
+                "wind_speed_10m_max",
+                "wind_direction_10m_dominant"
+            ],
+            "timezone": "UTC"
+        }
 
-    daily_data = {"date": pd.date_range(
-        start = pd.to_datetime(daily.Time(), unit = "s"),
-        end = pd.to_datetime(daily.TimeEnd(), unit = "s"),
-        freq = pd.Timedelta(seconds = daily.Interval()),
-        inclusive = "left"
-    )}
-    daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
-    daily_data["precipitation_sum"] = daily_precipitation_sum
-    daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
-    daily_data["wind_direction_10m_dominant"] = daily_wind_direction_10m_dominant
+        rate_limited_request()
+        responses = openmeteo.weather_api(url, params=params)
+        response = responses[0]
 
-    daily_dataframe = pd.DataFrame(data = daily_data)
-    daily_dataframe = daily_dataframe.dropna()
-    daily_dataframe['city'] = city
-    return daily_dataframe
+        daily = response.Daily()
+        df = pd.DataFrame({
+            "date": pd.date_range(
+                start=pd.to_datetime(daily.Time(), unit="s"),
+                end=pd.to_datetime(daily.TimeEnd(), unit="s"),
+                freq=pd.Timedelta(seconds=daily.Interval()),
+                inclusive="left"
+            ),
+            "temperature_2m_mean": daily.Variables(0).ValuesAsNumpy(),
+            "precipitation_sum": daily.Variables(1).ValuesAsNumpy(),
+            "wind_speed_10m_max": daily.Variables(2).ValuesAsNumpy(),
+            "wind_direction_10m_dominant": daily.Variables(3).ValuesAsNumpy(),
+        })
+
+        df["location_id"] = location_id
+        # df["city"] = city
+        df = df.dropna()
+
+        df = df.astype({
+            "temperature_2m_mean": "float64",
+            "precipitation_sum": "float64",
+            "wind_speed_10m_max": "float64",
+            "wind_direction_10m_dominant": "float64",
+        })
+
+        all_frames.append(df)
+        
+        time.sleep(0.3)   # 300 ms pause between requests
+
+
+    if not all_frames:
+        return pd.DataFrame()
+
+    return pd.concat(all_frames, ignore_index=True)
+
+
+# def get_historical_weather(city, start_date, end_date, latitude, longitude):
+#     # latitude, longitude = get_city_coordinates(city)
+
+#     # Setup the Open-Meteo API client with cache and retry on error
+#     cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
+#     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
+#     openmeteo = openmeteo_requests.Client(session = retry_session)
+
+#     # Make sure all required weather variables are listed here
+#     # The order of variables in hourly or daily is important to assign them correctly below
+#     url = "https://archive-api.open-meteo.com/v1/archive"
+#     params = {
+#         "latitude": latitude,
+#         "longitude": longitude,
+#         "start_date": start_date,
+#         "end_date": end_date,
+#         "daily": ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max", "wind_direction_10m_dominant"]
+#     }
+#     responses = openmeteo.weather_api(url, params=params)
+
+#     # Process first location. Add a for-loop for multiple locations or weather models
+#     response = responses[0]
+
+#     # Process daily data. The order of variables needs to be the same as requested.
+#     daily = response.Daily()
+#     daily_temperature_2m_mean = daily.Variables(0).ValuesAsNumpy()
+#     daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
+#     daily_wind_speed_10m_max = daily.Variables(2).ValuesAsNumpy()
+#     daily_wind_direction_10m_dominant = daily.Variables(3).ValuesAsNumpy()
+
+#     daily_data = {"date": pd.date_range(
+#         start = pd.to_datetime(daily.Time(), unit = "s"),
+#         end = pd.to_datetime(daily.TimeEnd(), unit = "s"),
+#         freq = pd.Timedelta(seconds = daily.Interval()),
+#         inclusive = "left"
+#     )}
+#     daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
+#     daily_data["precipitation_sum"] = daily_precipitation_sum
+#     daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
+#     daily_data["wind_direction_10m_dominant"] = daily_wind_direction_10m_dominant
+
+#     daily_dataframe = pd.DataFrame(data = daily_data)
+#     daily_dataframe = daily_dataframe.dropna()
+#     daily_dataframe['city'] = city
+#     return daily_dataframe
 
 
 def get_hourly_weather_forecast(city, latitude, longitude):
@@ -119,51 +207,62 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     hourly_dataframe = hourly_dataframe.dropna()
     return hourly_dataframe
 
-def get_historical_weather(city, df, today, feed_url, sensor_id, AQICN_API_KEY):
-    # 1. Determine earliest AQ date
-    start_dt = df["datetime"].min()
-    start_date = start_dt.strftime("%Y-%m-%d")
-    end_date = today.strftime("%Y-%m-%d")
+# def get_historical_weather(city, df, today, feed_url, sensor_id, AQICN_API_KEY):
+#     # 1. Determine earliest AQ date
+#     start_dt = df["date"].min()
+#     start_date = start_dt.strftime("%Y-%m-%d")
+#     end_date = today.strftime("%Y-%m-%d")
 
-    # 2. Get coordinates
-    latitude, longitude = get_sensor_coordinates(feed_url, sensor_id, AQICN_API_KEY)
+#     # 2. Get coordinates
+#     latitude, longitude = get_sensor_coordinates(feed_url, sensor_id, AQICN_API_KEY)
 
-    # 3. Call Open-Meteo DAILY archive API
-    url = "https://archive-api.open-meteo.com/v1/archive"
-    params = {
-        "latitude": latitude,
-        "longitude": longitude,
-        "start_date": start_date,
-        "end_date": end_date,
-        "daily": "temperature_2m_mean,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant",
-        "timezone": "UTC"
-    }
+#     # 3. Call Open-Meteo DAILY archive API
+#     url = "https://archive-api.open-meteo.com/v1/archive"
+#     params = {
+#         "latitude": latitude,
+#         "longitude": longitude,
+#         "start_date": start_date,
+#         "end_date": end_date,
+#         "daily": "temperature_2m_mean,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant",
+#         "timezone": "UTC"
+#     }
 
-    resp = requests.get(url, params=params)
-    resp.raise_for_status()
-    data = resp.json()
+#     resp = requests.get(url, params=params)
+#     resp.raise_for_status()
+#     data = resp.json()
 
-    daily = data.get("daily")
-    if daily is None:
-        print(f"No daily weather data for sensor {sensor_id}")
-        return pd.DataFrame(), latitude, longitude
+#     daily = data.get("daily")
+#     if daily is None:
+#         print(f"No daily weather data for sensor {sensor_id}")
+#         return pd.DataFrame(), latitude, longitude
 
-    weather_df = pd.DataFrame(daily)
-    weather_df["datetime"] = pd.to_datetime(weather_df["time"]).dt.tz_localize(None)
-    weather_df = weather_df.drop(columns=["time"])
+#     weather_df = pd.DataFrame(daily)
+#     weather_df["date"] = pd.to_datetime(weather_df["time"]).dt.tz_localize(None)
+#     weather_df = weather_df.drop(columns=["time"])
 
-    # Add metadata
-    weather_df["sensor_id"] = sensor_id
-    weather_df["city"] = city
-    weather_df["latitude"] = latitude
-    weather_df["longitude"] = longitude
+#     # Add metadata
+#     weather_df["sensor_id"] = sensor_id
+#     weather_df["city"] = city
+#     weather_df["latitude"] = latitude
+#     weather_df["longitude"] = longitude
 
-    return weather_df, latitude, longitude
+#     return weather_df, latitude, longitude
 
 def get_latest_weather(latitude: float, longitude: float, since: datetime):
     """
     Fetch only new weather rows since the last datetime.
     """
+    # Normalize start date
+    if since is None:
+        # First run - fetch today's weather only
+        start_date = datetime.utcnow().date().isoformat()
+    elif hasattr(since, "strftime"):
+        # datetime or pandas Timestamp
+        start_date = since.strftime("%Y-%m-%d")
+    else:
+        # if string, like "2025-01-07"
+        start_date = str(since)
+
 
     url = "https://api.open-meteo.com/v1/forecast"
 
@@ -171,8 +270,8 @@ def get_latest_weather(latitude: float, longitude: float, since: datetime):
         "latitude": latitude,
         "longitude": longitude,
         "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
-        "start_date": since.strftime("%Y-%m-%d"),
-        "end_date": datetime.utcnow().strftime("%Y-%m-%d"),
+        "start_date": start_date,
+        "end_date": datetime.utcnow().date().isoformat(),
         "timezone": "UTC"
     }
 
@@ -181,15 +280,22 @@ def get_latest_weather(latitude: float, longitude: float, since: datetime):
     data = response.json()
 
     # Convert to dataframe
-    hourly = data["hourly"]
+    hourly = data.get("hourly", {})
+    if not hourly:
+        return pd.DataFrame()
+
     df = pd.DataFrame(hourly)
 
-    # Convert time → datetime
-    df["datetime"] = pd.to_datetime(df["time"]).dt.tz_localize(None)
+    # Standardize datetime
+    df["date"] = pd.to_datetime(df["time"], errors="coerce").dt.tz_localize(None)
     df = df.drop(columns=["time"])
+    df = df.dropna(subset=["date"])
 
     # Keep only rows newer than "since"
-    df = df[df["datetime"] > since]
+    if since is not None:
+        if hasattr(since, "tzinfo"):
+            since = since.replace(tzinfo=None)
+        df = df[df["date"] > since]
 
     return df
 
@@ -346,7 +452,7 @@ def fetch_latest_aq_data(sensor_id: str, feed_url: str, since: datetime):
 
     df = pd.DataFrame([{
         "sensor_id": sensor_id,
-        "datetime": ts,
+        "date": ts,
         "pm25": pm25,
         "aqicn_url": feed_url
     }])

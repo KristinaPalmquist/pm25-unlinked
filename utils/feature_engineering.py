@@ -2,17 +2,17 @@ import pandas as pd
 import numpy as np
 
 def add_lagged_features(df, column="pm25", lags=[1, 2, 3]):
-    df = df.sort_values(["sensor_id", "datetime"]).copy()
+    df = df.sort_values(["sensor_id", "date"]).copy()
     for lag in lags:
         df[f"{column}_lag_{lag}d"] = df.groupby("sensor_id")[column].shift(lag)
     return df
 
 
 def add_rolling_window_feature(df, window_days=3, column="pm25", new_column="pm25_rolling_3d"):
-    df = df.sort_values(["sensor_id", "datetime"]).copy()
+    df = df.sort_values(["sensor_id", "date"]).copy()
     df[new_column] = (
         df.groupby("sensor_id")
-          .rolling(f"{window_days}D", on="datetime")[column]
+          .rolling(f"{window_days}D", on="date")[column]
           .mean()
           .reset_index(level=0, drop=True)
     )
@@ -33,7 +33,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def add_nearby_sensor_feature(df, metadata_df, n_closest=3):
-    df = df.sort_values(["sensor_id", "datetime"]).copy()
+    df = df.sort_values(["sensor_id", "date"]).copy()
 
     # Precompute lag
     df["pm25_lag_1d"] = df.groupby("sensor_id")["pm25"].shift(1)
@@ -54,11 +54,11 @@ def add_nearby_sensor_feature(df, metadata_df, n_closest=3):
 
         neighbor_data = (
             df[df["sensor_id"].isin(nearest_ids)]
-            .groupby("datetime")["pm25_lag_1d"]
+            .groupby("date")["pm25_lag_1d"]
             .mean()
         )
 
-        aligned = group["datetime"].map(neighbor_data)
+        aligned = group["date"].map(neighbor_data)
         results.append(pd.Series(aligned.values, index=group.index))
 
     df["pm25_nearby_avg"] = pd.concat(results).sort_index()
@@ -70,8 +70,8 @@ def add_nearby_sensor_feature(df, metadata_df, n_closest=3):
 
 
 # def add_rolling_window_feature(df, window_days=3, column="pm25", new_column="pm25_rolling_3d"):
-#     df = df.sort_values(["sensor_id", "datetime"]).copy()
-#     df_indexed = df.set_index("datetime", append=False)
+#     df = df.sort_values(["sensor_id", "date"]).copy()
+#     df_indexed = df.set_index("date", append=False)
 
 #     df_indexed[f"{column}_shifted"] = df_indexed.groupby("sensor_id")[column].shift(1)
     
@@ -86,7 +86,7 @@ def add_nearby_sensor_feature(df, metadata_df, n_closest=3):
 
 
 # def add_lagged_features(df, column="pm25", lags=[1, 2, 3]):
-#     df = df.sort_values(["sensor_id", "datetime"]).copy()
+#     df = df.sort_values(["sensor_id", "date"]).copy()
     
 #     for lag in lags:
 #         new_column = f"{column}_lag_{lag}d"

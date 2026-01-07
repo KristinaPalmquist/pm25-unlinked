@@ -4,6 +4,8 @@ import requests
 from not_needed_files import airquality
 from utils import fetchers
 
+# Cache for geocoding results to avoid duplicate API calls
+_geocoding_cache = {}
 
 def get_coordinates(city, street, country):
     candidates = []
@@ -19,6 +21,10 @@ def get_coordinates(city, street, country):
         candidates.append(country)
 
     for query in candidates:
+        # Check cache first
+        if query in _geocoding_cache:
+            return _geocoding_cache[query]
+        
         url = "https://geocoding-api.open-meteo.com/v1/search"
         params = {"name": query, "count": 1, "language": "en"}
 
@@ -28,10 +34,13 @@ def get_coordinates(city, street, country):
 
             if "results" in data and len(data["results"]) > 0:
                 result = data["results"][0]
-                return result["latitude"], result["longitude"]
+                coords = (result["latitude"], result["longitude"])
+                _geocoding_cache[query] = coords
+                return coords
         except Exception:
             pass
 
+    _geocoding_cache[query] = (None, None)
     return None, None
 
 
@@ -45,14 +54,6 @@ def clean_field(value):
         return None
     return value
 
-def validate_aqicn_feed(feed_url):
-    try:
-        r = requests.get(feed_url)
-        data = r.json()
-        return data.get("status") == "ok"
-    except:
-        return False
-    
 def validate_coordinates(lat, lon):
     return lat is not None and lon is not None
 
@@ -73,11 +74,6 @@ def build_metadata_from_csvs(data_dir, aqicn_api_key):
         street = clean_field(street)
         city = clean_field(city)
         country = clean_field(country)
-
-        # Validate feed URL
-        if not validate_aqicn_feed(feed_url):
-            print(f"[SKIP] Sensor {sensor_id}: invalid AQICN feed")
-            continue
 
         # Geocode
         lat, lon = get_coordinates(city, street, country)

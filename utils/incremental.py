@@ -23,14 +23,14 @@ def process_aq_increment(sensor_id, meta, last_ts):
         return None
 
     # Standardize datetime
-    aq_new["datetime"] = pd.to_datetime(aq_new["datetime"], errors="coerce")
-    aq_new = aq_new.dropna(subset=["datetime"])
-    aq_new["datetime"] = aq_new["datetime"].dt.tz_localize(None)
+    aq_new["date"] = pd.to_datetime(aq_new["date"], errors="coerce")
+    aq_new = aq_new.dropna(subset=["date"])
+    aq_new["date"] = aq_new["date"].dt.tz_localize(None)
 
     # Incremental filtering
     if last_ts is not None:
         last_ts_naive = last_ts.replace(tzinfo=None) if last_ts.tzinfo else last_ts
-        aq_new = aq_new[aq_new["datetime"] > last_ts_naive]
+        aq_new = aq_new[aq_new["date"] > last_ts_naive]
 
     if aq_new.empty:
         print(f"ℹ️ Sensor {sensor_id}: Data filtered out (older than last_ts)")
@@ -46,6 +46,7 @@ def process_aq_increment(sensor_id, meta, last_ts):
     aq_new = feature_engineering.add_lagged_features(
         aq_new, column="pm25", lags=[1, 2, 3]
     )
+    aq_new["pm25_nearby_avg"] = None
 
     # Clean schema
     aq_new = aq_new.drop(columns=["aqicn_url"], errors="ignore")
@@ -59,61 +60,50 @@ def process_aq_increment(sensor_id, meta, last_ts):
     return aq_new
 
 
-def process_weather_increment(sensor_id, meta, last_ts):
-    # Skip if updated in the last 24 hours
-    if last_ts is not None:
-        time_since_last = datetime.now(timezone.utc) - last_ts.replace(tzinfo=timezone.utc)
-        if time_since_last < timedelta(minutes=60):
-            print(f"⏭️ Sensor {sensor_id}: Weather updated {time_since_last.total_seconds()/3600:.1f} hours ago, skipping")
-            return None
-    
-    weather_new = fetchers.get_latest_weather(
+def _weather_start_date(last_ts):
+    """Return the correct start date string for the weather API."""
+    if last_ts is None:
+        # First run → fetch today's weather only
+        return datetime.now(timezone.utc).date().isoformat()
+    return last_ts.date().isoformat()
+
+
+def _fetch_weather(meta, start_date):
+    return fetchers.get_latest_weather(
         latitude=meta["latitude"],
         longitude=meta["longitude"],
-        since=last_ts
+        since=start_date
     )
 
-    if weather_new.empty:
-        print(f"ℹ️ Sensor {sensor_id}: No new weather data available")
+
+def _clean_weather_df(df):
+    if df is None or df.empty:
         return None
 
-    # Standardize datetime
-    weather_new["datetime"] = pd.to_datetime(weather_new["datetime"], errors="coerce")
-    weather_new = weather_new.dropna(subset=["datetime"])
-    weather_new["datetime"] = weather_new["datetime"].dt.tz_localize(None)
+    df = df.copy()
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df = df.dropna(subset=["date"])
+    df["date"] = df["date"].dt.tz_localize(None)
 
-    # Incremental filtering
-    if last_ts is not None:
-        last_ts_naive = last_ts.replace(tzinfo=None) if last_ts.tzinfo else last_ts
-        weather_new = weather_new[weather_new["datetime"] > last_ts_naive]
+    return df
 
-    if weather_new.empty:
-        print(f"ℹ️ Sensor {sensor_id}: Weather data filtered out (older than last_ts)")
-        return None
 
-    print(f"✅ Sensor {sensor_id}: Found {len(weather_new)} new weather records")
-
-    # Rename to match feature group schema
-    weather_new = weather_new.rename(columns={
+def _finalize_weather_schema(df, sensor_id, meta):
+    df = df.rename(columns={
         "temperature_2m": "temperature_2m_mean",
         "wind_speed_10m": "wind_speed_10m_max",
         "wind_direction_10m": "wind_direction_10m_dominant",
     })
 
-    # Ensure required columns exist
-    weather_new["precipitation_sum"] = weather_new.get("precipitation_sum", 0.0)
-    weather_new["wind_direction_10m_dominant"] = weather_new.get(
-        "wind_direction_10m_dominant", 0.0
-    )
+    df["precipitation_sum"] = df.get("precipitation_sum", 0.0)
+    df["wind_direction_10m_dominant"] = df.get("wind_direction_10m_dominant", 0.0)
 
-    # Add metadata
-    weather_new["sensor_id"] = int(sensor_id)
-    weather_new["city"] = meta["city"]
-    weather_new["latitude"] = meta["latitude"]
-    weather_new["longitude"] = meta["longitude"]
+    df["sensor_id"] = int(sensor_id)
+    df["city"] = meta["city"]
+    df["latitude"] = meta["latitude"]
+    df["longitude"] = meta["longitude"]
 
-    # Cast types
-    weather_new = weather_new.astype({
+    df = df.astype({
         "sensor_id": "int64",
         "latitude": "float64",
         "longitude": "float64",
@@ -123,10 +113,9 @@ def process_weather_increment(sensor_id, meta, last_ts):
         "wind_direction_10m_dominant": "float64",
     })
 
-    # Final schema
-    weather_new = weather_new[[
+    return df[[
         "sensor_id",
-        "datetime",
+        "date",
         "temperature_2m_mean",
         "precipitation_sum",
         "wind_speed_10m_max",
@@ -136,61 +125,96 @@ def process_weather_increment(sensor_id, meta, last_ts):
         "longitude",
     ]]
 
-    return weather_new
+
+def process_weather_increment(sensor_id, meta, last_ts):
+    # Skip if updated recently
+    if last_ts is not None:
+        time_since_last = datetime.now(timezone.utc) - last_ts.replace(tzinfo=timezone.utc)
+        if time_since_last < timedelta(hours=1):
+            print(f"⏭️ Sensor {sensor_id}: Weather updated {time_since_last.total_seconds()/3600:.1f} hours ago, skipping")
+            return None
+
+    # Determine start date safely
+    start_date = _weather_start_date(last_ts)
+
+    # Fetch raw weather
+    weather_new = _fetch_weather(meta, start_date)
+    if weather_new is None or weather_new.empty:
+        print(f"ℹ️ Sensor {sensor_id}: No new weather data available")
+        return None
+
+    # Clean + standardize
+    weather_new = _clean_weather_df(weather_new)
+    if weather_new is None or weather_new.empty:
+        print(f"ℹ️ Sensor {sensor_id}: Weather data invalid or empty after cleaning")
+        return None
+
+    # Filter incremental rows
+    if last_ts is not None:
+        last_ts_naive = last_ts.replace(tzinfo=None) if last_ts.tzinfo else last_ts
+        weather_new = weather_new[weather_new["date"] > last_ts_naive]
+
+    if weather_new.empty:
+        print(f"ℹ️ Sensor {sensor_id}: No weather newer than last_ts")
+        return None
+
+    print(f"✅ Sensor {sensor_id}: Found {len(weather_new)} new weather records")
+
+    return _finalize_weather_schema(weather_new, sensor_id, meta)
 
 
-def run_incremental_update(
-    sensor_metadata_fg,
-    air_quality_fg,
-    weather_fg,
-    latest_per_sensor
-):
+def run_incremental_update(sensor_metadata_fg, air_quality_fg, weather_fg, latest_per_sensor):
+    """
+    Update all sensors with new data if >24 hours since last update.
+    """
     metadata_df = sensor_metadata_fg.read().set_index("sensor_id")
 
-    locations = {
-        sid: {
-            "latitude": row["latitude"],
-            "longitude": row["longitude"]
-        }
-        for sid, row in metadata_df.iterrows()
-    }
-
     if metadata_df.empty:
-        print("⏭️ Skipping incremental updates - no sensors configured yet")
+        print("⏭️ No sensors configured — skipping incremental update")
         return
+    
+    locations = {}
+    for sensor_id, row in metadata_df.iterrows():
+        locations[sensor_id] = {
+            "latitude": row["latitude"],
+            "longitude": row["longitude"],
+            "city": row["city"],
+            "country": row["country"],
+            "street": row["street"],
+            "aqicn_url": row["aqicn_url"],
+        }
 
-    now = datetime.now(timezone.utc)
-    min_update_interval = pd.Timedelta(hours=1)
-    
+    # now = datetime.now(timezone.utc)
+    # min_update_interval = pd.Timedelta(hours=1)
     updated_count = 0
-    
+    all_new_aq = []
+
     for sensor_id, meta in metadata_df.iterrows():
         last_ts = latest_per_sensor.get(sensor_id)
-        
-        # Skip if recently updated
-        if last_ts is not None:
-            time_since_update = now - last_ts.replace(tzinfo=timezone.utc)
-            if time_since_update < min_update_interval:
-                print(f"⏭️ Skipping sensor {sensor_id} - updated {time_since_update.total_seconds()/60:.1f} minutes ago")
-                continue
+
+        # if last_ts is not None:
+        #     if now - last_ts.replace(tzinfo=timezone.utc) < min_update_interval:
+        #         continue
 
         aq_new = process_aq_increment(sensor_id, meta, last_ts)
-
-        # Only proceed if there is new AQ data
-        if not aq_new.empty:
-
-            # AQ update
-            aq_new["city"] = meta["city"]
-            aq_new["country"] = meta["country"]
-            aq_new["feed_url"] = meta["feed_url"]
-            air_quality_fg.insert(aq_new)
+        if aq_new is not None and not aq_new.empty:
+            all_new_aq.append(aq_new)
             updated_count += 1
 
-            # Weather update
             weather_new = process_weather_increment(sensor_id, meta, last_ts)
-            if not weather_new.empty:
+            if weather_new is not None and not weather_new.empty:
                 weather_fg.insert(weather_new)
-        
-        time.sleep(1) # Rate limiting - 1 second between sensors
+
+        time.sleep(1)
+
+    if all_new_aq:
+            combined_aq = pd.concat(all_new_aq, ignore_index=True)
+            combined_aq = feature_engineering.add_nearby_sensor_feature(
+                combined_aq,
+                locations,
+                column="pm25_lag_1d",
+                n_closest=3
+            )
+            air_quality_fg.insert(combined_aq)
 
     print(f"✅ Incremental update complete. Updated {updated_count} sensors.")
