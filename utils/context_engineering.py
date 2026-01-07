@@ -8,7 +8,7 @@ import torch
 import sys
 import pandas as pd
 from openai import OpenAI
-from utils.airquality_data_retrieval import (
+from utils.prediction import (
     get_historical_data_for_date,
     get_historical_data_in_date_range,
     get_future_data_in_date_range,
