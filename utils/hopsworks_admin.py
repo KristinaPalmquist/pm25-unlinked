@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import hopsworks
 import hsfs
 from hsfs.feature import Feature
@@ -57,6 +59,35 @@ def delete_secrets(proj, name):
 #     # Delete all Models
 #     delete_models(mr, "air_quality_xgboost_model")
 #     delete_secrets(proj, "SENSOR_LOCATION_JSON")
+
+
+def clone_or_update_repo(username: str):
+    repo_name = "pm25-forecast-openmeteo-aqicn"
+
+    # 1. Detect if already inside the repo
+    cwd = Path().absolute()
+    for parent in [cwd] + list(cwd.parents):
+        if (parent / ".git").exists() and parent.name == repo_name:
+            print(f"Already in repo at {parent}")
+            return parent
+
+    # 2. Detect if the repo exists in the current directory
+    repo_dir = Path(repo_name)
+    if repo_dir.exists():
+        print(f"Repository exists at {repo_dir.absolute()}")
+        os.system(f"git -C {repo_dir} pull")
+        return repo_dir
+
+    # 3. Otherwise clone it
+    print("Cloning repository...")
+    url = f"https://github.com/{username}/{repo_name}.git"
+    exit_code = os.system(f"git clone {url}")
+
+    if exit_code != 0:
+        raise RuntimeError("Git clone failed.")
+
+    print("Clone successful.")
+    return repo_dir
 
 
 def create_feature_groups(fs):

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 def add_lagged_features(df, column="pm25", lags=[1, 2, 3]):
+    df["sensor_id"] = df["sensor_id"].astype("int32")
     df = df.sort_values(["sensor_id", "date"]).copy()
     for lag in lags:
         df[f"{column}_lag_{lag}d"] = df.groupby("sensor_id")[column].shift(lag)
@@ -9,6 +10,7 @@ def add_lagged_features(df, column="pm25", lags=[1, 2, 3]):
 
 
 def add_rolling_window_feature(df, window_days=3, column="pm25", new_column="pm25_rolling_3d"):
+    df["sensor_id"] = df["sensor_id"].astype("int32")
     df = df.sort_values(["sensor_id", "date"]).copy()
     df[new_column] = (
         df.groupby("sensor_id")
@@ -33,6 +35,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def add_nearby_sensor_feature(df, metadata_df, n_closest=3):
+    df["sensor_id"] = df["sensor_id"].astype("int32")
     df = df.sort_values(["sensor_id", "date"]).copy()
 
     # Precompute lag

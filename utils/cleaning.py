@@ -1,40 +1,45 @@
 import pandas as pd
 
-
-def clean_and_append_data(df, street, city, country, feed_url, sensor_id):
+def clean_and_append_data(df, sensor_id):
     """
-    Clean AQ data, convert date → datetime, keep pm25, and append metadata.
+    Clean AQ data:
+    - extract pm25 (from 'median' or 'pm25')
+    - extract timestamp (from 'date', 'time', or 'timestamp')
+    - drop missing values
+    - attach sensor_id
+    Returns a dataframe ready for air_quality_fg insertion.
     """
 
     clean_df = pd.DataFrame()
 
-    # PM2.5
+    # --- PM2.5 extraction ---
     if "median" in df.columns:
-        clean_df["pm25"] = df["median"].astype(float)
+        clean_df["pm25"] = pd.to_numeric(df["median"], errors="coerce")
     elif "pm25" in df.columns:
-        clean_df["pm25"] = df["pm25"].astype(float)
+        clean_df["pm25"] = pd.to_numeric(df["pm25"], errors="coerce")
     else:
-        raise ValueError("No pm25 or median column found in AQ dataframe")
+        raise ValueError("No 'pm25' or 'median' column found in AQ dataframe")
 
-    # Drop rows with missing pm25
     clean_df = clean_df.dropna(subset=["pm25"])
 
+    # --- Timestamp extraction ---
     if "date" in df.columns:
-        clean_df["date"] = pd.to_datetime(df["date"])
+        ts = df["date"]
     elif "time" in df.columns:
-        clean_df["date"] = pd.to_datetime(df["time"])
+        ts = df["time"]
     elif "timestamp" in df.columns:
-        clean_df["date"] = pd.to_datetime(df["timestamp"])
+        ts = df["timestamp"]
     else:
-        raise KeyError("No date or time column found in AQ dataframe")
+        raise KeyError("No date/time column found in AQ dataframe")
 
+    clean_df["date"] = pd.to_datetime(ts, errors="coerce")
+    clean_df = clean_df.dropna(subset=["date"])
 
-    # Metadata
-    clean_df["sensor_id"] = sensor_id
-    clean_df["street"] = street
-    clean_df["city"] = city
-    clean_df["country"] = country
-    clean_df["feed_url"] = feed_url
+    # --- Attach sensor_id ---
+    clean_df["sensor_id"] = int(sensor_id)
 
+    # --- Final dtype normalization ---
+    clean_df["pm25"] = clean_df["pm25"].astype("float64")
+    clean_df["sensor_id"] = clean_df["sensor_id"].astype("int32")
 
     return clean_df
