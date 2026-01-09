@@ -208,14 +208,39 @@ def run_incremental_update(sensor_metadata_fg, air_quality_fg, weather_fg, lates
                     metadata_indexed,
                     n_closest=3
                 )
+
+                """ CHECK TYPES """ 
+
                 aq_new["sensor_id"] = aq_new["sensor_id"].astype("int32")
                 aq_new["location_id"] = aq_new["location_id"].astype("int32")
-                
+                aq_new = aq_new.astype({
+                    "sensor_id": "int32",
+                    "location_id": "int32",
+                    "pm25": "float64",
+                    "pm25_lag_1d": "float64",
+                    "pm25_lag_2d": "float64",
+                    "pm25_lag_3d": "float64",
+                    "pm25_rolling_3d": "float64",
+                    "pm25_nearby_avg": "float64",
+                })
+                                
                 # Insert air quality data immediately
                 air_quality_fg.insert(aq_new)
                 
                 # Process and insert weather data
                 weather_new = process_weather_increment(sensor_id, meta, last_ts)
+
+
+                """ CHECK TYPES """ 
+
+                weather_new = weather_new.astype({
+                    "location_id": "int32",
+                    "temperature_2m_mean": "float64",
+                    "precipitation_sum": "float64",
+                    "wind_speed_10m_max": "float64",
+                    "wind_direction_10m_dominant": "float64",
+                })
+
                 if weather_new is not None and not weather_new.empty:
                     weather_fg.insert(weather_new)
                 

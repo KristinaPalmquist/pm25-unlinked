@@ -205,6 +205,71 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     return hourly_dataframe
 
 
+def get_weather_forecast(location_id, start_date, end_date, latitude, longitude):
+    """
+    Fetch weather forecast for 7 days ahead using Open-Meteo forecast API.
+    """
+    cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
+    retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+    openmeteo = openmeteo_requests.Client(session=retry_session)
+
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "start_date": start_date.isoformat() if hasattr(start_date, 'isoformat') else str(start_date),
+        "end_date": end_date.isoformat() if hasattr(end_date, 'isoformat') else str(end_date),
+        "daily": [
+            "temperature_2m_mean",
+            "precipitation_sum",
+            "wind_speed_10m_max",
+            "wind_direction_10m_dominant"
+        ],
+        "timezone": "UTC"
+    }
+
+    rate_limited_request()
+    responses = openmeteo.weather_api(url, params=params)
+    response = responses[0]
+
+    daily = response.Daily()
+    df = pd.DataFrame({
+        "date": pd.date_range(
+            start=pd.to_datetime(daily.Time(), unit="s"),
+            end=pd.to_datetime(daily.TimeEnd(), unit="s"),
+            freq=pd.Timedelta(seconds=daily.Interval()),
+            inclusive="left"
+        ),
+        "temperature_2m_mean": daily.Variables(0).ValuesAsNumpy(),
+        "precipitation_sum": daily.Variables(1).ValuesAsNumpy(),
+        "wind_speed_10m_max": daily.Variables(2).ValuesAsNumpy(),
+        "wind_direction_10m_dominant": daily.Variables(3).ValuesAsNumpy(),
+    })
+
+    df["location_id"] = location_id
+    return df.dropna()
+
+
+def fetch_data_for_sensor(sensor_id, meta, today, AQICN_API_KEY):
+    """Fetch air quality and weather data for a single sensor."""
+    country = meta["country"]
+    city = meta["city"]
+    street = meta["street"]
+    aqicn_url = meta["aqicn_url"]
+    latitude = meta["latitude"]
+    longitude = meta["longitude"]
+    location_id = meta["location_id"]
+
+    # Fetch current air quality
+    aq_today_df = get_pm25(aqicn_url, country, city, street, today, AQICN_API_KEY)
+    
+    # Fetch weather forecast (7 days forward)
+    end_date = today + timedelta(days=7)
+    weather_df = get_weather_forecast(location_id, today, end_date, latitude, longitude)
+    
+    return aq_today_df, weather_df, location_id
+
+
 def get_latest_weather(latitude: float, longitude: float, since: datetime):
     """
     Fetch only new weather rows since the last datetime.
