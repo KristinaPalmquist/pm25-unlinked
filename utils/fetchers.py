@@ -162,9 +162,6 @@ def get_historical_weather(location_id, start_date, end_date, latitude, longitud
 
 
 def get_hourly_weather_forecast(city, latitude, longitude):
-
-    # latitude, longitude = get_city_coordinates(city)
-
     # Setup the Open-Meteo API client with cache and retry on error
     cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
@@ -207,71 +204,32 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     hourly_dataframe = hourly_dataframe.dropna()
     return hourly_dataframe
 
-# def get_historical_weather(city, df, today, feed_url, sensor_id, AQICN_API_KEY):
-#     # 1. Determine earliest AQ date
-#     start_dt = df["date"].min()
-#     start_date = start_dt.strftime("%Y-%m-%d")
-#     end_date = today.strftime("%Y-%m-%d")
-
-#     # 2. Get coordinates
-#     latitude, longitude = get_sensor_coordinates(feed_url, sensor_id, AQICN_API_KEY)
-
-#     # 3. Call Open-Meteo DAILY archive API
-#     url = "https://archive-api.open-meteo.com/v1/archive"
-#     params = {
-#         "latitude": latitude,
-#         "longitude": longitude,
-#         "start_date": start_date,
-#         "end_date": end_date,
-#         "daily": "temperature_2m_mean,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant",
-#         "timezone": "UTC"
-#     }
-
-#     resp = requests.get(url, params=params)
-#     resp.raise_for_status()
-#     data = resp.json()
-
-#     daily = data.get("daily")
-#     if daily is None:
-#         print(f"No daily weather data for sensor {sensor_id}")
-#         return pd.DataFrame(), latitude, longitude
-
-#     weather_df = pd.DataFrame(daily)
-#     weather_df["date"] = pd.to_datetime(weather_df["time"]).dt.tz_localize(None)
-#     weather_df = weather_df.drop(columns=["time"])
-
-#     # Add metadata
-#     weather_df["sensor_id"] = sensor_id
-#     weather_df["city"] = city
-#     weather_df["latitude"] = latitude
-#     weather_df["longitude"] = longitude
-
-#     return weather_df, latitude, longitude
 
 def get_latest_weather(latitude: float, longitude: float, since: datetime):
     """
     Fetch only new weather rows since the last datetime.
+    Uses forecast API, so always fetches from today onwards (not historical data).
     """
-    # Normalize start date
-    if since is None:
-        # First run - fetch today's weather only
-        start_date = datetime.utcnow().date().isoformat()
-    elif hasattr(since, "strftime"):
-        # datetime or pandas Timestamp
-        start_date = since.strftime("%Y-%m-%d")
-    else:
-        # if string, like "2025-01-07"
-        start_date = str(since)
-
+    # Forecast API only works for today and future dates
+    # Always use today as start_date, regardless of 'since' parameter
+    today = datetime.utcnow().date()
+    start_date = today.isoformat()
+    # Fetch 7 days ahead
+    end_date = (today + timedelta(days=7)).isoformat()
 
     url = "https://api.open-meteo.com/v1/forecast"
 
     params = {
         "latitude": latitude,
         "longitude": longitude,
-        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+        "daily": [
+            "temperature_2m_mean",
+            "precipitation_sum",
+            "wind_speed_10m_max",
+            "wind_direction_10m_dominant"
+        ],
         "start_date": start_date,
-        "end_date": datetime.utcnow().date().isoformat(),
+        "end_date": end_date,
         "timezone": "UTC"
     }
 
@@ -279,25 +237,18 @@ def get_latest_weather(latitude: float, longitude: float, since: datetime):
     response.raise_for_status()
     data = response.json()
 
-    # Convert to dataframe
-    hourly = data.get("hourly", {})
-    if not hourly:
+    # Convert to dataframe (daily data, not hourly)
+    daily = data.get("daily", {})
+    if not daily:
         return pd.DataFrame()
 
-    df = pd.DataFrame(hourly)
+    df = pd.DataFrame(daily)
 
-    # Standardize datetime
-    df["date"] = pd.to_datetime(df["time"], errors="coerce").dt.tz_localize(None)
-    df = df.drop(columns=["time"])
+    # Rename time column to date
+    df = df.rename(columns={"time": "date"})
     df = df.dropna(subset=["date"])
 
-    # Keep only rows newer than "since"
-    if since is not None:
-        if hasattr(since, "tzinfo"):
-            since = since.replace(tzinfo=None)
-        df = df[df["date"] > since]
-
-    return df
+    return df 
 
 
 """ Air Quality Sensor helpers """
@@ -425,15 +376,19 @@ def get_pm25(aqicn_url: str, country: str, city: str, street: str, day: datetime
 
     return aq_today_df
 
-def fetch_latest_aq_data(sensor_id: str, feed_url: str, since: datetime):
+def fetch_latest_aq_data(sensor_id: str, feed_url: str, since: datetime, AQICN_API_KEY: str):
     """
     Fetch only new AQ measurements for a sensor since the last datetime.
     """
 
     if since is None:
         since = pd.Timestamp.min
+    else:
+        since = pd.to_datetime(since)
+        if since.tz is not None:
+            since = since.tz_localize(None)
 
-    response = requests.get(feed_url)
+    response = requests.get(f"{feed_url}?token={AQICN_API_KEY}")
     response.raise_for_status()
     data = response.json()
 
