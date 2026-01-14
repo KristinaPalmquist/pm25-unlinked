@@ -41,5 +41,16 @@ def clean_and_append_data(df, sensor_id):
     # --- Final dtype normalization ---
     clean_df["pm25"] = clean_df["pm25"].astype("float64")
     clean_df["sensor_id"] = clean_df["sensor_id"].astype("int32")
+    # aq_columns = [f.name for f in df.features]
+    # clean_df = clean_df[aq_columns].astype({
+    #         "sensor_id": "int32",
+    #         "location_id": "int32",
+    #         "pm25": "float64",
+    #         "pm25_lag_1d": "float64",
+    #         "pm25_lag_2d": "float64",
+    #         "pm25_lag_3d": "float64",
+    #         "pm25_rolling_3d": "float64",
+    #         "pm25_nearby_avg": "float64",
+    #     })
 
     return clean_df

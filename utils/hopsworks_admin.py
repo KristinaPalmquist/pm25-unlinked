@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 import hopsworks
 import hsfs
@@ -90,63 +91,75 @@ def clone_or_update_repo(username: str):
     return repo_dir
 
 
-def create_feature_groups(fs):
-    air_quality_fg = fs.get_or_create_feature_group(
-        name="air_quality",
-        description="Air Quality characteristics of each day for all sensors",
-        version=1,
-        primary_key=["sensor_id", "date"],
-        event_time="date",
-        expectation_suite=None,
-        features=[
-            Feature("sensor_id", type="int"),
-            Feature("location_id", type="int"),
-            Feature("date", type="timestamp"),
-            Feature("pm25", type="double"),
-            Feature("pm25_lag_1d", type="double"),
-            Feature("pm25_lag_2d", type="double"),
-            Feature("pm25_lag_3d", type="double"),
-            Feature("pm25_rolling_3d", type="double"),
-            Feature("pm25_nearby_avg", type="double"),
-        ],
-    )
+def create_feature_groups(fs, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            air_quality_fg = fs.get_or_create_feature_group(
+                name="air_quality",
+                description="Air Quality characteristics of each day for all sensors",
+                version=1,
+                primary_key=["sensor_id", "date"],
+                event_time="date",
+                expectation_suite=None,
+                features=[
+                    Feature("sensor_id", type="int"),
+                    Feature("location_id", type="int"),
+                    Feature("date", type="timestamp"),
+                    Feature("pm25", type="double"),
+                    Feature("pm25_lag_1d", type="double"),
+                    Feature("pm25_lag_2d", type="double"),
+                    Feature("pm25_lag_3d", type="double"),
+                    Feature("pm25_rolling_3d", type="double"),
+                    Feature("pm25_nearby_avg", type="double"),
+                ],
+            )
 
-    sensor_metadata_fg = fs.get_or_create_feature_group(
-        name="sensor_metadata",
-        description="Metadata for each air quality sensor",
-        version=1,
-        primary_key=["sensor_id"],
-        expectation_suite=None,
-        features=[
-            Feature("sensor_id", type="int"),
-            Feature("location_id", type="int"),
-            Feature("city", type="string"),
-            Feature("street", type="string"),
-            Feature("country", type="string"),
-            Feature("aqicn_url", type="string"),
-            Feature("latitude", type="double"),
-            Feature("longitude", type="double"),
-        ],
-    )
+            sensor_metadata_fg = fs.get_or_create_feature_group(
+                name="sensor_metadata",
+                description="Metadata for each air quality sensor",
+                version=1,
+                primary_key=["sensor_id"],
+                expectation_suite=None,
+                features=[
+                    Feature("sensor_id", type="int"),
+                    Feature("location_id", type="int"),
+                    Feature("city", type="string"),
+                    Feature("street", type="string"),
+                    Feature("country", type="string"),
+                    Feature("aqicn_url", type="string"),
+                    Feature("latitude", type="double"),
+                    Feature("longitude", type="double"),
+                ],
+            )
 
-    weather_fg = fs.get_or_create_feature_group(
-        name="weather",
-        description="Weather characteristics of each day for all locations",
-        version=1,
-        primary_key=["location_id", "date"],
-        event_time="date",
-        expectation_suite=None,
-        features=[
-            Feature("date", "timestamp"),
-            Feature("location_id", "int"),
-            Feature("temperature_2m_mean", "double"),
-            Feature("precipitation_sum", "double"),
-            Feature("wind_speed_10m_max", "double"),
-            Feature("wind_direction_10m_dominant", "double"),
-        ]
-    )
+            weather_fg = fs.get_or_create_feature_group(
+                name="weather",
+                description="Weather characteristics of each day for all locations",
+                version=1,
+                primary_key=["location_id", "date"],
+                event_time="date",
+                expectation_suite=None,
+                features=[
+                    Feature("date", "timestamp"),
+                    Feature("location_id", "int"),
+                    Feature("temperature_2m_mean", "double"),
+                    Feature("precipitation_sum", "double"),
+                    Feature("wind_speed_10m_max", "double"),
+                    Feature("wind_direction_10m_dominant", "double"),
+                ]
+            )
 
-    return air_quality_fg, sensor_metadata_fg, weather_fg
+            return air_quality_fg, sensor_metadata_fg, weather_fg
+        except (hopsworks.client.exceptions.RestAPIError, ProtocolError, ConnectionError, Timeout) as e:
+            print(f"Attempt {attempt + 1} failed with error: {e}")
+            if attempt < max_retries - 1:
+                wait_time = 2 ** attempt
+                print(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                print("Max retries reached. Could not create feature groups.")
+                raise
+    
 
 
 def update_air_quality_description(air_quality_fg):
@@ -167,19 +180,6 @@ def update_air_quality_description(air_quality_fg):
     air_quality_fg.update_feature_description("pm25_nearby_avg", "Average PM2.5 from 3 nearest sensors on same day")
 
 
-def update_sensor_metadata_description(sensor_metadata_fg):
-    sensor_metadata_fg.update_feature_description("sensor_id", "AQICN sensor identifier (e.g., 59893)")
-    sensor_metadata_fg.update_feature_description("city", "City where the air quality was measured")
-    sensor_metadata_fg.update_feature_description("street", "Street in the city where the air quality was measured")
-    sensor_metadata_fg.update_feature_description(
-        "country",
-        "Country where the air quality was measured (sometimes a city in aqicn.org)",
-    )
-    sensor_metadata_fg.update_feature_description("aqicn_url", "URL to the AQICN feed for this sensor")
-    sensor_metadata_fg.update_feature_description("latitude", "Latitude of the sensor location")
-    sensor_metadata_fg.update_feature_description("longitude", "Longitude of the sensor location")
-
-
 def update_weather_description(weather_fg):
     weather_fg.update_feature_description("date", "Date and time of weather measurement")
     weather_fg.update_feature_description("location_id", "Geographic location identifier (multiple sensors can share same location)")
@@ -187,6 +187,25 @@ def update_weather_description(weather_fg):
     weather_fg.update_feature_description("precipitation_sum", "Daily total precipitation (rain/snow) in mm")
     weather_fg.update_feature_description("wind_speed_10m_max", "Maximum wind speed at 10m above ground in km/h")
     weather_fg.update_feature_description("wind_direction_10m_dominant", "Dominant wind direction over the day in degrees (0-360)")
+
+
+def read_data(fg, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            return fg.read()
+        except Exception as e:
+            if "flight" in str(e).lower() or "query service" in str(e).lower():
+                if attempt < max_retries - 1:
+                    wait_time = 10 * (attempt + 1)  # 10s, 20s, 30s, 40s, 50s
+                    print(f"⚠️  Hopsworks query service error (attempt {attempt+1}/{max_retries})")
+                    print(f"   Error: {str(e)[:100]}...")
+                    print(f"   Waiting {wait_time}s before retry...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"❌ Failed to read after {max_retries} attempts")
+                    raise
+            else:
+                raise
 
 
 def save_or_replace_expectation_suite(fg, suite):

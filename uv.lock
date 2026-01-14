@@ -1372,7 +1372,7 @@ wheels = [
 
 [[package]]
 name = "hopsworks"
-version = "4.4.2"
+version = "4.2.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "avro" },
@@ -1382,22 +1382,22 @@ dependencies = [
     { name = "grpcio" },
     { name = "hopsworks-aiomysql", extra = ["sa"] },
     { name = "mock" },
-    { name = "numpy" },
     { name = "opensearch-py" },
     { name = "packaging" },
-    { name = "pandas", extra = ["mysql"] },
+    { name = "pandas" },
     { name = "protobuf" },
     { name = "pyhumps" },
     { name = "pyjks" },
     { name = "pymysql", extra = ["rsa"] },
     { name = "requests" },
     { name = "retrying" },
+    { name = "sqlalchemy" },
     { name = "tqdm" },
     { name = "tzlocal" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/66/20/a98ba2cd9272bee2043cd6a1a30521b591107e2c88eec844eb9807831709/hopsworks-4.4.2.tar.gz", hash = "sha256:797a881d1a3ded4aa9567548f0746406038f0da90ba7b0290db0285e5ee3e396", size = 513571, upload-time = "2025-09-25T08:13:18.817Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/05/3c21fe9b1925db97100de4b96c5bbab20080b9156082fbce0d1575646972/hopsworks-4.2.10.tar.gz", hash = "sha256:14dd884f561121210e83a879fd1248f793ea579863df085bc30eb73b1a41da52", size = 495390, upload-time = "2025-12-08T16:30:33.061Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/b0/ecc3428e3adcde7b686472eb4f14d572e61afe8732d6bfb362d83496d9b6/hopsworks-4.4.2-py3-none-any.whl", hash = "sha256:70a678bd631b789507108b41cc1b5a0ff50c10745651ffecf91db207becda7ed", size = 691592, upload-time = "2025-09-25T08:13:16.01Z" },
+    { url = "https://files.pythonhosted.org/packages/19/15/5cb52f1f47e3728d8997ad5bc04bb19bf70e7063c79e00d71da2888904a4/hopsworks-4.2.10-py3-none-any.whl", hash = "sha256:bcf66dbcb911e9f8e2de658cc7a8a19eca2d596a39196acec2f0407c30660f97", size = 665006, upload-time = "2025-12-08T16:30:30.278Z" },
 ]
 
 [package.optional-dependencies]
@@ -1411,6 +1411,7 @@ polars = [
 python = [
     { name = "confluent-kafka" },
     { name = "fastavro" },
+    { name = "numpy" },
     { name = "pyarrow" },
     { name = "tqdm" },
 ]
@@ -2603,12 +2604,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9e/71/756a1be6bee0209d8c0d8c5e3b9fc72c00373f384a4017095ec404aec3ad/pandas-2.0.3-cp311-cp311-win_amd64.whl", hash = "sha256:6a21ab5c89dcbd57f78d0ae16630b090eec626360085a4148693def5452d8a6b", size = 10607692, upload-time = "2023-06-28T23:17:28.824Z" },
 ]
 
-[package.optional-dependencies]
-mysql = [
-    { name = "pymysql" },
-    { name = "sqlalchemy" },
-]
-
 [[package]]
 name = "pandocfilters"
 version = "1.5.1"
@@ -2734,29 +2729,29 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "email-validator", specifier = "==2.2.0" },
+    { name = "email-validator", specifier = ">=2.2.0" },
     { name = "faker" },
     { name = "feldera", specifier = ">=0.33.0" },
-    { name = "geopy", specifier = "==2.4.1" },
-    { name = "hopsworks", extras = ["python", "polars", "great-expectations"], specifier = ">=4.1.2" },
+    { name = "geopy", specifier = ">=2.4.1" },
+    { name = "hopsworks", extras = ["python", "polars", "great-expectations"], specifier = ">=4.2.0,<4.3.0" },
     { name = "huggingface-hub", specifier = ">=0.33.4" },
     { name = "ipykernel", specifier = ">=6.29.5" },
-    { name = "matplotlib", specifier = "==3.8.3" },
+    { name = "matplotlib", specifier = ">=3.8.3" },
     { name = "modal", specifier = ">=1.2.2" },
     { name = "nbformat" },
-    { name = "numpy", specifier = "==1.26.4" },
+    { name = "numpy", specifier = ">=1.26.4,<2.0" },
     { name = "openmeteo-requests" },
-    { name = "pandas", specifier = "==2.0.3" },
+    { name = "pandas", specifier = ">=2.0.3,<3.0" },
     { name = "plotly" },
     { name = "pydantic-settings", specifier = ">=2.6.1" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "requests-cache", specifier = "==1.2.0" },
-    { name = "retry-requests", specifier = "==2.0.0" },
-    { name = "scikit-learn", specifier = "==1.2.2" },
+    { name = "requests-cache", specifier = ">=1.2.0" },
+    { name = "retry-requests", specifier = ">=2.0.0" },
+    { name = "scikit-learn", specifier = ">=1.2.2,<2.0" },
     { name = "scipy", specifier = ">=1.16.3" },
     { name = "seaborn" },
-    { name = "streamlit", specifier = "==1.28.2" },
-    { name = "xgboost", specifier = "==2.0.3" },
+    { name = "streamlit", specifier = ">=1.28.2,<2.0" },
+    { name = "xgboost", specifier = ">=2.0.3,<3.0" },
 ]
 
 [[package]]
