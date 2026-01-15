@@ -1,12 +1,12 @@
 import pandas as pd
 
-def clean_and_append_data(df, sensor_id):
+def clean_and_append_data(df, sensor_id, city=None, street=None, country=None, latitude=None, longitude=None, aqicn_url=None):
     """
     Clean AQ data:
     - extract pm25 (from 'median' or 'pm25')
     - extract timestamp (from 'date', 'time', or 'timestamp')
     - drop missing values
-    - attach sensor_id
+    - attach sensor_id and metadata
     Returns a dataframe ready for air_quality_fg insertion.
     """
 
@@ -35,8 +35,14 @@ def clean_and_append_data(df, sensor_id):
     clean_df["date"] = pd.to_datetime(ts, errors="coerce")
     clean_df = clean_df.dropna(subset=["date"])
 
-    # --- Attach sensor_id ---
+    # --- Attach sensor_id and metadata ---
     clean_df["sensor_id"] = int(sensor_id)
+    clean_df["city"] = city
+    clean_df["street"] = street
+    clean_df["country"] = country
+    clean_df["latitude"] = latitude
+    clean_df["longitude"] = longitude
+    clean_df["aqicn_url"] = aqicn_url
 
     # --- Final dtype normalization ---
     clean_df["pm25"] = clean_df["pm25"].astype("float64")

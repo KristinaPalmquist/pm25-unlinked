@@ -39,7 +39,7 @@ def trigger_request(url:str):
 
 
 """ Weather data helpers """
-def get_historical_weather(location_id, start_date, end_date, latitude, longitude):
+def get_historical_weather(sensor_id, start_date, end_date, latitude, longitude):
     # Setup Open-Meteo client with caching + retry
     cache_session = requests_cache.CachedSession('.cache', expire_after=-1)
     retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
@@ -92,8 +92,7 @@ def get_historical_weather(location_id, start_date, end_date, latitude, longitud
             "wind_direction_10m_dominant": daily.Variables(3).ValuesAsNumpy(),
         })
 
-        df["location_id"] = location_id
-        # df["city"] = city
+        df["sensor_id"] = sensor_id
         df = df.dropna()
 
         df = df.astype({
@@ -205,7 +204,7 @@ def get_hourly_weather_forecast(city, latitude, longitude):
     return hourly_dataframe
 
 
-def get_weather_forecast(location_id, start_date, end_date, latitude, longitude):
+def get_weather_forecast(sensor_id, start_date, end_date, latitude, longitude):
     """
     Fetch weather forecast for 7 days ahead using Open-Meteo forecast API.
     """
@@ -246,7 +245,7 @@ def get_weather_forecast(location_id, start_date, end_date, latitude, longitude)
         "wind_direction_10m_dominant": daily.Variables(3).ValuesAsNumpy(),
     })
 
-    df["location_id"] = location_id
+    df["sensor_id"] = sensor_id
     return df.dropna()
 
 
@@ -258,16 +257,15 @@ def fetch_data_for_sensor(sensor_id, meta, today, AQICN_API_KEY):
     aqicn_url = meta["aqicn_url"]
     latitude = meta["latitude"]
     longitude = meta["longitude"]
-    location_id = meta["location_id"]
 
     # Fetch current air quality
     aq_today_df = get_pm25(aqicn_url, country, city, street, today, AQICN_API_KEY)
     
     # Fetch weather forecast (7 days forward)
     end_date = today + timedelta(days=7)
-    weather_df = get_weather_forecast(location_id, today, end_date, latitude, longitude)
+    weather_df = get_weather_forecast(sensor_id, today, end_date, latitude, longitude)
     
-    return aq_today_df, weather_df, location_id
+    return aq_today_df, weather_df, sensor_id
 
 
 def get_latest_weather(latitude: float, longitude: float, since: datetime):

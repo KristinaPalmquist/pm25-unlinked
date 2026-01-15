@@ -4,7 +4,9 @@ from pathlib import Path
 import hopsworks
 import hsfs
 from hsfs.feature import Feature
-
+from hopsworks.client.exceptions import RestAPIError
+from urllib3.exceptions import ProtocolError
+from requests.exceptions import ConnectionError, Timeout 
 
 
 def delete_feature_groups(fs, name):
@@ -103,7 +105,6 @@ def create_feature_groups(fs, max_retries=5):
                 expectation_suite=None,
                 features=[
                     Feature("sensor_id", type="int"),
-                    Feature("location_id", type="int"),
                     Feature("date", type="timestamp"),
                     Feature("pm25", type="double"),
                     Feature("pm25_lag_1d", type="double"),
@@ -111,18 +112,6 @@ def create_feature_groups(fs, max_retries=5):
                     Feature("pm25_lag_3d", type="double"),
                     Feature("pm25_rolling_3d", type="double"),
                     Feature("pm25_nearby_avg", type="double"),
-                ],
-            )
-
-            sensor_metadata_fg = fs.get_or_create_feature_group(
-                name="sensor_metadata",
-                description="Metadata for each air quality sensor",
-                version=1,
-                primary_key=["sensor_id"],
-                expectation_suite=None,
-                features=[
-                    Feature("sensor_id", type="int"),
-                    Feature("location_id", type="int"),
                     Feature("city", type="string"),
                     Feature("street", type="string"),
                     Feature("country", type="string"),
@@ -136,12 +125,12 @@ def create_feature_groups(fs, max_retries=5):
                 name="weather",
                 description="Weather characteristics of each day for all locations",
                 version=1,
-                primary_key=["location_id", "date"],
+                primary_key=["sensor_id", "date"],
                 event_time="date",
                 expectation_suite=None,
                 features=[
                     Feature("date", "timestamp"),
-                    Feature("location_id", "int"),
+                    Feature("sensor_id", "int"),
                     Feature("temperature_2m_mean", "double"),
                     Feature("precipitation_sum", "double"),
                     Feature("wind_speed_10m_max", "double"),
@@ -149,8 +138,9 @@ def create_feature_groups(fs, max_retries=5):
                 ]
             )
 
-            return air_quality_fg, sensor_metadata_fg, weather_fg
-        except (hopsworks.client.exceptions.RestAPIError, ProtocolError, ConnectionError, Timeout) as e:
+            return air_quality_fg, weather_fg
+
+        except (RestAPIError, ProtocolError, ConnectionError, Timeout) as e:
             print(f"Attempt {attempt + 1} failed with error: {e}")
             if attempt < max_retries - 1:
                 wait_time = 2 ** attempt
@@ -158,14 +148,13 @@ def create_feature_groups(fs, max_retries=5):
                 time.sleep(wait_time)
             else:
                 print("Max retries reached. Could not create feature groups.")
-                raise
+                raise e
     
 
 
 def update_air_quality_description(air_quality_fg):
     air_quality_fg.update_feature_description("date", "Date and time of measurement of air quality")
     air_quality_fg.update_feature_description("sensor_id", "AQICN sensor identifier (e.g., 59893)")
-    air_quality_fg.update_feature_description("location_id", "Geographic location identifier shared with weather data (multiple sensors can share same location)")
     air_quality_fg.update_feature_description(
         "pm25",
         "Particles less than 2.5 micrometers in diameter (fine particles) pose health risk",
@@ -178,11 +167,17 @@ def update_air_quality_description(air_quality_fg):
     air_quality_fg.update_feature_description("pm25_lag_2d", "PM2.5 value from 2 days ago.")
     air_quality_fg.update_feature_description("pm25_lag_3d", "PM2.5 value from 3 days ago.")
     air_quality_fg.update_feature_description("pm25_nearby_avg", "Average PM2.5 from 3 nearest sensors on same day")
+    air_quality_fg.update_feature_description("city", "City where the sensor is located")
+    air_quality_fg.update_feature_description("street", "Street address of the sensor")
+    air_quality_fg.update_feature_description("country", "Country where the sensor is located")
+    air_quality_fg.update_feature_description("latitude", "Latitude of sensor location")
+    air_quality_fg.update_feature_description("longitude", "Longitude of sensor location")
+    air_quality_fg.update_feature_description("aqicn_url", "URL to AQICN feed for this sensor")
 
 
 def update_weather_description(weather_fg):
     weather_fg.update_feature_description("date", "Date and time of weather measurement")
-    weather_fg.update_feature_description("location_id", "Geographic location identifier (multiple sensors can share same location)")
+    weather_fg.update_feature_description("sensor_id", "AQICN sensor identifier")
     weather_fg.update_feature_description("temperature_2m_mean", "Daily mean temperature at 2m above ground in Celsius")
     weather_fg.update_feature_description("precipitation_sum", "Daily total precipitation (rain/snow) in mm")
     weather_fg.update_feature_description("wind_speed_10m_max", "Maximum wind speed at 10m above ground in km/h")

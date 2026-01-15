@@ -6,6 +6,7 @@ from matplotlib.ticker import MultipleLocator
 
 
 def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_path: str, hindcast=False):
+    plt.close('all')
     fig, ax = plt.subplots(figsize=(10, 6))
 
     day = pd.to_datetime(df['date']).dt.date
@@ -50,4 +51,4 @@ def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_pat
 
     # # Save the figure, overwriting any existing file with the same name
     plt.savefig(file_path)
-    return plt
+    return fig

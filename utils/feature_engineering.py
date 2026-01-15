@@ -22,12 +22,8 @@ def add_lagged_features(df, column="pm25", lags=[1, 2, 3]):
 def add_rolling_window_feature(df, window_days=3, column="pm25", new_column="pm25_rolling_3d"):
     df = df.sort_values(["sensor_id", "date"]).copy()
     df[new_column] = (
-        df.groupby("sensor_id", group_keys=False)
-          .apply(lambda g: g.set_index("date")[column]
-                          .rolling(f"{window_days}D")
-                          .mean()
-                          .reset_index(drop=True))
-          .reset_index(drop=True)
+        df.groupby("sensor_id")[column]
+          .transform(lambda x: x.rolling(window_days, min_periods=1).mean().shift(1))
     )
     return df
 
@@ -41,38 +37,16 @@ def build_sensor_location_map(df, metadata):
     if not isinstance(metadata, pd.DataFrame):
         raise TypeError("metadata must be a DataFrame or dict")
 
-    cols = set(metadata.columns)
-
-    # If metadata already contains sensor_id + lat/lon
-    if {"sensor_id", "latitude", "longitude"}.issubset(cols):
-        sensor_locations = (
-            metadata[["sensor_id", "latitude", "longitude"]]
-            .drop_duplicates("sensor_id")
-            .set_index("sensor_id")
-        )
-        return sensor_locations.to_dict(orient="index")
-
-    # If metadata contains location_id + lat/lon
-    if {"location_id", "latitude", "longitude"}.issubset(cols):
-        sensor_locations = (
-            df[["sensor_id", "location_id"]]
-            .drop_duplicates()
-            .merge(
-                metadata[["location_id", "latitude", "longitude"]]
-                .drop_duplicates("location_id"),
-                on="location_id",
-                how="left"
-            )
-            .drop_duplicates("sensor_id")
-            .set_index("sensor_id")
-        )
-        return sensor_locations[["latitude", "longitude"]].to_dict(orient="index")
-
-    raise ValueError(
-        "metadata must contain either "
-        "['sensor_id','latitude','longitude'] or "
-        "['location_id','latitude','longitude']"
+    # Metadata should contain sensor_id + lat/lon
+    if not {"sensor_id", "latitude", "longitude"}.issubset(set(metadata.columns)):
+        raise ValueError("metadata must contain ['sensor_id', 'latitude', 'longitude']")
+    
+    sensor_locations = (
+        metadata[["sensor_id", "latitude", "longitude"]]
+        .drop_duplicates("sensor_id")
+        .set_index("sensor_id")
     )
+    return sensor_locations.to_dict(orient="index")
 
 
 def compute_closest_sensors(locations, n_closest):

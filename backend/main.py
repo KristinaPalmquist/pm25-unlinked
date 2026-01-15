@@ -146,3 +146,7 @@ def pipline():
     run_notebook("/root/notebooks/2_feature_pipeline.ipynb")
     run_notebook("/root/notebooks/4_batch_inference.ipynb")
     push_results()
+
+# def get_air_quality_plot(sensor_id):
+#     url = dataset_api.get_download_url(f"Resources/plots/{sensor_id}.png")
+#     return 
