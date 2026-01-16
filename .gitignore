@@ -21,3 +21,5 @@ not_needed_files/
 # virtual environment
 .venv/
 .venv*/
+# Local Netlify folder
+.netlify

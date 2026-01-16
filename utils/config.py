@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
+import hopsworks
 
 class FraudDatasetSize(Enum):
     LARGE = "LARGE"
@@ -28,10 +29,6 @@ class HopsworksSettings(BaseSettings):
 
     # Air Quality
     AQICN_API_KEY: SecretStr | None = None
-    # AQICN_COUNTRY: str | None = None
-    # AQICN_CITY: str | None = None
-    # AQICN_STREET: str | None = None
-    # AQICN_URL: str | None = None
 
     # GitHub
     GH_PAT: SecretStr | None = None
@@ -66,20 +63,53 @@ class HopsworksSettings(BaseSettings):
     RANKING_MODEL_TYPE: Literal["ranking", "llmranking"] = "ranking"
     CUSTOM_HOPSWORKS_INFERENCE_ENV: str = "custom_env_name"
 
+    def load_hopsworks_secrets_if_missing(self): 
+        """Fallback: load missing values from Hopsworks Secrets."""
+        try: 
+            project = hopsworks.login() 
+        except Exception: 
+            # Not running inside Hopsworks → ignore 
+            return self 
+        
+        def load(name): 
+            try: 
+                return project.get_secret(name).value() 
+            except Exception: 
+                return None 
+            
+        if self.HOPSWORKS_API_KEY is None: 
+            self.HOPSWORKS_API_KEY = SecretStr(load("HOPSWORKS_API_KEY")) 
+            
+        if self.AQICN_API_KEY is None: 
+            self.AQICN_API_KEY = SecretStr(load("AQICN_API_KEY")) 
+            
+        if self.GH_PAT is None: 
+            self.GH_PAT = SecretStr(load("GH_PAT")) 
+            
+        if self.GH_USERNAME is None: 
+            self.GH_USERNAME = SecretStr(load("GH_USERNAME")) 
+            
+        return self
+
     def model_post_init(self, __context):
         """Runs after the model is initialized."""
         print("HopsworksSettings initialized!")
 
-        # Set environment variables if not already set
-        if os.getenv("HOPSWORKS_API_KEY") is None:
-            if self.HOPSWORKS_API_KEY is not None:
-                os.environ['HOPSWORKS_API_KEY'] = self.HOPSWORKS_API_KEY.get_secret_value()
-        if os.getenv("HOPSWORKS_PROJECT") is None:
-            if self.HOPSWORKS_PROJECT is not None:
-                os.environ['HOPSWORKS_PROJECT'] = self.HOPSWORKS_PROJECT
-        if os.getenv("HOPSWORKS_HOST") is None:
-            if self.HOPSWORKS_HOST is not None:
-                os.environ['HOPSWORKS_HOST'] = self.HOPSWORKS_HOST
+        # load missing secrets from hopsworks
+        self.load_hopsworks_secrets_if_missing()
+
+
+
+        # # Set environment variables if not already set
+        # if os.getenv("HOPSWORKS_API_KEY") is None:
+        #     if self.HOPSWORKS_API_KEY is not None:
+        #         os.environ['HOPSWORKS_API_KEY'] = self.HOPSWORKS_API_KEY.get_secret_value()
+        # if os.getenv("HOPSWORKS_PROJECT") is None:
+        #     if self.HOPSWORKS_PROJECT is not None:
+        #         os.environ['HOPSWORKS_PROJECT'] = self.HOPSWORKS_PROJECT
+        # if os.getenv("HOPSWORKS_HOST") is None:
+        #     if self.HOPSWORKS_HOST is not None:
+        #         os.environ['HOPSWORKS_HOST'] = self.HOPSWORKS_HOST
 
         # --- Check required .env values ---
         missing = []
