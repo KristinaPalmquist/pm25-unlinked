@@ -1,7 +1,5 @@
-import os
 import pandas as pd
 import requests
-from not_needed_files import airquality
 from utils import fetchers
 
 # Cache for geocoding results to avoid duplicate API calls
@@ -57,42 +55,42 @@ def clean_field(value):
 def validate_coordinates(lat, lon):
     return lat is not None and lon is not None
 
-def build_metadata_from_csvs(data_dir, aqicn_api_key):
-    rows = []
+# def build_metadata_from_csvs(data_dir, aqicn_api_key):
+#     rows = []
 
-    for file in os.listdir(data_dir):
-        if not file.endswith(".csv"):
-            continue
+#     for file in os.listdir(data_dir):
+#         if not file.endswith(".csv"):
+#             continue
 
-        file_path = os.path.join(data_dir, file)
+#         file_path = os.path.join(data_dir, file)
 
-        aq_df_raw, street, city, country, feed_url, sensor_id = read_sensor_data(
-            file_path, aqicn_api_key
-        )
+#         aq_df_raw, street, city, country, feed_url, sensor_id = read_sensor_data(
+#             file_path, aqicn_api_key
+#         )
 
-        # Clean fields
-        street = clean_field(street)
-        city = clean_field(city)
-        country = clean_field(country)
+#         # Clean fields
+#         street = clean_field(street)
+#         city = clean_field(city)
+#         country = clean_field(country)
 
-        # Geocode
-        lat, lon = get_coordinates(city, street, country)
+#         # Geocode
+#         lat, lon = get_coordinates(city, street, country)
 
-        if not validate_coordinates(lat, lon):
-            print(f"[SKIP] Sensor {sensor_id}: cannot geocode location")
-            continue
+#         if not validate_coordinates(lat, lon):
+#             print(f"[SKIP] Sensor {sensor_id}: cannot geocode location")
+#             continue
 
-        rows.append({
-            "sensor_id": sensor_id,
-            "city": city,
-            "street": street,
-            "country": country,
-            "aqicn_url": feed_url,
-            "latitude": lat,
-            "longitude": lon,
-        })
+#         rows.append({
+#             "sensor_id": sensor_id,
+#             "city": city,
+#             "street": street,
+#             "country": country,
+#             "aqicn_url": feed_url,
+#             "latitude": lat,
+#             "longitude": lon,
+#         })
 
-    return pd.DataFrame(rows)
+#     return pd.DataFrame(rows)
 
 
 def read_sensor_data(file_path, aqicn_api_key):

@@ -1,6 +1,7 @@
 from math import radians, sqrt, sin, cos, asin
 import pandas as pd
 import numpy as np
+from requests_cache import Dict, Union
 
 
 # 📍 Haversine distance
@@ -76,14 +77,20 @@ def compute_closest_sensors(locations, n_closest):
 
 def add_nearby_sensor_feature(
     df,
-    metadata,
+    sensor_metadata: Union[pd.DataFrame, Dict],
     column="pm25_lag_1d",
     n_closest=3,
     new_column="pm25_nearby_avg"
 ):
+    # Convert dict to DataFrame if needed
+    if isinstance(sensor_metadata, dict):
+        sensor_metadata = pd.DataFrame([
+            {"sensor_id": sid, "latitude": lat, "longitude": lon}
+            for sid, (lat, lon, *_) in sensor_metadata.items()
+        ])
     df = df.sort_values(["sensor_id", "date"]).copy()
 
-    locations = build_sensor_location_map(df, metadata)
+    locations = build_sensor_location_map(df, sensor_metadata)
 
     closest_map = compute_closest_sensors(locations, n_closest)
 
