@@ -1,4 +1,5 @@
 import os
+import random
 import time
 from pathlib import Path
 import hopsworks
@@ -219,3 +220,14 @@ def save_or_replace_expectation_suite(fg, suite):
     # Now save the new suite
     fg.save_expectation_suite(suite)
     print(f"Saved expectation suite for FG '{fg.name}'.")
+
+
+def safe_upload(dataset_api, local_path, remote_path, retries=5):
+    for attempt in range(1, retries + 1):
+        try:
+            dataset_api.upload(local_path, remote_path, overwrite=True)
+            return True
+        except Exception as e:
+            print(f"⚠️ Upload failed ({attempt}/{retries}): {e}")
+            time.sleep(1 + random.random() * attempt)  # exponential-ish backoff
+    return False
