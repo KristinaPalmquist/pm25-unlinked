@@ -67,27 +67,37 @@ class HopsworksSettings(BaseSettings):
         """Fallback: load missing values from Hopsworks Secrets."""
         try: 
             project = hopsworks.login() 
+            secrets_api = project.get_secrets_api()
         except Exception: 
-            # Not running inside Hopsworks → ignore 
+            # Not running inside Hopsworks or no secrets API available
             return self 
         
         def load(name): 
             try: 
-                return project.get_secret(name).value() 
+                secret = secrets_api.get_secret(name)
+                return secret.value if secret else None
             except Exception: 
                 return None 
             
         if self.HOPSWORKS_API_KEY is None: 
-            self.HOPSWORKS_API_KEY = SecretStr(load("HOPSWORKS_API_KEY")) 
+            val = load("HOPSWORKS_API_KEY")
+            if val:
+                self.HOPSWORKS_API_KEY = SecretStr(val)
             
         if self.AQICN_API_KEY is None: 
-            self.AQICN_API_KEY = SecretStr(load("AQICN_API_KEY")) 
+            val = load("AQICN_API_KEY")
+            if val:
+                self.AQICN_API_KEY = SecretStr(val)
             
         if self.GH_PAT is None: 
-            self.GH_PAT = SecretStr(load("GH_PAT")) 
+            val = load("GH_PAT")
+            if val:
+                self.GH_PAT = SecretStr(val)
             
         if self.GH_USERNAME is None: 
-            self.GH_USERNAME = SecretStr(load("GH_USERNAME")) 
+            val = load("GH_USERNAME")
+            if val:
+                self.GH_USERNAME = SecretStr(val)
             
         return self
 
