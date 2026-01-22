@@ -1,6 +1,7 @@
 import os
 import random
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 import hopsworks
 import hsfs
@@ -231,3 +232,30 @@ def safe_upload(dataset_api, local_path, remote_path, retries=5):
             print(f"⚠️ Upload failed ({attempt}/{retries}): {e}")
             time.sleep(1 + random.random() * attempt)  # exponential-ish backoff
     return False
+
+
+def is_older_than_30_days(ts_str):
+    ts = datetime.fromisoformat(ts_str)
+    return datetime.now(ts.tzinfo) - ts > timedelta(days=30)
+
+
+
+def get_latest_training_dataset(dataset_api, fv_name):
+    """Return (version, creation_time) or (None, None) if missing."""
+    all_items = dataset_api.list("Training_Datasets")  # top-level folder
+
+    candidates = []
+    for item in all_items:
+        if item.name.startswith(fv_name + "_"):
+            candidates.append(item)
+
+    if not candidates:
+        return None, None
+
+    # Sort by version number (suffix after last underscore)
+    def extract_version(name):
+        return int(name.split("_")[-1])
+
+    latest = sorted(candidates, key=lambda x: extract_version(x.name))[-1]
+
+    return extract_version(latest.name), latest.created
