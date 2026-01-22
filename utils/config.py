@@ -63,42 +63,45 @@ class HopsworksSettings(BaseSettings):
     RANKING_MODEL_TYPE: Literal["ranking", "llmranking"] = "ranking"
     CUSTOM_HOPSWORKS_INFERENCE_ENV: str = "custom_env_name"
 
-    def load_hopsworks_secrets_if_missing(self): 
-        """Fallback: load missing values from Hopsworks Secrets."""
-        try: 
-            project = hopsworks.login() 
-            secrets_api = project.get_secrets_api()
-        except Exception: 
-            # Not running inside Hopsworks or no secrets API available
-            return self 
+    def load_hopsworks_secrets_if_missing(self):
+        """Load missing secrets only when running inside a Hopsworks Job."""
         
-        def load(name): 
-            try: 
+        # Detect Hopsworks Job runtime
+        if "HOPSWORKS_JOB_ID" not in os.environ:
+            return self  # Do nothing locally or in Jupyter
+
+        try:
+            secrets_api = hopsworks.get_secrets_api()
+        except Exception:
+            return self
+
+        def load(name):
+            try:
                 secret = secrets_api.get_secret(name)
                 return secret.value if secret else None
-            except Exception: 
-                return None 
-            
-        if self.HOPSWORKS_API_KEY is None: 
+            except Exception:
+                return None
+
+        if self.HOPSWORKS_API_KEY is None:
             val = load("HOPSWORKS_API_KEY")
             if val:
                 self.HOPSWORKS_API_KEY = SecretStr(val)
-            
-        if self.AQICN_API_KEY is None: 
+
+        if self.AQICN_API_KEY is None:
             val = load("AQICN_API_KEY")
             if val:
                 self.AQICN_API_KEY = SecretStr(val)
-            
-        if self.GH_PAT is None: 
+
+        if self.GH_PAT is None:
             val = load("GH_PAT")
             if val:
                 self.GH_PAT = SecretStr(val)
-            
-        if self.GH_USERNAME is None: 
+
+        if self.GH_USERNAME is None:
             val = load("GH_USERNAME")
             if val:
                 self.GH_USERNAME = SecretStr(val)
-            
+
         return self
 
     def model_post_init(self, __context):
