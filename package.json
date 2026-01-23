@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "tailwindcss -i ./frontend/styles/styles.css -o ./frontend/styles/output.css --minify",
+    "build:css": "cd frontend && tailwindcss -i ./styles/styles.css -o ./styles/output.css --minify",
     "copy:files": "node -e \"require('fs').cpSync('frontend', 'dist', {recursive: true})\"",
     "build": "npm run build:css && npm run copy:files"
   },
