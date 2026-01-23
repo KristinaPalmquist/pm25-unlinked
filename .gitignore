@@ -9,7 +9,8 @@
 __pycache__
 .cache.sqlite
 mistral/
-models/
+models/*
+!models/interpolation/
 config.local.js
 node_modules/
 not_needed_files/

@@ -52,6 +52,67 @@ def handler(event, context):
                     })
                 }
         
+        if params.get("type") == "interpolation":
+            # Serve interpolation heatmap images from Hopsworks
+            day = params.get("day", "0")
+            try:
+                dataset_api = project.get_dataset_api()
+                
+                # List available interpolation images
+                try:
+                    files = dataset_api.list("Resources/airquality", recursive=False)
+                    interpolation_files = [
+                        f for f in files 
+                        if "interpolation_" in f and f.endswith(".png")
+                    ]
+                    
+                    # Find the most recent interpolation for this day offset
+                    # Format: interpolation_YYYY-MM-DD_YYYY-MM-DD.png (today_forecast)
+                    target_files = [
+                        f for f in interpolation_files
+                        if f.endswith(f"_{day}d.png") or f"interpolation_{day}d" in f
+                    ]
+                    
+                    if target_files:
+                        # Get the most recent file
+                        latest_file = sorted(target_files)[-1]
+                        file_path = f"Resources/airquality/{latest_file}"
+                        
+                        # Download and return the image
+                        local_path = dataset_api.download(file_path, overwrite=True)
+                        
+                        with open(local_path, 'rb') as img_file:
+                            import base64
+                            img_data = base64.b64encode(img_file.read()).decode('utf-8')
+                        
+                        return {
+                            "statusCode": 200,
+                            "headers": {
+                                "Content-Type": "image/png",
+                                "Access-Control-Allow-Origin": "*"
+                            },
+                            "body": img_data,
+                            "isBase64Encoded": True
+                        }
+                    else:
+                        return {
+                            "statusCode": 404,
+                            "headers": {"Content-Type": "application/json"},
+                            "body": json.dumps({"error": f"No interpolation image found for day {day}"})
+                        }
+                except Exception as e:
+                    return {
+                        "statusCode": 404,
+                        "headers": {"Content-Type": "application/json"},
+                        "body": json.dumps({"error": "Interpolation images not found in Hopsworks", "details": str(e)})
+                    }
+            except Exception as e:
+                return {
+                    "statusCode": 500,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"error": str(e)})
+                }
+        
         if "sensor" in params:
             sensor_id = int(params["sensor"])
             try:
