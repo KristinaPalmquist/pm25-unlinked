@@ -1,4 +1,5 @@
-export const interpolationBase = '/.netlify/functions/api';
+// Fetch predictions and sensor data from Netlify function (backed by Hopsworks)
+export const interpolationBase = '/models/interpolation';
 
 export async function fetchPredictions() {
   try {
@@ -6,7 +7,8 @@ export async function fetchPredictions() {
     if (!res.ok) {
       throw new Error('Failed to fetch predictions');
     }
-    return await res.json();
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   } catch (err) {
     console.error('Error fetching predictions:', err);
     return [];

@@ -2,3 +2,10 @@
   command = "npm run build"
   functions = "netlify/functions"
   publish = "dist"
+
+[functions]
+  # Python runtime for serverless functions
+  included_files = ["netlify/functions/**"]
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
