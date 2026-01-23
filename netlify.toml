@@ -1,0 +1,3 @@
+[build]
+  functions = "netlify/functions"
+  publish = "dist"   # or "public" depending on your build setup
