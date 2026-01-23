@@ -29,7 +29,10 @@ async function main() {
   state.currentDay = Number(ui.dayDropdown?.value ?? config.forecastDays[0]);
 
   // Initialize map
-  initMap({ predictions, config });
+  const map = initMap(config);
+  
+  // Store predictions in state
+  state.predictions = predictions;
 
   // Initialize UI controls
   initControls(map, config, {
@@ -45,18 +48,16 @@ async function main() {
 
   // Load initial raster and markers
   map.on("load", async () => {
-    await loadRaster(state.currentDay);
-    await loadMarkersFromBackend();
+    if (config.forecastDays && config.forecastDays.length > 0) {
+      await loadRaster(map, config, state.currentDay, state);
+    }
+    
+    // Load markers from predictions if available
+    if (predictions && predictions.length > 0) {
+      console.log('Loading markers from predictions:', predictions.length);
+      // TODO: Implement marker loading from predictions
+    }
   });
-
-  const marker = createMarker(entry, (sensorId, el) => {
-    handleMarkerClick(sensorId, el, map);
-  });
-  marker.addTo(map);
-
-  const rows = predictions;
-
-  loadCsvMarkers(rows, state, ingestRow, createMarker);
 
   console.log("PM2.5 Forecast Map initialized");
   console.log("Predictions loaded:", predictions.length);
