@@ -1,9 +1,8 @@
-import { fetchLatestBatch } from "../api.js";
-import { getAQIColor } from "../config/mapConfig.js";
-import { deriveDayDates } from "../utils/index.js";
+import { getAQIColor } from '../config/mapConfig.js';
+import { deriveDayDates } from '../utils/index.js';
 
-export const sourceId = "pm25-interpolation";
-export const layerId = "pm25-interpolation-layer";
+export const sourceId = 'pm25-interpolation';
+export const layerId = 'pm25-interpolation-layer';
 
 export async function loadMarkersFromBackend(map, state, onClick) {
   const rows = await fetchLatestBatch();
@@ -21,7 +20,7 @@ export async function loadRaster(map, config, day, state) {
   removeRasterLayer(map);
 
   map.addSource(sourceId, {
-    type: "image",
+    type: 'image',
     url: buildRasterUrl(day, config),
     coordinates: [
       [config.mapBounds[0], config.mapBounds[3]],
@@ -33,9 +32,9 @@ export async function loadRaster(map, config, day, state) {
 
   map.addLayer({
     id: layerId,
-    type: "raster",
+    type: 'raster',
     source: sourceId,
-    paint: { "raster-opacity": 0.75, "raster-resampling": "linear" },
+    paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
   });
 }
 
@@ -45,12 +44,12 @@ export function removeRasterLayer(map) {
 }
 
 export function buildRasterUrl(day, config) {
-  return `${config.interpolationBase}/${config.interpolationTemplate.replace("{day}", day)}`;
+  return `${config.interpolationBase}/${config.interpolationTemplate.replace('{day}', day)}`;
 }
 
 export function waitForStyle(map) {
   return new Promise((resolve) =>
-    map.isStyleLoaded() ? resolve() : map.once("styledata", resolve),
+    map.isStyleLoaded() ? resolve() : map.once('styledata', resolve),
   );
 }
 
@@ -76,8 +75,8 @@ export function ingestRow(row, state) {
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) return;
 
-  const street = row.street || row.location || "";
-  const city = row.city_y || row.city_x || "";
+  const street = row.street || row.location || '';
+  const city = row.city_y || row.city_x || '';
 
   if (!state.sensorData[sensorId]) {
     state.sensorData[sensorId] = {
@@ -100,26 +99,26 @@ export function ingestRow(row, state) {
   if (!entry.city && city) entry.city = city;
   entry.rows.push(row);
 
-  const predicted = parseFloat(row.predicted_pm25 ?? row.predicted ?? "NaN");
-  const actual = parseFloat(row.pm25 ?? "NaN");
+  const predicted = parseFloat(row.predicted_pm25 ?? row.predicted ?? 'NaN');
+  const actual = parseFloat(row.pm25 ?? 'NaN');
   if (Number.isFinite(predicted)) entry.latestValue = predicted;
   else if (Number.isFinite(actual)) entry.latestValue = actual;
 }
 
 export function buildPopupHtml(entry) {
   const name = entry.street || entry.sensorId;
-  const location = entry.city ? `${entry.city}<br/>` : "";
+  const location = entry.city ? `${entry.city}<br/>` : '';
   const reading = Number.isFinite(entry.latestValue)
     ? `PM2.5: ${entry.latestValue.toFixed(1)}`
-    : "No recent value";
+    : 'No recent value';
   return `<strong>${name}</strong><br/>${location}${reading}`;
 }
 
 export function createMarker(entry, onClick) {
-  const element = document.createElement("div");
-  element.className = "sensor-marker";
+  const element = document.createElement('div');
+  element.className = 'sensor-marker';
   element.style.background = getAQIColor(entry.latestValue ?? 0);
-  element.addEventListener("click", (e) => {
+  element.addEventListener('click', (e) => {
     e.stopPropagation();
     onClick(entry.sensorId, element);
   });
