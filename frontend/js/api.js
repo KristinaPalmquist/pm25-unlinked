@@ -1,15 +1,29 @@
-export const interpolationBase = '/netlify/functions/api';
+export const interpolationBase = '/.netlify/functions/api';
 
 export async function fetchPredictions() {
-  const res = await fetch('/.netlify/functions/api?type=predictions');
-  if (!res.ok) throw new Error('Failed to fetch predictions');
-  return res.json();
+  try {
+    const res = await fetch('/.netlify/functions/api?type=predictions');
+    if (!res.ok) {
+      throw new Error('Failed to fetch predictions');
+    }
+    return await res.json();
+  } catch (err) {
+    console.error('Error fetching predictions:', err);
+    return [];
+  }
 }
 
 export async function fetchSensorData(sensorId) {
-  const res = await fetch(`/.netlify/functions/api?sensor=${sensorId}`);
-  if (!res.ok) throw new Error('Failed to fetch sensor data');
-  return res.json();
+  try {
+    const res = await fetch(`/.netlify/functions/api?sensor=${sensorId}`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch sensor data');
+    }
+    return await res.json();
+  } catch (err) {
+    console.error(`Error fetching sensor ${sensorId}:`, err);
+    return null;
+  }
 }
 
 // const URL = "https://hospitable-bravery-production-e171.up.railway.app";
