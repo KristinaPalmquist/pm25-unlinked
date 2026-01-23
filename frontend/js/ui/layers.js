@@ -44,7 +44,8 @@ export function removeRasterLayer(map) {
 }
 
 export function buildRasterUrl(day, config) {
-  return `${config.interpolationBase}/${config.interpolationTemplate.replace('{day}', day)}`;
+  // config.interpolationBase is now the API endpoint: /.netlify/functions/api?type=interpolation
+  return `${config.interpolationBase}&day=${day}`;
 }
 
 export function waitForStyle(map) {

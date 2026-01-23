@@ -1,13 +1,15 @@
 // Fetch predictions and sensor data from Netlify function (backed by Hopsworks)
-export const interpolationBase = '/models/interpolation';
+export const interpolationBase = '/.netlify/functions/api?type=interpolation';
 
 export async function fetchPredictions() {
   try {
     const res = await fetch('/.netlify/functions/api?type=predictions');
     if (!res.ok) {
-      console.warn('Predictions API not available (404). Make sure:', 
+      console.warn(
+        'Predictions API not available (404). Make sure:',
         '\n1. HOPSWORKS_API_KEY is set in Netlify environment variables',
-        '\n2. Notebook 4 has been run to create aq_predictions feature group');
+        '\n2. Notebook 4 has been run to create aq_predictions feature group',
+      );
       return [];
     }
     const data = await res.json();
