@@ -146,6 +146,9 @@ def create_feature_groups(fs, max_retries=5):
                 ]
             )
 
+            update_air_quality_description(air_quality_fg)
+            update_weather_description(weather_fg)
+
             return air_quality_fg, weather_fg
 
         except (RestAPIError, ProtocolError, ConnectionError, Timeout) as e:
@@ -161,6 +164,9 @@ def create_feature_groups(fs, max_retries=5):
 
 
 def update_air_quality_description(air_quality_fg):
+    # Ensure primary_key is set (workaround for Hopsworks SDK bug)
+    if air_quality_fg._primary_key is None:
+        air_quality_fg._primary_key = ["sensor_id", "date"]
     # Note: 'date' is added automatically as event_time and cannot be updated here
     air_quality_fg.update_feature_description("sensor_id", "AQICN sensor identifier (e.g., 59893)")
     air_quality_fg.update_feature_description(
@@ -184,6 +190,9 @@ def update_air_quality_description(air_quality_fg):
 
 
 def update_weather_description(weather_fg):
+    # Ensure primary_key is set (workaround for Hopsworks SDK bug)
+    if weather_fg._primary_key is None:
+        weather_fg._primary_key = ["sensor_id", "date"]
     # Note: 'date' is added automatically as event_time and cannot be updated here
     weather_fg.update_feature_description("sensor_id", "AQICN sensor identifier")
     weather_fg.update_feature_description("temperature_2m_mean", "Daily mean temperature at 2m above ground in Celsius")
