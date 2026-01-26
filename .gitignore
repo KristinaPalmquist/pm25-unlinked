@@ -16,6 +16,10 @@ node_modules/
 not_needed_files/
 dist/
 
+# Cloned repo folder (used in Hopsworks notebooks)
+notebooks/pm25-forecast-openmeteo-aqicn/
+pm25-forecast-openmeteo-aqicn/
+
 # env
 .env*
 !.env.example

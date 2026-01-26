@@ -67,32 +67,38 @@ def delete_secrets(proj, name):
 
 
 def clone_or_update_repo(username: str):
-    repo_name = "pm25-forecast-openmeteo-aqicn"
-
-    # 1. Detect if already inside the repo
+    # Accept either repo name
+    valid_repo_names = ["pm25-unlinked", "pm25"]
+    
+    # 1. Detect if already inside ANY git repository (for local development)
     cwd = Path().absolute()
     for parent in [cwd] + list(cwd.parents):
-        if (parent / ".git").exists() and parent.name == repo_name:
-            print(f"Already in repo at {parent}")
-            return parent
-
-    # 2. Detect if the repo exists in the current directory
-    repo_dir = Path(repo_name)
-    if repo_dir.exists():
-        print(f"Repository exists at {repo_dir.absolute()}")
-        os.system(f"git -C {repo_dir} pull")
-        return repo_dir
-
-    # 3. Otherwise clone it
-    print("Cloning repository...")
+        if (parent / ".git").exists():
+            # Check if it's one of our repos
+            if parent.name in valid_repo_names or parent.name == "pm25":
+                print(f"💻 Already in git repository at {parent}")
+                return parent
+    
+    # 2. Check for existing cloned repo in current directory (for Hopsworks subsequent runs)
+    for repo_name in valid_repo_names:
+        repo_dir = Path(repo_name)
+        if repo_dir.exists() and (repo_dir / ".git").exists():
+            print(f"🔄 Repository '{repo_name}' exists at {repo_dir.absolute()}, pulling latest...")
+            os.system(f"git -C {repo_dir} pull")
+            return repo_dir
+    
+    # 3. Clone the repo (only happens in Hopsworks first run)
+    # Try to clone the first valid repo name
+    repo_name = valid_repo_names[0]  # Use pm25-unlinked as default
+    print(f"📥 Cloning repository '{repo_name}' from GitHub...")
     url = f"https://github.com/{username}/{repo_name}.git"
     exit_code = os.system(f"git clone {url}")
-
+    
     if exit_code != 0:
-        raise RuntimeError("Git clone failed.")
-
-    print("Clone successful.")
-    return repo_dir
+        raise RuntimeError(f"Git clone failed for {repo_name}.")
+    
+    print("✅ Clone successful.")
+    return Path(repo_name)
 
 
 def create_feature_groups(fs, max_retries=5):
@@ -107,7 +113,7 @@ def create_feature_groups(fs, max_retries=5):
                 expectation_suite=None,
                 features=[
                     Feature("sensor_id", type="int"),
-                    Feature("date", type="timestamp"),
+                    # date is automatically added as event_time, don't include it here
                     Feature("pm25", type="double"),
                     Feature("pm25_lag_1d", type="double"),
                     Feature("pm25_lag_2d", type="double"),
@@ -131,7 +137,7 @@ def create_feature_groups(fs, max_retries=5):
                 event_time="date",
                 expectation_suite=None,
                 features=[
-                    Feature("date", "timestamp"),
+                    # date is automatically added as event_time, don't include it here
                     Feature("sensor_id", "int"),
                     Feature("temperature_2m_mean", "double"),
                     Feature("precipitation_sum", "double"),
@@ -155,7 +161,7 @@ def create_feature_groups(fs, max_retries=5):
 
 
 def update_air_quality_description(air_quality_fg):
-    air_quality_fg.update_feature_description("date", "Date and time of measurement of air quality")
+    # Note: 'date' is added automatically as event_time and cannot be updated here
     air_quality_fg.update_feature_description("sensor_id", "AQICN sensor identifier (e.g., 59893)")
     air_quality_fg.update_feature_description(
         "pm25",
@@ -178,7 +184,7 @@ def update_air_quality_description(air_quality_fg):
 
 
 def update_weather_description(weather_fg):
-    weather_fg.update_feature_description("date", "Date and time of weather measurement")
+    # Note: 'date' is added automatically as event_time and cannot be updated here
     weather_fg.update_feature_description("sensor_id", "AQICN sensor identifier")
     weather_fg.update_feature_description("temperature_2m_mean", "Daily mean temperature at 2m above ground in Celsius")
     weather_fg.update_feature_description("precipitation_sum", "Daily total precipitation (rain/snow) in mm")
