@@ -5,6 +5,72 @@ from utils import fetchers
 # Cache for geocoding results to avoid duplicate API calls
 _geocoding_cache = {}
 
+
+def get_sensor_locations(feature_group):
+    """
+    Extract sensor location metadata from air quality feature group.
+    
+    Returns dict: {sensor_id: (latitude, longitude, city, street, country)}
+    
+    This centralizes the repeated pattern of reading metadata from the feature group
+    that appears in all pipelines.
+    """
+    try:
+        df = feature_group.read()
+        if df.empty:
+            return {}
+        
+        # Extract unique sensor metadata
+        metadata_df = df[["sensor_id", "latitude", "longitude", "city", "street", "country"]].drop_duplicates(subset=["sensor_id"])
+        
+        # Build location dictionary
+        locations = {}
+        for _, row in metadata_df.iterrows():
+            locations[row["sensor_id"]] = (
+                row["latitude"],
+                row["longitude"],
+                row["city"],
+                row["street"],
+                row["country"]
+            )
+        
+        return locations
+    
+    except Exception as e:
+        print(f"⚠️ Error loading sensor locations: {e}")
+        return {}
+
+
+def get_sensor_locations_dict(feature_group):
+    """
+    Extract sensor location metadata as nested dictionaries (for pipeline 2).
+    
+    Returns dict: {sensor_id: {"latitude": ..., "longitude": ..., "city": ..., etc}}
+    """
+    try:
+        df = feature_group.read()
+        if df.empty:
+            return {}
+        
+        metadata_df = df[["sensor_id", "latitude", "longitude", "city", "street", "country", "aqicn_url"]].drop_duplicates(subset=["sensor_id"])
+        
+        locations = {}
+        for _, row in metadata_df.iterrows():
+            locations[row["sensor_id"]] = {
+                "latitude": row["latitude"],
+                "longitude": row["longitude"],
+                "city": row["city"],
+                "street": row["street"],
+                "country": row["country"],
+                "aqicn_url": row["aqicn_url"]
+            }
+        
+        return locations
+    
+    except Exception as e:
+        print(f"⚠️ Error loading sensor locations: {e}")
+        return {}
+
 def get_coordinates(city, street, country):
     candidates = []
 
