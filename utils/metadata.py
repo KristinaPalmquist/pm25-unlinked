@@ -18,6 +18,7 @@ def get_sensor_locations(feature_group):
     try:
         df = feature_group.read()
         if df.empty:
+            print("ℹ️  Feature group is empty (first run) - starting fresh backfill")
             return {}
         
         # Extract unique sensor metadata
@@ -37,7 +38,12 @@ def get_sensor_locations(feature_group):
         return locations
     
     except Exception as e:
-        print(f"⚠️ Error loading sensor locations: {e}")
+        # If feature group has no data (first run), this is expected
+        error_msg = str(e)
+        if "No data found" in error_msg:
+            print("ℹ️  Feature group is empty (first run) - starting fresh backfill")
+        else:
+            print(f"⚠️  Error loading sensor locations: {e}")
         return {}
 
 
@@ -50,6 +56,7 @@ def get_sensor_locations_dict(feature_group):
     try:
         df = feature_group.read()
         if df.empty:
+            print("ℹ️  Feature group is empty - no sensor locations available")
             return {}
         
         metadata_df = df[["sensor_id", "latitude", "longitude", "city", "street", "country", "aqicn_url"]].drop_duplicates(subset=["sensor_id"])
