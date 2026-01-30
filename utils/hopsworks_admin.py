@@ -116,7 +116,7 @@ def create_feature_groups(fs, max_retries=5):
                     expectation_suite=None,
                     features=[
                         Feature("sensor_id", type="int"),
-                        Feature("date", type="timestamp"),
+                        # date is automatically added by event_time="date" parameter
                         Feature("pm25", type="double"),
                         Feature("pm25_lag_1d", type="double"),
                         Feature("pm25_lag_2d", type="double"),
@@ -144,7 +144,7 @@ def create_feature_groups(fs, max_retries=5):
                     expectation_suite=None,
                     features=[
                         Feature("sensor_id", "int"),
-                        Feature("date", "timestamp"),
+                        # date is automatically added by event_time="date" parameter
                         Feature("temperature_2m_mean", "double"),
                         Feature("precipitation_sum", "double"),
                         Feature("wind_speed_10m_max", "double"),
