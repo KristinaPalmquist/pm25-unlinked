@@ -104,34 +104,50 @@ def clone_or_update_repo(username: str):
 def create_feature_groups(fs, max_retries=5):
     for attempt in range(max_retries):
         try:
-            # Check if feature groups already exist - just return them if they do
-            # Schema will be created automatically on first insert
+            # Check if feature groups already exist
             air_quality_fg = fs.get_feature_group(name="air_quality", version=1)
-            weather_fg = fs.get_feature_group(name="weather", version=1)
-            
-            # If both exist, return them
-            if air_quality_fg is not None and weather_fg is not None:
-                return air_quality_fg, weather_fg
-            
-            # If they don't exist, they'll be created on first insert
-            # Return get_or_create handles which will be populated during backfill
             if air_quality_fg is None:
-                air_quality_fg = fs.get_or_create_feature_group(
+                air_quality_fg = fs.create_feature_group(
                     name="air_quality",
                     description="Air Quality characteristics of each day for all sensors",
                     version=1,
                     primary_key=["sensor_id", "date"],
-                    event_time="date",
+                    features=[
+                        Feature("sensor_id", type="int"),
+                        Feature("date", type="timestamp"),
+                        Feature("pm25", type="double"),
+                        Feature("pm25_lag_1d", type="double"),
+                        Feature("pm25_lag_2d", type="double"),
+                        Feature("pm25_lag_3d", type="double"),
+                        Feature("pm25_rolling_3d", type="double"),
+                        Feature("pm25_nearby_avg", type="double"),
+                        Feature("city", type="string"),
+                        Feature("street", type="string"),
+                        Feature("country", type="string"),
+                        Feature("aqicn_url", type="string"),
+                        Feature("latitude", type="double"),
+                        Feature("longitude", type="double"),
+                    ],
                 )
-            
+                air_quality_fg.save() 
+
+            weather_fg = fs.get_feature_group(name="weather", version=1)
             if weather_fg is None:
-                weather_fg = fs.get_or_create_feature_group(
+                weather_fg = fs.create_feature_group(
                     name="weather",
                     description="Weather characteristics of each day for all locations",
                     version=1,
                     primary_key=["sensor_id", "date"],
-                    event_time="date",
+                    features=[
+                        Feature("sensor_id", "int"),
+                        Feature("date", "timestamp"),
+                        Feature("temperature_2m_mean", "double"),
+                        Feature("precipitation_sum", "double"),
+                        Feature("wind_speed_10m_max", "double"),
+                        Feature("wind_direction_10m_dominant", "double"),
+                    ]
                 )
+                weather_fg.save()
 
             return air_quality_fg, weather_fg
 
