@@ -21,18 +21,15 @@ def handler(event, context):
         fs = project.get_feature_store()
         
         if params.get("type") == "predictions":
-            # Fetch latest predictions from monitoring feature group
+            # Serve predictions from Hopsworks dataset storage (uploaded by batch job)
             try:
-                monitor_fg = fs.get_feature_group("aq_predictions", version=1)
+                dataset_api = project.get_dataset_api()
                 
-                # Get D+1 predictions (most recent forecast)
-                predictions_df = monitor_fg.filter(
-                    monitor_fg.days_before_forecast_day == 1
-                ).read()
+                # Download predictions.json from Hopsworks
+                local_path = dataset_api.download("Resources/airquality/predictions.json", overwrite=True)
                 
-                # Convert to JSON-serializable format
-                predictions_df["date"] = predictions_df["date"].astype(str)
-                predictions_data = predictions_df.to_dict(orient="records")
+                with open(local_path, 'r') as f:
+                    predictions_data = json.load(f)
                 
                 return {
                     "statusCode": 200,
@@ -47,7 +44,7 @@ def handler(event, context):
                     "statusCode": 404,
                     "headers": {"Content-Type": "application/json"},
                     "body": json.dumps({
-                        "error": "Predictions not found",
+                        "error": "Predictions not found in Hopsworks storage",
                         "details": str(e)
                     })
                 }
