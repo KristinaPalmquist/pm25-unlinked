@@ -91,6 +91,15 @@ body {
   border-color: rgba(255, 255, 255, 0.9);
 } */
 
+/* Force Tailwind to keep the full backdrop filter chain */
+.backdrop-blur-lg {
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness)
+    var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale)
+    var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert)
+    var(--tw-backdrop-opacity) var(--tw-backdrop-saturate)
+    var(--tw-backdrop-sepia);
+}
+
 #focus-panel {
   opacity: 0;
   transition: opacity var(--transition);
