@@ -1,5 +1,6 @@
 // Fetch predictions from static JSON file (updated daily by Hopsworks job)
-export const interpolationBase = '/.netlify/functions/api?type=interpolation';
+// Interpolation images are also served statically
+export const interpolationBase = '/interpolation/forecast_interpolation';
 
 export async function fetchPredictions() {
   try {
