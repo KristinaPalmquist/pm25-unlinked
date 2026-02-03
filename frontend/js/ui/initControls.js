@@ -1,4 +1,4 @@
-import { populateDropdown, state, ui } from "./index.js";
+import { state, ui } from './index.js';
 
 export function initControls(
   map,
@@ -14,51 +14,83 @@ export function initControls(
     formatDayLabel,
   },
 ) {
-  populateDropdown(config, (day) => formatDayLabel(day, state.dayDates));
+  // Set weekday labels dynamically
+  const today = new Date();
+  const weekdays = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
 
-  ui.dayDropdown.value = String(state.currentDay);
+  document.querySelectorAll('.weekday-label').forEach((label, index) => {
+    const dayOffset = index + 2; // Start from day +2
+    const futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + dayOffset);
+    label.textContent = weekdays[futureDate.getDay()];
+  });
 
-  ui.dayDropdown?.addEventListener("change", (e) => {
-    const day = Number(e.target.value);
-    state.currentDay = day;
-    loadRaster(day);
+  // Initialize day buttons
+  ui.dayButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const day = Number(button.dataset.day);
+      state.currentDay = day;
 
-    if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
-      updateFocusPanelValue(ui.focusDetailsBtn.dataset.sensorId);
+      // Update active state for all buttons
+      ui.dayButtons.forEach((btn) => {
+        btn.dataset.active = btn.dataset.day === String(day) ? 'true' : 'false';
+      });
+
+      loadRaster(map, config, day, state);
+
+      if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
+        updateFocusPanelValue(ui.focusDetailsBtn.dataset.sensorId);
+      }
+    });
+  });
+
+  ui.overlayToggle?.addEventListener('click', () => {
+    const isActive = ui.overlayToggle.dataset.active === 'true';
+    const newActive = !isActive;
+    ui.overlayToggle.dataset.active = String(newActive);
+
+    if (newActive) {
+      loadRaster(map, config, state.currentDay, state);
+    } else {
+      removeRasterLayer(map);
     }
   });
 
-  ui.overlayToggle?.addEventListener("change", () => {
-    ui.overlayToggle.checked
-      ? loadRaster(state.currentDay)
-      : removeRasterLayer();
+  ui.sensorToggle?.addEventListener('click', () => {
+    const isActive = ui.sensorToggle.dataset.active === 'true';
+    const newActive = !isActive;
+    ui.sensorToggle.dataset.active = String(newActive);
+
+    state.markers.forEach((m) => (newActive ? m.addTo(map) : m.remove()));
+    if (!newActive) clearFocus();
   });
 
-  ui.sensorToggle?.addEventListener("change", () => {
-    state.markers.forEach((m) =>
-      ui.sensorToggle.checked ? m.addTo(map) : m.remove(),
-    );
-    if (!ui.sensorToggle.checked) clearFocus();
-  });
-
-  ui.focusDetailsBtn?.addEventListener("click", () => {
+  ui.focusDetailsBtn?.addEventListener('click', () => {
     if (ui.focusDetailsBtn.dataset.sensorId)
       openDetailsModal(ui.focusDetailsBtn.dataset.sensorId);
   });
-  ui.imageModalClose?.addEventListener("click", closeImageModal);
-  ui.imageModalBackdrop?.addEventListener("click", closeImageModal);
-  ui.detailsModalClose?.addEventListener("click", closeDetailsModal);
-  ui.detailsModalBackdrop?.addEventListener("click", closeDetailsModal);
+  ui.imageModalClose?.addEventListener('click', closeImageModal);
+  ui.imageModalBackdrop?.addEventListener('click', closeImageModal);
+  ui.detailsModalClose?.addEventListener('click', closeDetailsModal);
+  ui.detailsModalBackdrop?.addEventListener('click', closeDetailsModal);
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
       if (state.modals.image) closeImageModal();
       if (state.modals.details) closeDetailsModal();
     }
   });
 
-  map.on("click", (e) => {
-    if (!e.originalEvent?.target?.classList?.contains("sensor-marker"))
+  map.on('click', (e) => {
+    if (!e.originalEvent?.target?.classList?.contains('sensor-marker'))
       clearFocus();
   });
 }

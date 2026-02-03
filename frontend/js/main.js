@@ -29,7 +29,7 @@ async function main() {
   // Build config
   const config = buildMapConfig(gridBounds, interpolationBase);
 
-  state.currentDay = Number(ui.dayDropdown?.value ?? config.forecastDays[0]);
+  state.currentDay = 0; // Default to today
 
   // Initialize map
   const map = initMap(config);
@@ -62,7 +62,7 @@ async function main() {
           console.warn('Could not load interpolation overlay:', err.message);
           // Disable overlay toggle since it won't work
           if (ui.overlayToggle) {
-            ui.overlayToggle.checked = false;
+            ui.overlayToggle.dataset.active = 'false';
             ui.overlayToggle.disabled = true;
           }
         }
@@ -81,11 +81,11 @@ async function main() {
 
       // Disable overlay and sensor toggles
       if (ui.overlayToggle) {
-        ui.overlayToggle.checked = false;
+        ui.overlayToggle.dataset.active = 'false';
         ui.overlayToggle.disabled = true;
       }
       if (ui.sensorToggle) {
-        ui.sensorToggle.checked = false;
+        ui.sensorToggle.dataset.active = 'false';
         ui.sensorToggle.disabled = true;
       }
     }

@@ -1,30 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PM25 Forecast</title>
+    <title>PM2.5 Air Quality Forecast</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css"
     />
-    <link href="./styles/output.css" rel="stylesheet">
+    <link href="./styles/output.css" rel="stylesheet" />
   </head>
-  <body>
+  <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
-      <div id="map" class="h-full w-full"></div>
-      <div class="absolute left-4 top-4 z-10 flex flex-col gap-4">
-        <aside
+      <!-- Header -->
+      <header
+        class="absolute top-0 left-0 right-0 z-30 bg-white/40 backdrop-blur-lg px-6 py-6 text-4xl font-bold text-center shadow-xl border-b border-white/35 text-gray-900"
+      >
+        AI Air Quality Forecast – Stockholm Region
+      </header>
+
+      <!-- Toggle Controls -->
+      <nav class="absolute top-32 left-4 z-20 flex space-x-4">
+        <button
+          id="toggle-sensors"
+          class="px-5 py-2 bg-white/50 backdrop-blur-lg text-gray-900 rounded-lg shadow-xl border border-white/35 hover:bg-emerald-800 hover:text-white data-[active=true]:bg-emerald-400 data-[active=true]:text-gray-900 font-semibold"
+          data-active="true"
+        >
+          Sensors
+        </button>
+        <button
+          id="toggle-overlay"
+          class="px-5 py-2 bg-white/50 backdrop-blur-lg text-gray-900 rounded-lg shadow-xl border border-white/35 hover:bg-emerald-800 hover:text-white data-[active=true]:bg-emerald-400 data-[active=true]:text-gray-900 font-semibold"
+          data-active="true"
+        >
+          Heatmap
+        </button>
+      </nav>
+
+      <!-- Main Map Area -->
+      <div id="map"></div>
+
+      <!-- Legend -->
+      <aside
+        class="absolute bottom-24 right-4 z-20 bg-white/40 backdrop-blur-lg p-4 rounded-lg shadow-xl border border-white/35 text-gray-900"
+        aria-label="Air quality legend"
+      >
+        <h3 class="font-semibold mb-2">Air Quality Levels</h3>
+        <ul class="space-y-1 text-sm">
+          <li class="flex items-center">
+            <span class="w-4 h-4 bg-green-500 mr-2"></span> Good
+          </li>
+          <li class="flex items-center">
+            <span class="w-4 h-4 bg-yellow-400 mr-2"></span> Moderate
+          </li>
+          <li class="flex items-center">
+            <span class="w-4 h-4 bg-orange-500 mr-2"></span> Unhealthy
+            (Sensitive)
+          </li>
+          <li class="flex items-center">
+            <span class="w-4 h-4 bg-red-600 mr-2"></span> Unhealthy
+          </li>
+          <li class="flex items-center">
+            <span class="w-4 h-4 bg-purple-700 mr-2"></span> Very Unhealthy
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Day Selector -->
+      <section
+        class="absolute bottom-4 left-0 right-0 z-20 flex flex-col items-center text-gray-900"
+        aria-label="Day selection"
+      >
+        <!-- <label class="mb-3 text-lg font-semibold bg-white/60 backdrop-blur-lg px-5 py-2 rounded-lg border border-white/35 shadow-lg">
+          Select Forecast Day for Heatmap
+        </label> -->
+        <div class="flex gap-2">
+          <button data-day="0" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white" data-active="true">
+            Today
+          </button>
+          <button data-day="1" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+            Tomorrow
+          </button>
+          <button data-day="2" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+            <span class="weekday-label"></span>
+          </button>
+          <button data-day="3" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+            <span class="weekday-label"></span>
+          </button>
+          <button data-day="4" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+            <span class="weekday-label"></span>
+          </button>
+          <button data-day="5" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+            <span class="weekday-label"></span>
+          </button>
+          <button data-day="6" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+            <span class="weekday-label"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- <aside
           class="flex w-96 flex-col gap-4 rounded-2xl border border-white/40 bg-white/60 p-4 text-sm backdrop-blur-lg"
         >
           <section class="flex flex-col gap-2">
             <h2 class="text-base font-semibold">Map options</h2>
             <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" id="toggle-sensors" checked class="h-4 w-4 rounded" />
-                <span>Show sensors</span>
-              </label>
+              <input
+                type="checkbox"
+                id="toggle-sensors"
+                checked
+                class="h-4 w-4 rounded"
+              />
+              <span>Show sensors</span>
+            </label>
             <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox" id="toggle-overlay" checked class="h-4 w-4 rounded" />
+              <input
+                type="checkbox"
+                id="toggle-overlay"
+                checked
+                class="h-4 w-4 rounded"
+              />
               <span>Show air quality overlay</span>
             </label>
             <label class="flex flex-col gap-1 text-sm">
@@ -32,36 +127,55 @@
               <select
                 id="forecast-dropdown"
                 class="w-full rounded-lg border border-white/40 bg-white/70 px-3 py-2 text-sm"
-              >
-              </select>
+              ></select>
             </label>
           </section>
           <section>
-            <h2 class="mb-2 text-base font-semibold">PM<sub>2.5</sub> concentrations</h2>
+            <h2 class="mb-2 text-base font-semibold">
+              PM<sub>2.5</sub> concentrations
+            </h2>
             <ul class="legend flex flex-col gap-1 text-sm">
               <li><span class="color good"></span> 0-50 µg/m<sup>3</sup></li>
-              <li><span class="color moderate"></span> 50-100 µg/m<sup>3</sup></li>
-              <li><span class="color unhealthy"></span> 100-150 µg/m<sup>3</sup></li>
-              <li><span class="color very-unhealthy"></span> 150+ µg/m<sup>3</sup></li>
+              <li>
+                <span class="color moderate"></span> 50-100 µg/m<sup>3</sup>
+              </li>
+              <li>
+                <span class="color unhealthy"></span> 100-150 µg/m<sup>3</sup>
+              </li>
+              <li>
+                <span class="color very-unhealthy"></span> 150+ µg/m<sup>3</sup>
+              </li>
             </ul>
           </section>
         </aside>
 
         <aside
           id="focus-panel"
-          style="display: none;"
+          style="display: none"
           class="flex w-96 flex-col gap-3 rounded-2xl border border-white/40 bg-white/70 p-4 text-sm backdrop-blur-lg"
         >
-          <div id="focus-name" class="text-base font-semibold">Select a station</div>
-          <p id="focus-meta" class="text-xs select-none -mt-1">Lat -, Lon -, ID -</p>
+          <div id="focus-name" class="text-base font-semibold">
+            Select a station
+          </div>
+          <p id="focus-meta" class="text-xs select-none -mt-1">
+            Lat -, Lon -, ID -
+          </p>
           <div class="flex flex-col gap-3">
             <div id="forecast-card" class="focus-image-card hidden">
               <p class="text-xs font-semibold uppercase">Forecast plot</p>
-              <img id="focus-forecast-thumb" alt="Forecast preview" class="focus-thumb" />
+              <img
+                id="focus-forecast-thumb"
+                alt="Forecast preview"
+                class="focus-thumb"
+              />
             </div>
             <div id="hindcast-card" class="focus-image-card hidden">
               <p class="text-xs font-semibold uppercase">Hindcast plot</p>
-              <img id="focus-hindcast-thumb" alt="Hindcast preview" class="focus-thumb" />
+              <img
+                id="focus-hindcast-thumb"
+                alt="Hindcast preview"
+                class="focus-thumb"
+              />
             </div>
           </div>
           <button
@@ -71,14 +185,18 @@
           >
             View details
           </button>
-        </aside>
+        </aside> -->
       </div>
     </div>
 
     <div id="image-modal" class="image-modal hidden">
       <div id="image-modal-backdrop" class="image-modal-backdrop"></div>
       <div class="image-modal-content">
-        <button id="image-modal-close" class="image-modal-close" aria-label="Close image">
+        <button
+          id="image-modal-close"
+          class="image-modal-close"
+          aria-label="Close image"
+        >
           ×
         </button>
         <img id="image-modal-img" alt="Expanded plot" />
@@ -93,7 +211,13 @@
             <h3 class="text-base font-semibold">Sensor details:</h3>
             <p id="details-modal-title" class="text-base font-semibold"></p>
           </div>
-          <button id="details-modal-close" class="details-modal-close" aria-label="Close details">×</button>
+          <button
+            id="details-modal-close"
+            class="details-modal-close"
+            aria-label="Close details"
+          >
+            ×
+          </button>
         </header>
         <div class="details-table-wrapper">
           <table>
