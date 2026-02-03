@@ -1,14 +1,12 @@
-// Fetch predictions from Netlify function (which fetches from Hopsworks)
+// Fetch predictions from static JSON file (updated daily by Hopsworks job)
 export const interpolationBase = '/.netlify/functions/api?type=interpolation';
 
 export async function fetchPredictions() {
   try {
-    const res = await fetch('/.netlify/functions/api?type=predictions');
+    const res = await fetch('/predictions.json');
     if (!res.ok) {
       console.warn(
-        'Predictions not available. Make sure:',
-        '\n1. HOPSWORKS_API_KEY is set in Netlify environment variables',
-        '\n2. Notebook 4 batch job has run to upload predictions.json to Hopsworks',
+        'Predictions not available. Hopsworks job may not have run yet.',
       );
       return [];
     }
