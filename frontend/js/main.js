@@ -26,6 +26,12 @@ async function main() {
     loadCoordinates(),
   ]);
 
+  // Set region name from config
+  const regionNameEl = document.getElementById('region-name');
+  if (regionNameEl && gridBounds.REGION_NAME) {
+    regionNameEl.textContent = ' – ' + gridBounds.REGION_NAME;
+  }
+
   // Build config
   const config = buildMapConfig(gridBounds, interpolationBase);
 
