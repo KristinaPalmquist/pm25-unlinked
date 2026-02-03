@@ -55,59 +55,50 @@ def handler(event, context):
             try:
                 dataset_api = project.get_dataset_api()
                 
-                # List available interpolation images
+                # Pattern for interpolation files: forecast_interpolation_0d.png, forecast_interpolation_1d.png, etc.
+                filename = f"forecast_interpolation_{day}d.png"
+                file_path = f"Resources/airquality/{filename}"
+                
                 try:
-                    files = dataset_api.list("Resources/airquality", recursive=False)
-                    interpolation_files = [
-                        f for f in files 
-                        if "interpolation_" in f and f.endswith(".png")
-                    ]
+                    # Try to download the specific file
+                    local_path = dataset_api.download(file_path, overwrite=True)
                     
-                    # Find the most recent interpolation for this day offset
-                    # Format: interpolation_YYYY-MM-DD_YYYY-MM-DD.png (today_forecast)
-                    target_files = [
-                        f for f in interpolation_files
-                        if f.endswith(f"_{day}d.png") or f"interpolation_{day}d" in f
-                    ]
+                    with open(local_path, 'rb') as img_file:
+                        import base64
+                        img_data = base64.b64encode(img_file.read()).decode('utf-8')
                     
-                    if target_files:
-                        # Get the most recent file
-                        latest_file = sorted(target_files)[-1]
-                        file_path = f"Resources/airquality/{latest_file}"
-                        
-                        # Download and return the image
-                        local_path = dataset_api.download(file_path, overwrite=True)
-                        
-                        with open(local_path, 'rb') as img_file:
-                            import base64
-                            img_data = base64.b64encode(img_file.read()).decode('utf-8')
-                        
-                        return {
-                            "statusCode": 200,
-                            "headers": {
-                                "Content-Type": "image/png",
-                                "Access-Control-Allow-Origin": "*"
-                            },
-                            "body": img_data,
-                            "isBase64Encoded": True
-                        }
-                    else:
-                        return {
-                            "statusCode": 404,
-                            "headers": {"Content-Type": "application/json"},
-                            "body": json.dumps({"error": f"No interpolation image found for day {day}"})
-                        }
-                except Exception as e:
+                    return {
+                        "statusCode": 200,
+                        "headers": {
+                            "Content-Type": "image/png",
+                            "Access-Control-Allow-Origin": "*",
+                            "Cache-Control": "public, max-age=300"
+                        },
+                        "body": img_data,
+                        "isBase64Encoded": True
+                    }
+                except Exception as download_err:
+                    # File doesn't exist or can't be downloaded
                     return {
                         "statusCode": 404,
-                        "headers": {"Content-Type": "application/json"},
-                        "body": json.dumps({"error": "Interpolation images not found in Hopsworks", "details": str(e)})
+                        "headers": {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        },
+                        "body": json.dumps({
+                            "error": f"Interpolation image not found for day {day}",
+                            "filename": filename,
+                            "details": str(download_err)
+                        })
                     }
             except Exception as e:
                 return {
                     "statusCode": 500,
-                    "headers": {"Content-Type": "application/json"},
-                    "body": json.dumps({"error": str(e)})
+                    "headers": {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    },
+                    "body": json.dumps({"error": "Failed to fetch interpolation", "details": str(e)})
                 }
         
         if "sensor" in params:
