@@ -1,3 +1,6 @@
+// Base path for interpolation images (served as static files)
+export const interpolationBase = '/interpolation/forecast_interpolation';
+
 // Fetch predictions from static file (committed by Hopsworks job)
 export async function fetchPredictions() {
   try {
