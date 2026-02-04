@@ -44,8 +44,8 @@ export function removeRasterLayer(map) {
 }
 
 export function buildRasterUrl(day, config) {
-  // config.interpolationBase is the static file path: /interpolation/forecast_interpolation
-  // Returns: /interpolation/forecast_interpolation_0d.png, /interpolation/forecast_interpolation_1d.png, etc.
+  // config.interpolationBase points to Hopsworks storage
+  // Returns: https://c.app.hopsworks.ai/p/{id}/fs/Resources/airquality/forecast_interpolation_0d.png
   return `${config.interpolationBase}_${day}d.png`;
 }
 
