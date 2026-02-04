@@ -604,12 +604,16 @@ video {
   bottom: 1rem;
 }
 
+.bottom-40 {
+  bottom: 10rem;
+}
+
 .left-0 {
   left: 0px;
 }
 
-.left-4 {
-  left: 1rem;
+.left-16 {
+  left: 4rem;
 }
 
 .right-0 {
@@ -622,10 +626,6 @@ video {
 
 .top-0 {
   top: 0px;
-}
-
-.top-32 {
-  top: 8rem;
 }
 
 .z-20 {
@@ -720,12 +720,6 @@ video {
 
 .gap-4 {
   gap: 1rem;
-}
-
-.space-x-4 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(1rem * var(--tw-space-x-reverse));
-  margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .space-y-1 > :not([hidden]) ~ :not([hidden]) {
