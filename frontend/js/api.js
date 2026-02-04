@@ -1,17 +1,11 @@
-// Fetch predictions and images from Hopsworks public storage (runtime)
-// Update PROJECT_ID with your Hopsworks project ID
-const HOPSWORKS_PROJECT_ID = '271255'; // Replace with actual project ID
-const HOPSWORKS_BASE = `https://c.app.hopsworks.ai/p/${HOPSWORKS_PROJECT_ID}/fs/Resources/airquality`;
-
-export const interpolationBase = `${HOPSWORKS_BASE}/forecast_interpolation`;
-
+// Fetch predictions from static file (committed by Hopsworks job)
 export async function fetchPredictions() {
   try {
-    const res = await fetch(`${HOPSWORKS_BASE}/predictions.json`);
+    const res = await fetch('/predictions.json');
     if (!res.ok) {
       console.warn(
-        'Predictions not available from Hopsworks.',
-        '\nMake sure notebook 4 batch job has uploaded predictions.json',
+        'Predictions not available.',
+        '\nMake sure notebook 4 batch job has run and committed predictions.json',
       );
       return [];
     }
