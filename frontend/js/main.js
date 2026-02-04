@@ -73,7 +73,20 @@ async function main() {
           }
         }
       }
-      // TODO: Implement marker loading from predictions
+      
+      // Load sensor markers from predictions
+      loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
+        openDetailsModal(sensorId, markerElement, map, state);
+      });
+      
+      // Add markers to map (initially hidden based on toggle state)
+      const showMarkers = ui.sensorToggle && ui.sensorToggle.dataset.active === 'true';
+      state.markers.forEach(marker => {
+        marker.addTo(map);
+        marker.getElement().style.display = showMarkers ? 'block' : 'none';
+      });
+      
+      console.log(`✅ Loaded ${state.markers.length} sensor markers`);
     } else {
       console.info('📍 No predictions available yet.');
       console.info('ℹ️  To enable the map overlay and sensors:');

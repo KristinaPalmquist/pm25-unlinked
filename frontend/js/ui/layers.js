@@ -19,9 +19,12 @@ export async function loadRaster(map, config, day, state) {
   await waitForStyle(map);
   removeRasterLayer(map);
 
+  const url = buildRasterUrl(day, config);
+  console.log(`Loading interpolation overlay: ${url}`);
+
   map.addSource(sourceId, {
     type: 'image',
-    url: buildRasterUrl(day, config),
+    url: url,
     coordinates: [
       [config.mapBounds[0], config.mapBounds[3]],
       [config.mapBounds[2], config.mapBounds[3]],
@@ -36,6 +39,8 @@ export async function loadRaster(map, config, day, state) {
     source: sourceId,
     paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
   });
+
+  console.log(`✅ Interpolation overlay added for day ${day}`);
 }
 
 export function removeRasterLayer(map) {

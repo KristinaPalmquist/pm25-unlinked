@@ -76,7 +76,24 @@ def clone_or_update_repo(username: str):
         if (parent / ".git").exists():
             # Check if it's one of our repos
             if parent.name in valid_repo_names or parent.name == "pm25":
-                print(f"💻 Already in git repository at {parent}")
+                print(f"💻 URL: {parent}")
+                
+                # Configure remote URL with credentials for push access (if GH_PAT is available)
+                gh_pat = os.environ.get("GH_PAT")
+                if gh_pat:
+                    import subprocess
+                    # Try to update remote URL for all valid repo names
+                    for repo_name in valid_repo_names:
+                        auth_url = f"https://{gh_pat}@github.com/{username}/{repo_name}.git"
+                        result = subprocess.run(
+                            ["git", "-C", str(parent), "remote", "set-url", "origin", auth_url],
+                            capture_output=True,
+                            text=True
+                        )
+                        if result.returncode == 0:
+                            print(f"   ✅ Configured git remote with authentication for {repo_name}")
+                            break
+                
                 return parent
     
     # 2. Check for existing cloned repo in current directory (for Hopsworks subsequent runs)
@@ -84,6 +101,15 @@ def clone_or_update_repo(username: str):
         repo_dir = Path(repo_name)
         if repo_dir.exists() and (repo_dir / ".git").exists():
             print(f"🔄 Repository '{repo_name}' exists at {repo_dir.absolute()}, pulling latest...")
+            
+            # Configure remote URL with credentials for push access (if GH_PAT is available)
+            gh_pat = os.environ.get("GH_PAT")
+            if gh_pat:
+                import subprocess
+                auth_url = f"https://{gh_pat}@github.com/{username}/{repo_name}.git"
+                subprocess.run(["git", "-C", str(repo_dir), "remote", "set-url", "origin", auth_url], check=False)
+                print(f"   Configured git remote with authentication")
+            
             os.system(f"git -C {repo_dir} pull")
             return repo_dir
     
@@ -91,7 +117,16 @@ def clone_or_update_repo(username: str):
     # Try to clone the first valid repo name
     repo_name = valid_repo_names[0]  # Use pm25-unlinked as default
     print(f"📥 Cloning repository '{repo_name}' from GitHub...")
-    url = f"https://github.com/{username}/{repo_name}.git"
+    
+    # Use authenticated URL if GH_PAT is available (for push access)
+    gh_pat = os.environ.get("GH_PAT")
+    if gh_pat:
+        url = f"https://{gh_pat}@github.com/{username}/{repo_name}.git"
+        print(f"   Using authenticated HTTPS URL")
+    else:
+        url = f"https://github.com/{username}/{repo_name}.git"
+        print(f"   Using public HTTPS URL (read-only)")
+    
     exit_code = os.system(f"git clone {url}")
     
     if exit_code != 0:
