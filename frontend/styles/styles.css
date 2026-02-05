@@ -27,6 +27,11 @@ body {
 
 /* Map container - explicitly set to bottom layer */
 #map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0 !important;
 }
 
@@ -34,6 +39,18 @@ body {
 #map canvas,
 #map .maplibregl-canvas-container {
   pointer-events: auto !important;
+}
+
+/* Force UI elements into higher compositing layers */
+#app-header,
+nav,
+#legend-area,
+section[aria-label='Day selection'],
+.maplibregl-ctrl {
+  position: relative;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* Ensure sensor markers are interactive */
