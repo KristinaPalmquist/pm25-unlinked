@@ -69,9 +69,12 @@ export function initControls(
     const newActive = !isActive;
     ui.overlayToggle.dataset.active = String(newActive);
 
+    // Toggle heatmap-active class on body for UI styling
     if (newActive) {
+      document.body.classList.add('heatmap-active');
       loadRaster(map, config, state.currentDay, state);
     } else {
+      document.body.classList.remove('heatmap-active');
       removeRasterLayer(map);
     }
   });

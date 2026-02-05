@@ -84,6 +84,9 @@ async function main() {
           ui.overlayToggle && ui.overlayToggle.dataset.active === 'true';
 
         if (overlayActive) {
+          // Add heatmap-active class for opaque UI backgrounds
+          document.body.classList.add('heatmap-active');
+
           try {
             await loadRaster(map, config, state.currentDay, state);
           } catch (err) {
@@ -92,6 +95,7 @@ async function main() {
             if (ui.overlayToggle) {
               ui.overlayToggle.dataset.active = 'false';
               ui.overlayToggle.disabled = true;
+              document.body.classList.remove('heatmap-active');
             }
           }
         }

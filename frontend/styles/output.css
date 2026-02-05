@@ -901,6 +901,36 @@ section {
   pointer-events: auto !important;
 }
 
+/* Make UI backgrounds opaque when heatmap is active */
+
+body.heatmap-active #app-header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.heatmap-active #legend-area {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.heatmap-active .day-button,
+body.heatmap-active #toggle-sensors,
+body.heatmap-active #toggle-overlay {
+  background-color: rgb(255, 255, 255) !important;
+}
+
+body.heatmap-active .day-button:hover,
+body.heatmap-active #toggle-sensors:hover,
+body.heatmap-active #toggle-overlay:hover {
+  background-color: rgb(52, 211, 153) !important;
+  /* emerald-400 */
+}
+
+body.heatmap-active .day-button[data-active='true'],
+body.heatmap-active #toggle-sensors[data-active='true'],
+body.heatmap-active #toggle-overlay[data-active='true'] {
+  background-color: rgb(16, 185, 129) !important;
+  /* emerald-500 */
+}
+
 /* Ensure sensor markers are interactive */
 
 .maplibregl-marker {
