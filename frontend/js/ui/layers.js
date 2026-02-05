@@ -33,14 +33,30 @@ export async function loadRaster(map, config, day, state) {
     ],
   });
 
-  map.addLayer({
-    id: layerId,
-    type: 'raster',
-    source: sourceId,
-    paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
-  });
+  // Find the first symbol layer to insert the raster BELOW markers
+  const layers = map.getStyle().layers;
+  let firstSymbolId;
+  for (const layer of layers) {
+    if (layer.type === 'symbol') {
+      firstSymbolId = layer.id;
+      break;
+    }
+  }
 
-  console.log(`✅ Interpolation overlay added for day ${day}`);
+  // Add raster layer BEFORE symbol layers (markers), so it appears below UI elements
+  map.addLayer(
+    {
+      id: layerId,
+      type: 'raster',
+      source: sourceId,
+      paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
+    },
+    firstSymbolId, // Insert before first symbol layer (if any)
+  );
+
+  console.log(
+    `✅ Interpolation overlay added for day ${day}${firstSymbolId ? ' (below symbols)' : ''}`,
+  );
 }
 
 export function removeRasterLayer(map) {
