@@ -36,19 +36,18 @@ body {
   pointer-events: auto !important;
 }
 
-/* Don't override MapLibre's positioning - just ensure z-index is low */
-#map canvas,
-#map .maplibregl-canvas-container,
-#map .maplibregl-canvas {
+/* Don't override MapLibre's internal canvas z-index */
+#map canvas {
   z-index: 1 !important;
 }
 
-/* Ensure UI elements are above map */
+/* Ensure UI elements have position so z-index applies */
 header,
 nav,
 aside,
 section {
-  z-index: 50;
+  position: relative;
+  z-index: 50 !important;
   pointer-events: auto !important;
 }
 
