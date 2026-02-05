@@ -76,7 +76,7 @@ export async function loadRaster(map, config, day, state) {
     `✅ Interpolation overlay layer added for day ${day}${firstSymbolId ? ' (below labels)' : ' (on top)'}`,
   );
   console.log(`   Layer ID: ${layerId}, Opacity: 0.75`);
-  
+
   // Debug: Check layer visibility
   setTimeout(() => {
     const layer = map.getLayer(layerId);
@@ -90,12 +90,19 @@ export async function loadRaster(map, config, day, state) {
       visibility: visibility || 'visible',
       layerType: layer?.type,
     });
-    
+
     // Check all layers to see position
     const allLayers = map.getStyle().layers;
-    const layerIndex = allLayers.findIndex(l => l.id === layerId);
-    console.log(`   Layer position: ${layerIndex} of ${allLayers.length} layers`);
-    console.log(`   Layers around it:`, allLayers.slice(Math.max(0, layerIndex-2), layerIndex+3).map(l => `${l.id} (${l.type})`));
+    const layerIndex = allLayers.findIndex((l) => l.id === layerId);
+    console.log(
+      `   Layer position: ${layerIndex} of ${allLayers.length} layers`,
+    );
+    console.log(
+      `   Layers around it:`,
+      allLayers
+        .slice(Math.max(0, layerIndex - 2), layerIndex + 3)
+        .map((l) => `${l.id} (${l.type})`),
+    );
   }, 500);
 }
 
@@ -152,6 +159,8 @@ export function ingestRow(row, state) {
   const sensorId = row.sensor_id || row.sensorId;
   const lat = parseFloat(row.latitude ?? row.lat);
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
+
+  console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
     console.warn('Skipping row - missing data:', {
