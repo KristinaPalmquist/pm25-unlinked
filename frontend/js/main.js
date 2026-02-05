@@ -43,25 +43,40 @@ async function main() {
   // Store predictions in state
   state.predictions = predictions;
 
-  // Initialize UI controls
-  initControls(map, config, {
-    loadRaster,
-    removeRasterLayer,
-    updateFocusPanelValue,
-    clearFocus,
-    openDetailsModal,
-    closeImageModal,
-    closeDetailsModal,
-    formatDayLabel,
-  });
-
   // Load initial raster and markers
   map.on('load', async () => {
     // Only try to load overlay if we have predictions (API is working)
     if (predictions && predictions.length > 0) {
-      console.log('Loading markers from predictions:', predictions.length);
-      console.log('Current day:', state.currentDay);
-      console.log('Forecast days available:', config.forecastDays);
+      // Load sensor markers from predictions FIRST
+      loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
+        openDetailsModal(sensorId, markerElement, map, state);
+      });
+
+      // Add markers to map and set initial visibility based on toggle state
+      const showMarkers =
+        ui.sensorToggle && ui.sensorToggle.dataset.active === 'true';
+
+      state.markers.forEach((marker) => {
+        marker.addTo(map);
+        const element = marker.getElement();
+        if (element) {
+          element.style.display = showMarkers ? 'block' : 'none';
+        }
+      });
+
+      console.log(`✅ Loaded ${state.markers.length} sensor markers`);
+
+      // NOW initialize UI controls after markers are loaded
+      initControls(map, config, {
+        loadRaster,
+        removeRasterLayer,
+        updateFocusPanelValue,
+        clearFocus,
+        openDetailsModal,
+        closeImageModal,
+        closeDetailsModal,
+        formatDayLabel,
+      });
 
       if (config.forecastDays && config.forecastDays.length > 0) {
         // Check if overlay toggle is active
@@ -70,7 +85,6 @@ async function main() {
 
         if (overlayActive) {
           try {
-            console.log('Attempting to load overlay for day', state.currentDay);
             await loadRaster(map, config, state.currentDay, state);
           } catch (err) {
             console.error('Could not load interpolation overlay:', err);
@@ -80,38 +94,8 @@ async function main() {
               ui.overlayToggle.disabled = true;
             }
           }
-        } else {
-          console.log('Overlay toggle is off, skipping initial overlay load');
         }
       }
-
-      // Load sensor markers from predictions
-      loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
-        openDetailsModal(sensorId, markerElement, map, state);
-      });
-
-      // Add markers to map and set initial visibility based on toggle state
-      const showMarkers =
-        ui.sensorToggle && ui.sensorToggle.dataset.active === 'true';
-
-      console.log(
-        'Sensor toggle initial state:',
-        ui.sensorToggle?.dataset.active,
-      );
-      console.log('Show markers:', showMarkers);
-
-      state.markers.forEach((marker) => {
-        marker.addTo(map);
-        const element = marker.getElement();
-        if (element) {
-          element.style.display = showMarkers ? 'block' : 'none';
-          console.log('Marker element display set to:', element.style.display);
-        } else {
-          console.warn('Marker element not found');
-        }
-      });
-
-      console.log(`✅ Loaded ${state.markers.length} sensor markers`);
     } else {
       console.info('📍 No predictions available yet.');
       console.info('ℹ️  To enable the map overlay and sensors:');
@@ -132,6 +116,18 @@ async function main() {
         ui.sensorToggle.dataset.active = 'false';
         ui.sensorToggle.disabled = true;
       }
+
+      // Initialize controls even without predictions (for day selector, etc.)
+      initControls(map, config, {
+        loadRaster,
+        removeRasterLayer,
+        updateFocusPanelValue,
+        clearFocus,
+        openDetailsModal,
+        closeImageModal,
+        closeDetailsModal,
+        formatDayLabel,
+      });
     }
   });
 

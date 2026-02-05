@@ -38,23 +38,16 @@ export function initControls(
     button.addEventListener('click', () => {
       const day = Number(button.dataset.day);
       state.currentDay = day;
-      console.log('Day button clicked:', day);
 
       // Update active state for all buttons
       ui.dayButtons.forEach((btn) => {
         const isActive = btn.dataset.day === String(day);
         btn.dataset.active = isActive ? 'true' : 'false';
-        console.log(
-          `Button day ${btn.dataset.day}: active=${btn.dataset.active}`,
-        );
       });
 
       // Only load raster if overlay is enabled
       if (ui.overlayToggle?.dataset.active === 'true') {
-        console.log('Loading raster for day', day);
         loadRaster(map, config, day, state);
-      } else {
-        console.log('Overlay is disabled, not loading raster');
       }
 
       if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
@@ -80,22 +73,11 @@ export function initControls(
     const newActive = !isActive;
     ui.sensorToggle.dataset.active = String(newActive);
 
-    console.log('Sensor toggle clicked. Was:', isActive, 'Now:', newActive);
-    console.log('Number of markers:', state.markers.length);
-
     // Toggle marker visibility by changing display style
-    state.markers.forEach((marker, index) => {
+    state.markers.forEach((marker) => {
       const element = marker.getElement();
       if (element) {
         element.style.display = newActive ? 'block' : 'none';
-        if (index === 0) {
-          console.log(
-            'First marker element display set to:',
-            element.style.display,
-          );
-        }
-      } else {
-        console.warn('Marker element not found for marker', index);
       }
     });
 
