@@ -124,10 +124,10 @@ export function waitForStyle(map) {
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
+  console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
+
   state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
   state.dayDates = deriveDayDates(rows);
-
-  console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
 
   state.markers.forEach((m) => m.remove());
   state.markers = [];
