@@ -15,13 +15,13 @@
       <!-- Header -->
       <header
         id="app-header"
-        class="absolute top-0 left-0 right-0 z-30 backdrop-blur-lg px-6 py-6 pb-16 text-4xl font-bold text-center text-gray-900"
+        class="absolute top-0 left-0 right-0 z-50 backdrop-blur-lg px-6 py-6 pb-16 text-4xl font-bold text-center text-gray-900"
        >
         AI Air Quality Forecast<span id="region-name"></span>
       </header>
 
       <!-- Toggle Controls -->
-      <nav class="absolute bottom-36 left-16 z-20 flex flex-col gap-3">
+      <nav class="absolute bottom-36 left-16 z-50 flex flex-col gap-3">
         <button
           id="toggle-sensors"
           class= "px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white"
@@ -44,7 +44,7 @@
       <!-- Legend -->
       <aside
         id="legend-area"
-        class="absolute bottom-24 right-4 z-20 bg-white/30 backdrop-blur-lg p-4 rounded-lg shadow-xl border border-white/35 text-gray-900"
+        class="absolute bottom-24 right-4 z-50 bg-white/30 backdrop-blur-lg p-4 rounded-lg shadow-xl border border-white/35 text-gray-900"
         aria-label="Air quality legend"
       >
         <h3 class="font-semibold mb-2">Air Quality Levels</h3>
@@ -70,12 +70,9 @@
 
       <!-- Day Selector -->
       <section
-        class="absolute bottom-4 left-0 right-0 z-20 flex flex-col items-center text-gray-900"
+        class="absolute bottom-4 left-0 right-0 z-50 flex flex-col items-center text-gray-900"
         aria-label="Day selection"
       >
-        <!-- <label class="mb-3 text-lg font-semibold bg-white/60 backdrop-blur-lg px-5 py-2 rounded-lg border border-white/35 shadow-lg">
-          Select Forecast Day for Heatmap
-        </label> -->
         <div class="flex gap-2">
           <button data-day="0" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white" data-active="true">
             Today
@@ -100,94 +97,6 @@
           </button>
         </div>
       </section>
-
-      <!-- <aside
-          class="flex w-96 flex-col gap-4 rounded-2xl border border-white/40 bg-white/60 p-4 text-sm backdrop-blur-lg"
-        >
-          <section class="flex flex-col gap-2">
-            <h2 class="text-base font-semibold">Map options</h2>
-            <label class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                id="toggle-sensors"
-                checked
-                class="h-4 w-4 rounded"
-              />
-              <span>Show sensors</span>
-            </label>
-            <label class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                id="toggle-overlay"
-                checked
-                class="h-4 w-4 rounded"
-              />
-              <span>Show air quality overlay</span>
-            </label>
-            <label class="flex flex-col gap-1 text-sm">
-              <span>Showing</span>
-              <select
-                id="forecast-dropdown"
-                class="w-full rounded-lg border border-white/40 bg-white/70 px-3 py-2 text-sm"
-              ></select>
-            </label>
-          </section>
-          <section>
-            <h2 class="mb-2 text-base font-semibold">
-              PM<sub>2.5</sub> concentrations
-            </h2>
-            <ul class="legend flex flex-col gap-1 text-sm">
-              <li><span class="color good"></span> 0-50 µg/m<sup>3</sup></li>
-              <li>
-                <span class="color moderate"></span> 50-100 µg/m<sup>3</sup>
-              </li>
-              <li>
-                <span class="color unhealthy"></span> 100-150 µg/m<sup>3</sup>
-              </li>
-              <li>
-                <span class="color very-unhealthy"></span> 150+ µg/m<sup>3</sup>
-              </li>
-            </ul>
-          </section>
-        </aside>
-
-        <aside
-          id="focus-panel"
-          style="display: none"
-          class="flex w-96 flex-col gap-3 rounded-2xl border border-white/40 bg-white/70 p-4 text-sm backdrop-blur-lg"
-        >
-          <div id="focus-name" class="text-base font-semibold">
-            Select a station
-          </div>
-          <p id="focus-meta" class="text-xs select-none -mt-1">
-            Lat -, Lon -, ID -
-          </p>
-          <div class="flex flex-col gap-3">
-            <div id="forecast-card" class="focus-image-card hidden">
-              <p class="text-xs font-semibold uppercase">Forecast plot</p>
-              <img
-                id="focus-forecast-thumb"
-                alt="Forecast preview"
-                class="focus-thumb"
-              />
-            </div>
-            <div id="hindcast-card" class="focus-image-card hidden">
-              <p class="text-xs font-semibold uppercase">Hindcast plot</p>
-              <img
-                id="focus-hindcast-thumb"
-                alt="Hindcast preview"
-                class="focus-thumb"
-              />
-            </div>
-          </div>
-          <button
-            id="focus-details-btn"
-            class="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-xs font-semibold uppercase tracking-wide"
-            disabled
-          >
-            View details
-          </button>
-        </aside> -->
       </div>
     </div>
 
