@@ -45,12 +45,23 @@ async function main() {
 
   // Load initial raster and markers
   map.on('load', async () => {
+    console.log('🗺️ Map load event fired');
+    console.log('Predictions array:', predictions);
+    console.log('Predictions length:', predictions?.length);
+    console.log('Predictions check:', predictions && predictions.length > 0);
+    
     // Only try to load overlay if we have predictions (API is working)
     if (predictions && predictions.length > 0) {
+      console.log('🔵 About to call loadCsvMarkers with', predictions.length, 'rows');
+      
       // Load sensor markers from predictions FIRST
       loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
         openDetailsModal(sensorId, markerElement, map, state);
       });
+      
+      console.log('🔵 After loadCsvMarkers call');
+      console.log('State.markers:', state.markers);
+      console.log('State.sensorData:', Object.keys(state.sensorData || {}).length, 'sensors');
 
       // Add markers to map and set initial visibility based on toggle state
       const showMarkers =
