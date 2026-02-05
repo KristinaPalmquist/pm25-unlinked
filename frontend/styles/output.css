@@ -890,7 +890,7 @@ body {
 }
 
 .maplibregl-control-container {
-  top: 40px;
+  top: 130px;
 }
 
 /* Ensure MapLibre controls are interactive */
