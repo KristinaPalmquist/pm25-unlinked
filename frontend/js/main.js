@@ -65,8 +65,9 @@ async function main() {
 
       if (config.forecastDays && config.forecastDays.length > 0) {
         // Check if overlay toggle is active
-        const overlayActive = ui.overlayToggle && ui.overlayToggle.dataset.active === 'true';
-        
+        const overlayActive =
+          ui.overlayToggle && ui.overlayToggle.dataset.active === 'true';
+
         if (overlayActive) {
           try {
             console.log('Attempting to load overlay for day', state.currentDay);
@@ -83,19 +84,33 @@ async function main() {
           console.log('Overlay toggle is off, skipping initial overlay load');
         }
       }
-      
+
       // Load sensor markers from predictions
       loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
         openDetailsModal(sensorId, markerElement, map, state);
       });
-      
-      // Add markers to map (initially hidden based on toggle state)
-      const showMarkers = ui.sensorToggle && ui.sensorToggle.dataset.active === 'true';
-      state.markers.forEach(marker => {
+
+      // Add markers to map and set initial visibility based on toggle state
+      const showMarkers =
+        ui.sensorToggle && ui.sensorToggle.dataset.active === 'true';
+
+      console.log(
+        'Sensor toggle initial state:',
+        ui.sensorToggle?.dataset.active,
+      );
+      console.log('Show markers:', showMarkers);
+
+      state.markers.forEach((marker) => {
         marker.addTo(map);
-        marker.getElement().style.display = showMarkers ? 'block' : 'none';
+        const element = marker.getElement();
+        if (element) {
+          element.style.display = showMarkers ? 'block' : 'none';
+          console.log('Marker element display set to:', element.style.display);
+        } else {
+          console.warn('Marker element not found');
+        }
       });
-      
+
       console.log(`✅ Loaded ${state.markers.length} sensor markers`);
     } else {
       console.info('📍 No predictions available yet.');

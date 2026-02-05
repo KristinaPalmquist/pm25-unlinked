@@ -80,7 +80,25 @@ export function initControls(
     const newActive = !isActive;
     ui.sensorToggle.dataset.active = String(newActive);
 
-    state.markers.forEach((m) => (newActive ? m.addTo(map) : m.remove()));
+    console.log('Sensor toggle clicked. Was:', isActive, 'Now:', newActive);
+    console.log('Number of markers:', state.markers.length);
+
+    // Toggle marker visibility by changing display style
+    state.markers.forEach((marker, index) => {
+      const element = marker.getElement();
+      if (element) {
+        element.style.display = newActive ? 'block' : 'none';
+        if (index === 0) {
+          console.log(
+            'First marker element display set to:',
+            element.style.display,
+          );
+        }
+      } else {
+        console.warn('Marker element not found for marker', index);
+      }
+    });
+
     if (!newActive) clearFocus();
   });
 
