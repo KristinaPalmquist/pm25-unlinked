@@ -33,11 +33,11 @@ export async function loadRaster(map, config, day, state) {
     ],
   });
 
-  // Get all layers - insert raster at index 0 (very bottom)
+  // Add raster layer on top of base map but below labels
+  // Find the first label or symbol layer to insert before it
   const layers = map.getStyle().layers;
-  const firstLayerId = layers.length > 0 ? layers[0].id : undefined;
+  const firstSymbolId = layers.find((layer) => layer.type === 'symbol')?.id;
 
-  // Add raster layer at the very bottom of the layer stack
   map.addLayer(
     {
       id: layerId,
@@ -45,11 +45,11 @@ export async function loadRaster(map, config, day, state) {
       source: sourceId,
       paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
     },
-    firstLayerId, // Insert before the first layer (bottom of stack)
+    firstSymbolId, // Insert before labels, or on top if no labels found
   );
 
   console.log(
-    `✅ Interpolation overlay added for day ${day} at bottom of layer stack`,
+    `✅ Interpolation overlay added for day ${day}${firstSymbolId ? ' (below labels)' : ' (on top)'}`,
   );
 }
 

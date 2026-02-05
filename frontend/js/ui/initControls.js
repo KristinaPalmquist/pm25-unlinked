@@ -39,15 +39,23 @@ export function initControls(
       const day = Number(button.dataset.day);
       state.currentDay = day;
 
+      console.log(`Day button clicked: Day ${day}`);
+
       // Update active state for all buttons
       ui.dayButtons.forEach((btn) => {
         const isActive = btn.dataset.day === String(day);
         btn.dataset.active = isActive ? 'true' : 'false';
+        console.log(`Button ${btn.dataset.day}: active=${btn.dataset.active}`);
       });
 
       // Only load raster if overlay is enabled
-      if (ui.overlayToggle?.dataset.active === 'true') {
+      const overlayEnabled = ui.overlayToggle?.dataset.active === 'true';
+      console.log(`Overlay enabled: ${overlayEnabled}`);
+
+      if (overlayEnabled) {
         loadRaster(map, config, day, state);
+      } else {
+        console.log(`Skipping raster load - overlay is disabled`);
       }
 
       if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
