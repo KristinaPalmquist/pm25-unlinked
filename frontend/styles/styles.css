@@ -53,15 +53,20 @@ body {
   pointer-events: auto !important;
 }
 
-.maplibregl-control-container {
-  top: 130px;
-  z-index: 5 !important;
+/* Position map controls below the header */
+.maplibregl-ctrl-top-right {
+  top: 140px !important;
 }
 
-/* Ensure MapLibre controls are interactive */
+.maplibregl-ctrl-top-left {
+  top: 140px !important;
+}
+
+/* Ensure MapLibre controls are interactive and above map */
 .maplibregl-control-container,
 .maplibregl-ctrl {
   pointer-events: auto;
+  z-index: 20 !important;
 }
 
 .legend .color {
