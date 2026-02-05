@@ -22,6 +22,24 @@ export async function loadRaster(map, config, day, state) {
   const url = buildRasterUrl(day, config);
   console.log(`Loading interpolation overlay: ${url}`);
 
+  // Add error handling for source loading
+  const handleSourceError = (e) => {
+    if (e.sourceId === sourceId) {
+      console.error(`❌ Failed to load raster image: ${url}`, e.error);
+      map.off('error', handleSourceError);
+    }
+  };
+
+  const handleSourceData = (e) => {
+    if (e.sourceId === sourceId && e.isSourceLoaded) {
+      console.log(`✅ Raster image loaded successfully: ${url}`);
+      map.off('sourcedata', handleSourceData);
+    }
+  };
+
+  map.on('error', handleSourceError);
+  map.on('sourcedata', handleSourceData);
+
   map.addSource(sourceId, {
     type: 'image',
     url: url,
@@ -49,8 +67,9 @@ export async function loadRaster(map, config, day, state) {
   );
 
   console.log(
-    `✅ Interpolation overlay added for day ${day}${firstSymbolId ? ' (below labels)' : ' (on top)'}`,
+    `✅ Interpolation overlay layer added for day ${day}${firstSymbolId ? ' (below labels)' : ' (on top)'}`,
   );
+  console.log(`   Layer ID: ${layerId}, Opacity: 0.75`);
 }
 
 export function removeRasterLayer(map) {
