@@ -877,11 +877,27 @@ body {
   width: 100%;
   height: 100%;
   z-index: 0 !important;
+  pointer-events: auto !important;
 }
 
-#map,
+/* Force all MapLibre canvases to stay below UI (z-index 1) */
+
 #map canvas,
-#map .maplibregl-canvas-container {
+#map .maplibregl-canvas-container,
+#map .maplibregl-canvas,
+.mapboxgl-canvas-container,
+.maplibregl-canvas-container {
+  z-index: 1 !important;
+  position: relative !important;
+}
+
+/* Ensure UI elements can be clicked through the canvas */
+
+header,
+nav,
+aside,
+section {
+  position: relative;
   pointer-events: auto !important;
 }
 
