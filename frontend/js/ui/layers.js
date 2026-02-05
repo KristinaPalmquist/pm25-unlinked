@@ -68,11 +68,21 @@ export function loadCsvMarkers(rows, state, onClick) {
   state.markers = [];
   state.sensorData = {};
 
+  console.log('loadCsvMarkers: Processing', rows.length, 'rows');
+  if (rows.length > 0) {
+    console.log('Sample row keys:', Object.keys(rows[0]));
+    console.log('Sample row:', rows[0]);
+  }
+
   rows.forEach((row) => ingestRow(row, state));
+
+  console.log('Unique sensors found:', Object.keys(state.sensorData).length);
 
   state.markers = Object.values(state.sensorData).map((entry) =>
     createMarker(entry, onClick),
   );
+
+  console.log('Markers created:', state.markers.length);
 }
 
 export function ingestRow(row, state) {
@@ -80,10 +90,21 @@ export function ingestRow(row, state) {
   const lat = parseFloat(row.latitude ?? row.lat);
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
 
-  if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) return;
+  if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
+    console.warn('Skipping row - missing data:', {
+      sensorId,
+      lat,
+      lon,
+      hasLatitude: 'latitude' in row,
+      hasLat: 'lat' in row,
+      hasLongitude: 'longitude' in row,
+      hasLon: 'lon' in row,
+    });
+    return;
+  }
 
   const street = row.street || row.location || '';
-  const city = row.city_y || row.city_x || '';
+  const city = row.city_y || row.city_x || row.city || '';
 
   if (!state.sensorData[sensorId]) {
     state.sensorData[sensorId] = {
