@@ -56,12 +56,12 @@ body {
 
 /* Position map controls below the header */
 .maplibregl-ctrl-top-right {
-  top: 130px !important;
+  top: 100px !important;
   right: 20px !important;
 }
 
 .maplibregl-ctrl-top-left {
-  top: 130px !important;
+  top: 100px !important;
   left: 20px !important;
 }
 
