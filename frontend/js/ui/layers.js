@@ -127,7 +127,14 @@ export function loadCsvMarkers(rows, state, onClick) {
   console.log('loadCsvMarkers: Processing', rows.length, 'rows');
   if (rows.length > 0) {
     console.log('Sample row keys:', Object.keys(rows[0]));
-    console.log('Sample row:', rows[0]);
+    console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
+    console.log('Checking fields:', {
+      sensor_id: rows[0].sensor_id,
+      latitude: rows[0].latitude,
+      longitude: rows[0].longitude,
+      hasLatitude: 'latitude' in rows[0],
+      hasLongitude: 'longitude' in rows[0],
+    });
   }
 
   rows.forEach((row) => ingestRow(row, state));
