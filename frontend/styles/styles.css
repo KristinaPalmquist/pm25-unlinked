@@ -32,22 +32,29 @@ body {
   width: 100%;
   height: 100%;
   z-index: 1;
+  pointer-events: none; /* Let clicks pass through to UI elements */
 }
 
-/* Ensure MapLibre canvas doesn't block UI elements */
-#map canvas {
-  position: absolute;
-  z-index: 0;
+/* Re-enable pointer events only for the actual map canvas */
+#map > .maplibregl-canvas-container,
+#map .maplibregl-canvas {
+  pointer-events: auto;
 }
 
-/* Ensure sensor markers appear above the heatmap */
+/* Ensure sensor markers are interactive */
 .maplibregl-marker {
   z-index: 10 !important;
+  pointer-events: auto !important;
 }
 
-/* Ensure MapLibre controls appear above canvas */
 .maplibregl-control-container {
-  z-index: 10;
+  top: 130px;
+}
+
+/* Ensure MapLibre controls are interactive */
+.maplibregl-control-container,
+.maplibregl-ctrl {
+  pointer-events: auto;
 }
 
 .legend .color {
@@ -108,7 +115,7 @@ body {
 } */
 
 #app-header {
-  pointer-events: auto;
+  pointer-events: auto !important;
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.4) 0%,
@@ -131,11 +138,11 @@ nav,
 section[aria-label='Day selection'],
 .day-button,
 button {
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 
 #legend-area {
-  pointer-events: auto;
+  pointer-events: auto !important;
   padding: 32px;
   margin: 8px;
   background: rgba(255, 255, 255, 0.3);
