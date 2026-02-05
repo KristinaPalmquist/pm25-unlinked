@@ -127,6 +127,8 @@ export function loadCsvMarkers(rows, state, onClick) {
   state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
   state.dayDates = deriveDayDates(rows);
 
+  console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
+
   state.markers.forEach((m) => m.remove());
   state.markers = [];
   state.sensorData = {};
@@ -159,8 +161,6 @@ export function ingestRow(row, state) {
   const sensorId = row.sensor_id || row.sensorId;
   const lat = parseFloat(row.latitude ?? row.lat);
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
-
-  console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
     console.warn('Skipping row - missing data:', {
