@@ -34,8 +34,19 @@ body {
   z-index: 1;
 }
 
+/* Ensure MapLibre canvas doesn't block UI elements */
+#map canvas {
+  position: absolute;
+  z-index: 0;
+}
+
 /* Ensure sensor markers appear above the heatmap */
 .maplibregl-marker {
+  z-index: 10 !important;
+}
+
+/* Ensure MapLibre controls appear above canvas */
+.maplibregl-control-container {
   z-index: 10;
 }
 
