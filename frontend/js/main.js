@@ -42,6 +42,8 @@ async function main() {
 
   // Load initial raster and markers
   map.on('load', async () => {
+    console.log('Map loaded state at script start:', map.loaded());
+
     console.log('🗺️ Map load event fired');
     console.log('Predictions array:', predictions);
     console.log('Predictions length:', predictions?.length);
