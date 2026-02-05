@@ -8,7 +8,7 @@
       rel="stylesheet"
       href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css"
     />
-    <link href="./styles/output.css" rel="stylesheet" >
+    <link href="./styles/output.css" rel="stylesheet" />
   </head>
   <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
@@ -19,7 +19,7 @@
       <header
         id="app-header"
         class="absolute top-0 left-0 right-0 z-50 backdrop-blur-lg px-6 py-6 pb-16 text-4xl font-bold text-center text-gray-900"
-       >
+      >
         AI Air Quality Forecast<span id="region-name"></span>
       </header>
 
@@ -27,7 +27,7 @@
       <nav class="absolute bottom-36 left-16 z-50 flex flex-col gap-3">
         <button
           id="toggle-sensors"
-          class= "px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white"
+          class="px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white"
           data-active="true"
         >
           Sensors
@@ -74,30 +74,51 @@
         aria-label="Day selection"
       >
         <div class="flex gap-2">
-          <button data-day="0" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white" data-active="true">
+          <button
+            data-day="0"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white"
+            data-active="true"
+          >
             Today
           </button>
-          <button data-day="1" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+          <button
+            data-day="1"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm"
+          >
             Tomorrow
           </button>
-          <button data-day="2" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+          <button
+            data-day="2"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm"
+          >
             <span class="weekday-label"></span>
           </button>
-          <button data-day="3" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+          <button
+            data-day="3"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm"
+          >
             <span class="weekday-label"></span>
           </button>
-          <button data-day="4" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+          <button
+            data-day="4"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm"
+          >
             <span class="weekday-label"></span>
           </button>
-          <button data-day="5" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+          <button
+            data-day="5"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm"
+          >
             <span class="weekday-label"></span>
           </button>
-          <button data-day="6" class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm">
+          <button
+            data-day="6"
+            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm"
+          >
             <span class="weekday-label"></span>
           </button>
         </div>
       </section>
-      </div>
     </div>
 
     <div id="image-modal" class="image-modal hidden">

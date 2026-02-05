@@ -41,18 +41,6 @@ body {
   pointer-events: auto !important;
 }
 
-/* Force UI elements into higher compositing layers */
-#app-header,
-nav,
-#legend-area,
-section[aria-label='Day selection'],
-.maplibregl-ctrl {
-  position: relative;
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
 /* Ensure sensor markers are interactive */
 .maplibregl-marker {
   z-index: 10 !important;
