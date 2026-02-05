@@ -588,6 +588,10 @@ video {
   }
 }
 
+.visible {
+  visibility: visible;
+}
+
 .static {
   position: static;
 }
@@ -880,24 +884,21 @@ body {
   pointer-events: auto !important;
 }
 
-/* Force all MapLibre canvases to stay below UI (z-index 1) */
+/* Don't override MapLibre's positioning - just ensure z-index is low */
 
 #map canvas,
 #map .maplibregl-canvas-container,
-#map .maplibregl-canvas,
-.mapboxgl-canvas-container,
-.maplibregl-canvas-container {
+#map .maplibregl-canvas {
   z-index: 1 !important;
-  position: relative !important;
 }
 
-/* Ensure UI elements can be clicked through the canvas */
+/* Ensure UI elements are above map */
 
 header,
 nav,
 aside,
 section {
-  position: relative;
+  z-index: 50;
   pointer-events: auto !important;
 }
 

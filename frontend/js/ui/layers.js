@@ -21,6 +21,12 @@ export async function loadRaster(map, config, day, state) {
 
   const url = buildRasterUrl(day, config);
   console.log(`Loading interpolation overlay: ${url}`);
+  console.log(`   Coordinates:`, {
+    topLeft: [config.mapBounds[0], config.mapBounds[3]],
+    topRight: [config.mapBounds[2], config.mapBounds[3]],
+    bottomRight: [config.mapBounds[2], config.mapBounds[1]],
+    bottomLeft: [config.mapBounds[0], config.mapBounds[1]],
+  });
 
   // Add error handling for source loading
   const handleSourceError = (e) => {
@@ -70,6 +76,27 @@ export async function loadRaster(map, config, day, state) {
     `✅ Interpolation overlay layer added for day ${day}${firstSymbolId ? ' (below labels)' : ' (on top)'}`,
   );
   console.log(`   Layer ID: ${layerId}, Opacity: 0.75`);
+  
+  // Debug: Check layer visibility
+  setTimeout(() => {
+    const layer = map.getLayer(layerId);
+    const source = map.getSource(sourceId);
+    const paint = map.getPaintProperty(layerId, 'raster-opacity');
+    const visibility = map.getLayoutProperty(layerId, 'visibility');
+    console.log(`🔍 Layer debug:`, {
+      layerExists: !!layer,
+      sourceExists: !!source,
+      opacity: paint,
+      visibility: visibility || 'visible',
+      layerType: layer?.type,
+    });
+    
+    // Check all layers to see position
+    const allLayers = map.getStyle().layers;
+    const layerIndex = allLayers.findIndex(l => l.id === layerId);
+    console.log(`   Layer position: ${layerIndex} of ${allLayers.length} layers`);
+    console.log(`   Layers around it:`, allLayers.slice(Math.max(0, layerIndex-2), layerIndex+3).map(l => `${l.id} (${l.type})`));
+  }, 500);
 }
 
 export function removeRasterLayer(map) {
