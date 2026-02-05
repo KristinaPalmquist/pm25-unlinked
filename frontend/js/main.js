@@ -60,17 +60,27 @@ async function main() {
     // Only try to load overlay if we have predictions (API is working)
     if (predictions && predictions.length > 0) {
       console.log('Loading markers from predictions:', predictions.length);
+      console.log('Current day:', state.currentDay);
+      console.log('Forecast days available:', config.forecastDays);
 
       if (config.forecastDays && config.forecastDays.length > 0) {
-        try {
-          await loadRaster(map, config, state.currentDay, state);
-        } catch (err) {
-          console.warn('Could not load interpolation overlay:', err.message);
-          // Disable overlay toggle since it won't work
-          if (ui.overlayToggle) {
-            ui.overlayToggle.dataset.active = 'false';
-            ui.overlayToggle.disabled = true;
+        // Check if overlay toggle is active
+        const overlayActive = ui.overlayToggle && ui.overlayToggle.dataset.active === 'true';
+        
+        if (overlayActive) {
+          try {
+            console.log('Attempting to load overlay for day', state.currentDay);
+            await loadRaster(map, config, state.currentDay, state);
+          } catch (err) {
+            console.error('Could not load interpolation overlay:', err);
+            // Disable overlay toggle since it won't work
+            if (ui.overlayToggle) {
+              ui.overlayToggle.dataset.active = 'false';
+              ui.overlayToggle.disabled = true;
+            }
           }
+        } else {
+          console.log('Overlay toggle is off, skipping initial overlay load');
         }
       }
       

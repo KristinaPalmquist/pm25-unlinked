@@ -38,13 +38,24 @@ export function initControls(
     button.addEventListener('click', () => {
       const day = Number(button.dataset.day);
       state.currentDay = day;
+      console.log('Day button clicked:', day);
 
       // Update active state for all buttons
       ui.dayButtons.forEach((btn) => {
-        btn.dataset.active = btn.dataset.day === String(day) ? 'true' : 'false';
+        const isActive = btn.dataset.day === String(day);
+        btn.dataset.active = isActive ? 'true' : 'false';
+        console.log(
+          `Button day ${btn.dataset.day}: active=${btn.dataset.active}`,
+        );
       });
 
-      loadRaster(map, config, day, state);
+      // Only load raster if overlay is enabled
+      if (ui.overlayToggle?.dataset.active === 'true') {
+        console.log('Loading raster for day', day);
+        loadRaster(map, config, day, state);
+      } else {
+        console.log('Overlay is disabled, not loading raster');
+      }
 
       if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
         updateFocusPanelValue(ui.focusDetailsBtn.dataset.sensorId);
