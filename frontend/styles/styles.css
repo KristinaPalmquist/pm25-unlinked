@@ -25,26 +25,14 @@ body {
   color: var(--text-primary);
 }
 
-/* Ensure proper stacking context for the main container */
-.relative {
-  isolation: isolate;
-}
-
+/* Map container - explicitly set to bottom layer */
 #map {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1 !important;
-  pointer-events: none !important; /* Make container transparent to clicks */
+  z-index: 0 !important;
 }
 
-/* Re-enable pointer events only for map canvas and interactive elements */
+#map,
 #map canvas,
-#map .maplibregl-canvas,
-#map .maplibregl-canvas-container,
-#map .maplibregl-control-container {
+#map .maplibregl-canvas-container {
   pointer-events: auto !important;
 }
 
@@ -65,11 +53,14 @@ body {
   left: 20px !important;
 }
 
-/* Ensure MapLibre controls are interactive and above map */
-.maplibregl-control-container,
+/* Ensure MapLibre controls are interactive and properly layered */
+.maplibregl-control-container {
+  pointer-events: none; /* Let clicks pass through the container */
+}
+
 .maplibregl-ctrl {
-  pointer-events: auto;
-  z-index: 20 !important;
+  pointer-events: auto; /* But buttons themselves are clickable */
+  z-index: 60 !important;
 }
 
 .legend .color {

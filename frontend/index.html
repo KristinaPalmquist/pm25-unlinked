@@ -12,6 +12,9 @@
   </head>
   <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
+      <!-- Main Map Area (lowest layer) -->
+      <div id="map" class="absolute inset-0"></div>
+
       <!-- Header -->
       <header
         id="app-header"
@@ -37,9 +40,6 @@
           Heatmap
         </button>
       </nav>
-
-      <!-- Main Map Area -->
-      <div id="map"></div>
 
       <!-- Legend -->
       <aside
