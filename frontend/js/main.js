@@ -87,7 +87,6 @@ async function main() {
 
           try {
             await loadRaster(map, config, state.currentDay, state);
-            console.log(`✅ Initial raster loaded for day ${state.currentDay}`);
           } catch (err) {
             console.error(
               `❌ Could not load interpolation overlay for day ${state.currentDay}:`,

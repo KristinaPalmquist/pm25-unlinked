@@ -77,7 +77,6 @@ export function initControls(
     } else {
       document.body.classList.remove('heatmap-active');
       removeRasterLayer(map);
-      console.log('Overlay disabled');
     }
   });
 
