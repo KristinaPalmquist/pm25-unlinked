@@ -120,18 +120,20 @@ export function ingestRow(row, state) {
 }
 
 export function buildPopupHtml(entry) {
-  const name = entry.street || entry.sensorId;
-  const location = entry.city ? `${entry.city}<br/>` : '';
+  const sensorId = `Sensor ID: ${entry.sensorId}`;
+  const street = entry.street ? `<br/>${entry.street}` : '';
+  const city = entry.city ? `<br/>${entry.city}` : '';
   const reading = Number.isFinite(entry.latestValue)
-    ? `PM2.5: ${entry.latestValue.toFixed(1)}`
-    : 'No recent value';
-  return `<strong>${name}</strong><br/>${location}${reading}`;
+    ? `<br/>PM2.5: ${entry.latestValue.toFixed(1)}`
+    : '<br/>No recent value';
+  return `<strong>${sensorId}</strong>${street}${city}${reading}`;
 }
 
 export function createMarker(entry, onClick) {
   const element = document.createElement('div');
   element.className = 'sensor-marker';
   element.style.background = getAQIColor(entry.latestValue ?? 0);
+  element.style.cursor = 'pointer';
   element.addEventListener('click', (e) => {
     e.stopPropagation();
     onClick(entry.sensorId, element);
