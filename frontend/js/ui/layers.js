@@ -124,31 +124,33 @@ export function waitForStyle(map) {
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
-  // IMMEDIATE ALERT TO VERIFY FUNCTION IS CALLED
-  alert('🟢 loadCsvMarkers CALLED - Check console for logs');
-  console.log('🟢 loadCsvMarkers ENTERED');
-  console.log(
-    '🟢 Received rows:',
-    Array.isArray(rows),
-    'length:',
-    rows?.length,
+  alert(
+    `FUNCTION CALLED: rows=${rows?.length}, state=${!!state}, onClick=${!!onClick}`,
   );
-  console.log('🟢 Received state:', typeof state, state);
-  console.log('🟢 Received onClick:', typeof onClick);
+
+  // Use window.console to bypass any overrides
+  window.console.log('🟢 loadCsvMarkers ENTERED');
 
   try {
-    // Validate inputs
+    // Validate inputs with alerts
     if (!Array.isArray(rows)) {
-      console.error('❌ rows is not an array:', typeof rows, rows);
+      alert('ERROR: rows is not an array!');
+      window.console.error('❌ rows is not an array:', typeof rows, rows);
       return;
     }
+    alert(`Rows is array: ${rows.length} items`);
 
     if (!state) {
-      console.error('❌ state is undefined or null');
+      alert('ERROR: state is null/undefined!');
+      window.console.error('❌ state is undefined or null');
       return;
     }
+    alert('State exists');
 
-    console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
+    window.console.log(
+      'Sample row full data:',
+      JSON.stringify(rows[0], null, 2),
+    );
 
     state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
     state.dayDates = deriveDayDates(rows);
@@ -157,7 +159,8 @@ export function loadCsvMarkers(rows, state, onClick) {
     state.markers = [];
     state.sensorData = {};
 
-    console.log('loadCsvMarkers: Processing', rows.length, 'rows');
+    alert(`About to process ${rows.length} rows`);
+    window.console.log('loadCsvMarkers: Processing', rows.length, 'rows');
     if (rows.length > 0) {
       console.log('Sample row keys:', Object.keys(rows[0]));
       console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
