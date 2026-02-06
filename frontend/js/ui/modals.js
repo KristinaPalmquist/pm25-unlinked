@@ -21,16 +21,28 @@ export function openDetailsModal(sensorId) {
   if (!entry || !entry.rows.length) return;
 
   if (ui.detailsModalTitle) {
-    const parts = [
-      entry.sensorId,
-      entry.street,
-      entry.city,
-      entry.lat,
-      entry.lon,
-    ].filter(Boolean);
-    ui.detailsModalTitle.textContent = parts.length
-      ? parts.join(', ')
-      : entry.sensorId;
+    const id = entry.sensorId;
+    const street = entry.street || '';
+    const city = entry.city || '';
+    const lat = entry.lat;
+    const lon = entry.lon;
+
+    ui.detailsModalTitle.innerHTML = `
+      <div class="font-semibold text-lg">Sensor id: ${id}</div>
+      <div class="text-sm text-gray-700">Location: ${street}, ${city}</div>
+      <div class="text-sm text-gray-700">Coordinates: latitude ${lat}, longitude ${lon}</div>
+    `;
+
+    // const parts = [
+    //   entry.sensorId,
+    //   entry.street,
+    //   entry.city,
+    //   entry.lat,
+    //   entry.lon,
+    // ].filter(Boolean);
+    // ui.detailsModalTitle.textContent = parts.length
+    //   ? parts.join(', ')
+    //   : entry.sensorId;
   }
 
   renderDetailsTable(entry);
