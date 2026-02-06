@@ -124,6 +124,8 @@ export function waitForStyle(map) {
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
+  // IMMEDIATE ALERT TO VERIFY FUNCTION IS CALLED
+  alert('🟢 loadCsvMarkers CALLED - Check console for logs');
   console.log('🟢 loadCsvMarkers ENTERED');
   console.log(
     '🟢 Received rows:',
