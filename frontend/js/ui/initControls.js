@@ -48,17 +48,10 @@ export function initControls(
       // Only load raster if overlay is enabled
       const overlayEnabled = ui.overlayToggle?.dataset.active === 'true';
 
-      if (overlayEnabled) {
-        try {
-          await loadRaster(map, config, day, state);
-          console.log(`✅ Loaded raster for day ${day}`);
-        } catch (err) {
-          console.error(`❌ Failed to load raster for day ${day}:`, err);
-        }
-      } else {
-        console.log(
-          `Skipping raster load for day ${day} - overlay is disabled`,
-        );
+      try {
+        await loadRaster(map, config, day, state);
+      } catch (err) {
+        console.error(`❌ Failed to load raster for day ${day}:`, err);
       }
 
       if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
@@ -77,12 +70,7 @@ export function initControls(
       document.body.classList.add('heatmap-active');
       try {
         await loadRaster(map, config, state.currentDay, state);
-        console.log(`✅ Overlay enabled for day ${state.currentDay}`);
       } catch (err) {
-        console.error(
-          `❌ Failed to enable overlay for day ${state.currentDay}:`,
-          err,
-        );
         // Keep the toggle on but remove the styling class since overlay didn't load
         document.body.classList.remove('heatmap-active');
       }

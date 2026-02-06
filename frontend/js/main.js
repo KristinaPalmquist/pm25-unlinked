@@ -45,12 +45,6 @@ async function main() {
   map.on('load', async () => {
     // Only try to load overlay if there are predictions (API is working)
     if (predictions && predictions.length > 0) {
-      console.log(
-        '🔵 About to call loadCsvMarkers with',
-        predictions.length,
-        'rows',
-      );
-
       // Load sensor markers from predictions
       loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
         openDetailsModal(sensorId, markerElement, map, state);
