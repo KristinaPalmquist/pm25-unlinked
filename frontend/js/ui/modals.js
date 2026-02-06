@@ -28,21 +28,9 @@ export function openDetailsModal(sensorId) {
     const lon = entry.lon;
 
     ui.detailsModalTitle.innerHTML = `
-      <div class="font-semibold text-lg">Sensor id: ${id}</div>
-      <div class="text-sm text-gray-700">Location: ${street}, ${city}</div>
-      <div class="text-sm text-gray-700">Coordinates: latitude ${lat}, longitude ${lon}</div>
+      <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${street}, ${city}</h3>
+      <p class="text-sm text-gray-700">Coordinates: latitude ${lat}, longitude ${lon}</p>
     `;
-
-    // const parts = [
-    //   entry.sensorId,
-    //   entry.street,
-    //   entry.city,
-    //   entry.lat,
-    //   entry.lon,
-    // ].filter(Boolean);
-    // ui.detailsModalTitle.textContent = parts.length
-    //   ? parts.join(', ')
-    //   : entry.sensorId;
   }
 
   renderDetailsTable(entry);
