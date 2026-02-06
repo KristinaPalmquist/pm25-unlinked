@@ -62,7 +62,7 @@ async function main() {
         }
       });
 
-      console.log(`✅ Sensor markers loaded: ${state.markers.length}`);
+      console.log(`✅ Sensor markers loaded:`, state.markers.length);
 
       // Initialize UI controls after markers are loaded
       initControls(map, config, {
