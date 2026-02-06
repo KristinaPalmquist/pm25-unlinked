@@ -35,27 +35,30 @@ export function initControls(
 
   // Initialize day buttons
   ui.dayButtons.forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
       const day = Number(button.dataset.day);
       state.currentDay = day;
-
-      console.log(`Day button clicked: Day ${day}`);
 
       // Update active state for all buttons
       ui.dayButtons.forEach((btn) => {
         const isActive = btn.dataset.day === String(day);
         btn.dataset.active = isActive ? 'true' : 'false';
-        console.log(`Button ${btn.dataset.day}: active=${btn.dataset.active}`);
       });
 
       // Only load raster if overlay is enabled
       const overlayEnabled = ui.overlayToggle?.dataset.active === 'true';
-      console.log(`Overlay enabled: ${overlayEnabled}`);
 
       if (overlayEnabled) {
-        loadRaster(map, config, day, state);
+        try {
+          await loadRaster(map, config, day, state);
+          console.log(`✅ Loaded raster for day ${day}`);
+        } catch (err) {
+          console.error(`❌ Failed to load raster for day ${day}:`, err);
+        }
       } else {
-        console.log(`Skipping raster load - overlay is disabled`);
+        console.log(
+          `Skipping raster load for day ${day} - overlay is disabled`,
+        );
       }
 
       if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
@@ -64,7 +67,7 @@ export function initControls(
     });
   });
 
-  ui.overlayToggle?.addEventListener('click', () => {
+  ui.overlayToggle?.addEventListener('click', async () => {
     const isActive = ui.overlayToggle.dataset.active === 'true';
     const newActive = !isActive;
     ui.overlayToggle.dataset.active = String(newActive);
@@ -72,10 +75,21 @@ export function initControls(
     // Toggle heatmap-active class on body for UI styling
     if (newActive) {
       document.body.classList.add('heatmap-active');
-      loadRaster(map, config, state.currentDay, state);
+      try {
+        await loadRaster(map, config, state.currentDay, state);
+        console.log(`✅ Overlay enabled for day ${state.currentDay}`);
+      } catch (err) {
+        console.error(
+          `❌ Failed to enable overlay for day ${state.currentDay}:`,
+          err,
+        );
+        // Keep the toggle on but remove the styling class since overlay didn't load
+        document.body.classList.remove('heatmap-active');
+      }
     } else {
       document.body.classList.remove('heatmap-active');
       removeRasterLayer(map);
+      console.log('Overlay disabled');
     }
   });
 

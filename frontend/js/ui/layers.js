@@ -20,6 +20,7 @@ export async function loadRaster(map, config, day, state) {
   removeRasterLayer(map);
 
   const url = buildRasterUrl(day, config);
+  console.log(`Loading raster for day ${day}: ${url}`);
 
   map.addSource(sourceId, {
     type: 'image',
@@ -46,6 +47,8 @@ export async function loadRaster(map, config, day, state) {
     },
     firstSymbolId, // Insert before labels, or on top if no labels found
   );
+
+  console.log(`✅ Raster layer added for day ${day}`);
 }
 
 export function removeRasterLayer(map) {

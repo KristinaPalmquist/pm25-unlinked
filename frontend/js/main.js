@@ -1,6 +1,7 @@
 import { fetchPredictions, interpolationBase } from './api.js';
 import { buildMapConfig } from './config/mapConfig.js';
 import {
+  buildRasterUrl,
   clearFocus,
   closeDetailsModal,
   closeImageModal,
@@ -92,14 +93,18 @@ async function main() {
 
           try {
             await loadRaster(map, config, state.currentDay, state);
+            console.log(`✅ Initial raster loaded for day ${state.currentDay}`);
           } catch (err) {
-            console.error('Could not load interpolation overlay:', err);
-            // Disable overlay toggle since it won't work
-            if (ui.overlayToggle) {
-              ui.overlayToggle.dataset.active = 'false';
-              ui.overlayToggle.disabled = true;
-              document.body.classList.remove('heatmap-active');
-            }
+            console.error(
+              `❌ Could not load interpolation overlay for day ${state.currentDay}:`,
+              err,
+            );
+            console.error(
+              '   Image URL:',
+              buildRasterUrl(state.currentDay, config),
+            );
+            // Don't disable the toggle - user might want to try other days
+            document.body.classList.remove('heatmap-active');
           }
         }
       }
