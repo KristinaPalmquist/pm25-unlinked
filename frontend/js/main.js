@@ -42,12 +42,7 @@ async function main() {
 
   // Load initial raster and markers
   map.on('load', async () => {
-    console.log('🗺️ Map load event fired');
-    console.log('Predictions array:', predictions);
-    console.log('Predictions length:', predictions?.length);
-    console.log('Predictions check:', predictions && predictions.length > 0);
-
-    // Only try to load overlay if we have predictions (API is working)
+    // Only try to load overlay if there are predictions (API is working)
     if (predictions && predictions.length > 0) {
       console.log(
         '🔵 About to call loadCsvMarkers with',
@@ -55,19 +50,10 @@ async function main() {
         'rows',
       );
 
-      // Load sensor markers from predictions FIRST
+      // Load sensor markers from predictions
       loadCsvMarkers(predictions, state, (sensorId, markerElement) => {
-        console.log(`Marker clicked: Sensor ID ${sensorId}`);
         openDetailsModal(sensorId, markerElement, map, state);
       });
-
-      console.log('🔵 After loadCsvMarkers call');
-      console.log('State.markers:', state.markers);
-      console.log(
-        'State.sensorData:',
-        Object.keys(state.sensorData || {}).length,
-        'sensors',
-      );
 
       // Add markers to map and set initial visibility based on toggle state
       const showMarkers =
@@ -83,7 +69,7 @@ async function main() {
 
       console.log(`✅ Loaded ${state.markers.length} sensor markers`);
 
-      // NOW initialize UI controls after markers are loaded
+      // Initialize UI controls after markers are loaded
       initControls(map, config, {
         loadRaster,
         removeRasterLayer,
@@ -138,7 +124,7 @@ async function main() {
         ui.sensorToggle.disabled = true;
       }
 
-      // Initialize controls even without predictions (for day selector, etc.)
+      // Initialize controls even without predictions
       initControls(map, config, {
         loadRaster,
         removeRasterLayer,

@@ -1056,34 +1056,20 @@ body.heatmap-active #toggle-overlay[data-active='true'] {
   border-radius: 50%;
   border: 1.5px solid #fff;
   display: block;
-  box-shadow: 0 2px 4px rgba(65, 38, 38, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   transition:
     width 0.3s ease,
     height 0.3s ease,
-    border 0.3s ease;
-}
-
-/* .sensor-marker.is-active {
-  width: 32px;
-  height: 32px;
-  border-color: rgba(255, 255, 255, 0.9);
-} */
-
-/* .sensor-marker {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  display: block;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  transition: width 0.3s ease, height 0.3s ease, border 0.3s ease;
+    border 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .sensor-marker.is-active {
-  width: 32px;
-  height: 32px;
-  border-color: rgba(255, 255, 255, 0.9);
-} */
+  width: 28px;
+  height: 28px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
 
 #app-header {
   pointer-events: auto !important;
