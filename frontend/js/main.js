@@ -62,7 +62,7 @@ async function main() {
         }
       });
 
-      console.log(`✅ Loaded ${state.markers.length} sensor markers`);
+      console.log(`✅ Sensor markers loaded: ${state.markers.length}`);
 
       // Initialize UI controls after markers are loaded
       initControls(map, config, {
@@ -136,8 +136,8 @@ async function main() {
     }
   });
 
-  console.log('PM2.5 Forecast Map initialized');
-  console.log('Predictions loaded:', predictions.length);
+  console.log('PM2.5 Forecast Map initialized!');
+  console.log('✅ Predictions loaded:', predictions.length);
 }
 
 main();
