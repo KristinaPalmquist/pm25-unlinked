@@ -134,6 +134,7 @@ export function createMarker(entry, onClick) {
   element.className = 'sensor-marker';
   element.style.background = getAQIColor(entry.latestValue ?? 0);
   element.style.cursor = 'pointer';
+  element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.2)';
   element.addEventListener('click', (e) => {
     e.stopPropagation();
     onClick(entry.sensorId, element);
