@@ -124,37 +124,72 @@ export function waitForStyle(map) {
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
-  console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
-
-  state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
-  state.dayDates = deriveDayDates(rows);
-
-  state.markers.forEach((m) => m.remove());
-  state.markers = [];
-  state.sensorData = {};
-
-  console.log('loadCsvMarkers: Processing', rows.length, 'rows');
-  if (rows.length > 0) {
-    console.log('Sample row keys:', Object.keys(rows[0]));
-    console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
-    console.log('Checking fields:', {
-      sensor_id: rows[0].sensor_id,
-      latitude: rows[0].latitude,
-      longitude: rows[0].longitude,
-      hasLatitude: 'latitude' in rows[0],
-      hasLongitude: 'longitude' in rows[0],
-    });
-  }
-
-  rows.forEach((row) => ingestRow(row, state));
-
-  console.log('Unique sensors found:', Object.keys(state.sensorData).length);
-
-  state.markers = Object.values(state.sensorData).map((entry) =>
-    createMarker(entry, onClick),
+  console.log('🟢 loadCsvMarkers ENTERED');
+  console.log(
+    '🟢 Received rows:',
+    Array.isArray(rows),
+    'length:',
+    rows?.length,
   );
+  console.log('🟢 Received state:', typeof state, state);
+  console.log('🟢 Received onClick:', typeof onClick);
 
-  console.log('Markers created:', state.markers.length);
+  try {
+    // Validate inputs
+    if (!Array.isArray(rows)) {
+      console.error('❌ rows is not an array:', typeof rows, rows);
+      return;
+    }
+
+    if (!state) {
+      console.error('❌ state is undefined or null');
+      return;
+    }
+
+    console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
+
+    state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
+    state.dayDates = deriveDayDates(rows);
+
+    state.markers.forEach((m) => m.remove());
+    state.markers = [];
+    state.sensorData = {};
+
+    console.log('loadCsvMarkers: Processing', rows.length, 'rows');
+    if (rows.length > 0) {
+      console.log('Sample row keys:', Object.keys(rows[0]));
+      console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
+      console.log('Checking fields:', {
+        sensor_id: rows[0].sensor_id,
+        latitude: rows[0].latitude,
+        longitude: rows[0].longitude,
+        hasLatitude: 'latitude' in rows[0],
+        hasLongitude: 'longitude' in rows[0],
+      });
+    }
+
+    console.log('🟡 About to process rows with ingestRow');
+    rows.forEach((row, index) => {
+      try {
+        ingestRow(row, state);
+      } catch (err) {
+        console.error(`❌ Error in ingestRow at index ${index}:`, err);
+      }
+    });
+    console.log('🟡 Finished processing rows');
+
+    console.log('Unique sensors found:', Object.keys(state.sensorData).length);
+
+    state.markers = Object.values(state.sensorData).map((entry) =>
+      createMarker(entry, onClick),
+    );
+
+    console.log('Markers created:', state.markers.length);
+    console.log('🟢 loadCsvMarkers COMPLETED SUCCESSFULLY');
+  } catch (error) {
+    console.error('❌ Error in loadCsvMarkers:', error);
+    console.error('❌ Stack:', error.stack);
+  }
 }
 
 export function ingestRow(row, state) {
@@ -163,14 +198,20 @@ export function ingestRow(row, state) {
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
-    console.warn('Skipping row - missing data:', {
+    console.warn('⚠️ Skipping row - missing data:', {
       sensorId,
       lat,
       lon,
+      rawLatitude: row.latitude,
+      rawLat: row.lat,
+      rawLongitude: row.longitude,
+      rawLon: row.lon,
+      rawLng: row.lng,
       hasLatitude: 'latitude' in row,
       hasLat: 'lat' in row,
       hasLongitude: 'longitude' in row,
       hasLon: 'lon' in row,
+      allKeys: Object.keys(row).join(', '),
     });
     return;
   }
