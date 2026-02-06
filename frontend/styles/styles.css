@@ -142,6 +142,12 @@ body.heatmap-active #toggle-overlay[data-active='true'] {
 .maplibregl-marker {
   z-index: 10 !important;
   pointer-events: auto !important;
+  box-shadow: none !important;
+}
+
+/* Remove any shadow from the marker's default anchor element */
+.maplibregl-marker .maplibregl-marker-anchor-center {
+  box-shadow: none !important;
 }
 
 /* Position map controls below the header */
@@ -193,8 +199,14 @@ body.heatmap-active #toggle-overlay[data-active='true'] {
   border-radius: 50%;
   border: 1.5px solid #fff;
   display: block;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
   transition: box-shadow 0.2s ease;
+  outline: none !important;
+}
+
+.sensor-marker:focus,
+.sensor-marker:active {
+  outline: none !important;
 }
 
 .sensor-marker.is-active {
