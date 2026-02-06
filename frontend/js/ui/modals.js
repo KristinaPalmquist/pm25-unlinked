@@ -29,7 +29,7 @@ export function openDetailsModal(sensorId) {
 
     ui.detailsModalTitle.innerHTML = `
       <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${street}, ${city}</h3>
-      <p class="text-sm text-gray-700">Coordinates: latitude ${lat}, longitude ${lon}</p>
+      <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude ${lon}</p>
     `;
   }
 
