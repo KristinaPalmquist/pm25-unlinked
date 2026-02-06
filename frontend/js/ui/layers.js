@@ -20,31 +20,6 @@ export async function loadRaster(map, config, day, state) {
   removeRasterLayer(map);
 
   const url = buildRasterUrl(day, config);
-  console.log(`Loading interpolation overlay: ${url}`);
-  console.log(`   Coordinates:`, {
-    topLeft: [config.mapBounds[0], config.mapBounds[3]],
-    topRight: [config.mapBounds[2], config.mapBounds[3]],
-    bottomRight: [config.mapBounds[2], config.mapBounds[1]],
-    bottomLeft: [config.mapBounds[0], config.mapBounds[1]],
-  });
-
-  // Add error handling for source loading
-  const handleSourceError = (e) => {
-    if (e.sourceId === sourceId) {
-      console.error(`❌ Failed to load raster image: ${url}`, e.error);
-      map.off('error', handleSourceError);
-    }
-  };
-
-  const handleSourceData = (e) => {
-    if (e.sourceId === sourceId && e.isSourceLoaded) {
-      console.log(`✅ Raster image loaded successfully: ${url}`);
-      map.off('sourcedata', handleSourceData);
-    }
-  };
-
-  map.on('error', handleSourceError);
-  map.on('sourcedata', handleSourceData);
 
   map.addSource(sourceId, {
     type: 'image',
@@ -71,39 +46,6 @@ export async function loadRaster(map, config, day, state) {
     },
     firstSymbolId, // Insert before labels, or on top if no labels found
   );
-
-  console.log(
-    `✅ Interpolation overlay layer added for day ${day}${firstSymbolId ? ' (below labels)' : ' (on top)'}`,
-  );
-  console.log(`   Layer ID: ${layerId}, Opacity: 0.75`);
-
-  // Debug: Check layer visibility
-  setTimeout(() => {
-    const layer = map.getLayer(layerId);
-    const source = map.getSource(sourceId);
-    const paint = map.getPaintProperty(layerId, 'raster-opacity');
-    const visibility = map.getLayoutProperty(layerId, 'visibility');
-    console.log(`🔍 Layer debug:`, {
-      layerExists: !!layer,
-      sourceExists: !!source,
-      opacity: paint,
-      visibility: visibility || 'visible',
-      layerType: layer?.type,
-    });
-
-    // Check all layers to see position
-    const allLayers = map.getStyle().layers;
-    const layerIndex = allLayers.findIndex((l) => l.id === layerId);
-    console.log(
-      `   Layer position: ${layerIndex} of ${allLayers.length} layers`,
-    );
-    console.log(
-      `   Layers around it:`,
-      allLayers
-        .slice(Math.max(0, layerIndex - 2), layerIndex + 3)
-        .map((l) => `${l.id} (${l.type})`),
-    );
-  }, 500);
 }
 
 export function removeRasterLayer(map) {
@@ -124,83 +66,26 @@ export function waitForStyle(map) {
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
-  // Create debug output element
-  const debugDiv = document.createElement('div');
-  debugDiv.id = 'loadCsvMarkers-debug';
-  debugDiv.style.cssText =
-    'position:fixed;top:10px;right:10px;background:black;color:lime;padding:10px;font-family:monospace;font-size:12px;max-width:400px;max-height:600px;overflow:auto;z-index:99999;';
-  document.body.appendChild(debugDiv);
+  state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
+  state.dayDates = deriveDayDates(rows);
 
-  function log(msg) {
-    debugDiv.innerHTML += msg + '<br>';
-  }
+  state.markers.forEach((m) => m.remove());
+  state.markers = [];
+  state.sensorData = {};
 
-  log('🟢 loadCsvMarkers ENTERED');
-  log(`Rows: ${rows?.length}, State: ${!!state}, onClick: ${!!onClick}`);
+  rows.forEach((row) => ingestRow(row, state));
 
-  try {
-    if (!Array.isArray(rows)) {
-      log('❌ ERROR: rows is not an array');
-      return;
-    }
-    log(`✅ Rows is array with ${rows.length} items`);
-
-    if (!state) {
-      log('❌ ERROR: state is null/undefined');
-      return;
-    }
-    log('✅ State exists');
-
-    log(`Sample row keys: ${Object.keys(rows[0]).join(', ')}`);
-    log(`sensor_id: ${rows[0].sensor_id}`);
-    log(`latitude: ${rows[0].latitude}`);
-    log(`longitude: ${rows[0].longitude}`);
-
-    state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
-    state.dayDates = deriveDayDates(rows);
-
-    state.markers.forEach((m) => m.remove());
-    state.markers = [];
-    state.sensorData = {};
-
-    log(`Processing ${rows.length} rows...`);
-    rows.forEach((row, index) => {
-      try {
-        ingestRow(row, state);
-        if (index === 0) log(`✅ First row ingested`);
-      } catch (err) {
-        log(`❌ Error at row ${index}: ${err.message}`);
-      }
-    });
-    log(`Processed all rows`);
-
-    log(`Unique sensors found: ${Object.keys(state.sensorData).length}`);
-
-    state.markers = Object.values(state.sensorData).map((entry) =>
-      createMarker(entry, onClick),
-    );
-
-    log(`Markers created: ${state.markers.length}`);
-    log('🟢 COMPLETED SUCCESSFULLY');
-  } catch (error) {
-    log(`❌ FATAL ERROR: ${error.message}`);
-    log(`Stack: ${error.stack}`);
-  }
+  state.markers = Object.values(state.sensorData).map((entry) =>
+    createMarker(entry, onClick),
+  );
 }
 
 export function ingestRow(row, state) {
-  const debugDiv = document.getElementById('loadCsvMarkers-debug');
-  function log(msg) {
-    if (debugDiv) debugDiv.innerHTML += msg + '<br>';
-  }
-
   const sensorId = row.sensor_id || row.sensorId;
   const lat = parseFloat(row.latitude ?? row.lat);
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
-    log(`⚠️ SKIP: sensorId=${sensorId}, lat=${lat}, lon=${lon}`);
-    log(`   Keys: ${Object.keys(row).slice(0, 5).join(', ')}...`);
     return;
   }
 
