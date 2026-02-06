@@ -57,7 +57,34 @@ body.heatmap-active #app-header {
 }
 
 body.heatmap-active #legend-area {
-  background-color: rgba(221, 221, 221, 0.95) !important;
+  /* background-color: rgba(221, 221, 221, 0.95) !important; */
+
+  pointer-events: auto !important;
+  padding: 32px;
+  margin: 8px;
+
+  /* 1. Color gradient: white center → soft gray edges */
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    /* white center */ rgba(240, 240, 240, 0.95) 60%,
+    /* light gray mid-zone */ rgba(230, 230, 230, 0.85) 80%
+      /* slightly darker gray near fade-out */
+  );
+
+  /* 2. Fade-out mask: visible center → transparent edges */
+  -webkit-mask-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 1) 70%,
+    /* fully visible center */ rgba(0, 0, 0, 0) 100% /* fade to transparent */
+  );
+  mask-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 1) 70%,
+    rgba(0, 0, 0, 0) 100%
+  );
+
+  backdrop-filter: blur(16px);
 }
 
 body.heatmap-active .day-button,
