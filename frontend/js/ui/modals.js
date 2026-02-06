@@ -27,8 +27,13 @@ export function openDetailsModal(sensorId) {
     const lat = entry.lat;
     const lon = entry.lon;
 
+    function capitalize(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
     ui.detailsModalTitle.innerHTML = `
-      <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${street}, ${city}</h3>
+      <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${capitalize(street)}, ${capitalize(city)}</h3>
       <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude ${lon}</p>
     `;
   }
