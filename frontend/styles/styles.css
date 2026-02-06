@@ -200,11 +200,11 @@ body.heatmap-active #toggle-overlay[data-active='true'] {
     border 0.3s ease;
 }
 
-.sensor-marker.is-active {
+/* .sensor-marker.is-active {
   width: 32px;
   height: 32px;
   border-color: rgba(255, 255, 255, 0.9);
-}
+} */
 
 /* .sensor-marker {
   width: 20px;

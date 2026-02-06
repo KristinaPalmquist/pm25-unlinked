@@ -588,10 +588,6 @@ video {
   }
 }
 
-.visible {
-  visibility: visible;
-}
-
 .static {
   position: static;
 }
@@ -810,6 +806,11 @@ video {
   line-height: 1.5rem;
 }
 
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -821,6 +822,11 @@ video {
 
 .font-semibold {
   font-weight: 600;
+}
+
+.text-gray-700 {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity, 1));
 }
 
 .text-gray-900 {
@@ -1057,11 +1063,11 @@ body.heatmap-active #toggle-overlay[data-active='true'] {
     border 0.3s ease;
 }
 
-.sensor-marker.is-active {
+/* .sensor-marker.is-active {
   width: 32px;
   height: 32px;
   border-color: rgba(255, 255, 255, 0.9);
-}
+} */
 
 /* .sensor-marker {
   width: 20px;
