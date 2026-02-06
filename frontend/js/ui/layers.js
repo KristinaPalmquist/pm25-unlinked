@@ -124,33 +124,37 @@ export function waitForStyle(map) {
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
-  alert(
-    `FUNCTION CALLED: rows=${rows?.length}, state=${!!state}, onClick=${!!onClick}`,
-  );
+  // Create debug output element
+  const debugDiv = document.createElement('div');
+  debugDiv.id = 'loadCsvMarkers-debug';
+  debugDiv.style.cssText =
+    'position:fixed;top:10px;right:10px;background:black;color:lime;padding:10px;font-family:monospace;font-size:12px;max-width:400px;max-height:600px;overflow:auto;z-index:99999;';
+  document.body.appendChild(debugDiv);
 
-  // Use window.console to bypass any overrides
-  window.console.log('🟢 loadCsvMarkers ENTERED');
+  function log(msg) {
+    debugDiv.innerHTML += msg + '<br>';
+  }
+
+  log('🟢 loadCsvMarkers ENTERED');
+  log(`Rows: ${rows?.length}, State: ${!!state}, onClick: ${!!onClick}`);
 
   try {
-    // Validate inputs with alerts
     if (!Array.isArray(rows)) {
-      alert('ERROR: rows is not an array!');
-      window.console.error('❌ rows is not an array:', typeof rows, rows);
+      log('❌ ERROR: rows is not an array');
       return;
     }
-    alert(`Rows is array: ${rows.length} items`);
+    log(`✅ Rows is array with ${rows.length} items`);
 
     if (!state) {
-      alert('ERROR: state is null/undefined!');
-      window.console.error('❌ state is undefined or null');
+      log('❌ ERROR: state is null/undefined');
       return;
     }
-    alert('State exists');
+    log('✅ State exists');
 
-    window.console.log(
-      'Sample row full data:',
-      JSON.stringify(rows[0], null, 2),
-    );
+    log(`Sample row keys: ${Object.keys(rows[0]).join(', ')}`);
+    log(`sensor_id: ${rows[0].sensor_id}`);
+    log(`latitude: ${rows[0].latitude}`);
+    log(`longitude: ${rows[0].longitude}`);
 
     state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
     state.dayDates = deriveDayDates(rows);
@@ -159,65 +163,44 @@ export function loadCsvMarkers(rows, state, onClick) {
     state.markers = [];
     state.sensorData = {};
 
-    alert(`About to process ${rows.length} rows`);
-    window.console.log('loadCsvMarkers: Processing', rows.length, 'rows');
-    if (rows.length > 0) {
-      console.log('Sample row keys:', Object.keys(rows[0]));
-      console.log('Sample row full data:', JSON.stringify(rows[0], null, 2));
-      console.log('Checking fields:', {
-        sensor_id: rows[0].sensor_id,
-        latitude: rows[0].latitude,
-        longitude: rows[0].longitude,
-        hasLatitude: 'latitude' in rows[0],
-        hasLongitude: 'longitude' in rows[0],
-      });
-    }
-
-    console.log('🟡 About to process rows with ingestRow');
+    log(`Processing ${rows.length} rows...`);
     rows.forEach((row, index) => {
       try {
         ingestRow(row, state);
+        if (index === 0) log(`✅ First row ingested`);
       } catch (err) {
-        console.error(`❌ Error in ingestRow at index ${index}:`, err);
+        log(`❌ Error at row ${index}: ${err.message}`);
       }
     });
-    console.log('🟡 Finished processing rows');
+    log(`Processed all rows`);
 
-    console.log('Unique sensors found:', Object.keys(state.sensorData).length);
+    log(`Unique sensors found: ${Object.keys(state.sensorData).length}`);
 
     state.markers = Object.values(state.sensorData).map((entry) =>
       createMarker(entry, onClick),
     );
 
-    console.log('Markers created:', state.markers.length);
-    console.log('🟢 loadCsvMarkers COMPLETED SUCCESSFULLY');
+    log(`Markers created: ${state.markers.length}`);
+    log('🟢 COMPLETED SUCCESSFULLY');
   } catch (error) {
-    console.error('❌ Error in loadCsvMarkers:', error);
-    console.error('❌ Stack:', error.stack);
+    log(`❌ FATAL ERROR: ${error.message}`);
+    log(`Stack: ${error.stack}`);
   }
 }
 
 export function ingestRow(row, state) {
+  const debugDiv = document.getElementById('loadCsvMarkers-debug');
+  function log(msg) {
+    if (debugDiv) debugDiv.innerHTML += msg + '<br>';
+  }
+
   const sensorId = row.sensor_id || row.sensorId;
   const lat = parseFloat(row.latitude ?? row.lat);
   const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
-    console.warn('⚠️ Skipping row - missing data:', {
-      sensorId,
-      lat,
-      lon,
-      rawLatitude: row.latitude,
-      rawLat: row.lat,
-      rawLongitude: row.longitude,
-      rawLon: row.lon,
-      rawLng: row.lng,
-      hasLatitude: 'latitude' in row,
-      hasLat: 'lat' in row,
-      hasLongitude: 'longitude' in row,
-      hasLon: 'lon' in row,
-      allKeys: Object.keys(row).join(', '),
-    });
+    log(`⚠️ SKIP: sensorId=${sensorId}, lat=${lat}, lon=${lon}`);
+    log(`   Keys: ${Object.keys(row).slice(0, 5).join(', ')}...`);
     return;
   }
 
