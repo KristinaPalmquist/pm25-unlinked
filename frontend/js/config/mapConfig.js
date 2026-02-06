@@ -22,8 +22,15 @@ export function buildMapConfig(gridBounds, interpolationBase) {
 }
 
 // configuration constants
-const AQI_COLORS = ['#00e400', '#ffff00', '#ff7e00', '#ff0000'];
-const AQI_THRESHOLDS = [50, 100, 150];
+const AQI_COLORS = [
+  '#00e400',
+  '#ffff00',
+  '#ff7e00',
+  '#ff0000',
+  '#8f3f97',
+  '#7e0023',
+];
+const AQI_THRESHOLDS = [50, 100, 150, 200, 300];
 
 // data processing constants
 export const HIDDEN_COLUMNS = new Set([
