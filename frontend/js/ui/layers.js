@@ -20,7 +20,8 @@ export async function loadRaster(map, config, day, state) {
   removeRasterLayer(map);
 
   const url = buildRasterUrl(day, config);
-  console.log(`Loading raster for day ${day}: ${url}`);
+  console.log(`🗺️  Loading raster for day ${day}`);
+  console.log(`   URL: ${url}`);
 
   map.addSource(sourceId, {
     type: 'image',
@@ -31,6 +32,15 @@ export async function loadRaster(map, config, day, state) {
       [config.mapBounds[2], config.mapBounds[1]],
       [config.mapBounds[0], config.mapBounds[1]],
     ],
+  });
+
+  // Listen for source data events to detect load failures
+  map.once('error', (e) => {
+    if (e.sourceId === sourceId) {
+      console.error(`❌ Failed to load raster image for day ${day}`);
+      console.error(`   URL: ${url}`);
+      console.error(`   Error:`, e.error);
+    }
   });
 
   // Add raster layer on top of base map but below labels
