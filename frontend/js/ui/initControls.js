@@ -14,6 +14,11 @@ export function initControls(
     formatDayLabel,
   },
 ) {
+  console.log(`🎮 Initializing controls...`);
+  console.log(`   Day buttons found: ${ui.dayButtons.length}`);
+  console.log(`   Overlay toggle: ${ui.overlayToggle ? 'found' : 'NOT FOUND'}`);
+  console.log(`   Overlay active: ${ui.overlayToggle?.dataset.active}`);
+
   // Set weekday labels dynamically
   const today = new Date();
   const weekdays = [
@@ -38,6 +43,8 @@ export function initControls(
     button.addEventListener('click', async () => {
       const day = Number(button.dataset.day);
       state.currentDay = day;
+
+      console.log(`🔘 Day button clicked: ${day}`);
 
       // Update active state for all buttons
       ui.dayButtons.forEach((btn) => {
