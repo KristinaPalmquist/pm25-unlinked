@@ -2,6 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
+import numpy as np
+import matplotlib.colors as mcolors
+from scipy.spatial.distance import cdist
+from datetime import datetime
 
 
 
@@ -52,3 +56,141 @@ def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_pat
     # # Save the figure, overwriting any existing file with the same name
     plt.savefig(file_path)
     return fig
+
+
+def idw_interpolation(points, values, grid_points, lon_mesh, power=2):
+    """
+    Inverse Distance Weighting (IDW) interpolation.
+    
+    Args:
+        points: Array of known point coordinates (lon, lat)
+        values: Array of known PM2.5 values at those points
+        grid_points: Array of grid point coordinates to interpolate
+        lon_mesh: Longitude mesh grid for reshaping
+        power: IDW power parameter (default 2)
+    
+    Returns:
+        Interpolated values reshaped to match grid
+    """
+    # Compute distances between grid points and known data points 
+    distances = cdist(grid_points, points)
+    # Replace 0 with a small value to avoid division by zero
+    distances = np.where(distances == 0, 1e-10, distances)
+    # Compute weights based on inverse distance
+    weights = 1.0 / (distances ** power)
+    # Sum of weights for normalization
+    weights_sum = np.sum(weights, axis=1)
+    # Compute interpolated values - weighted average of known values for each grid point
+    interpolated = np.sum(weights * values, axis=1) / weights_sum
+    # Reshape to match grid shape
+    return interpolated.reshape(lon_mesh.shape)
+
+
+def plot_pm25_idw_heatmap(
+    predictions: pd.DataFrame,
+    sensor_locations: dict,
+    forecast_date: datetime,
+    path: str,
+    grid_bounds: tuple,
+    today: datetime.date,
+    grid_resolution=800,
+    power=2,
+):
+    """
+    Generate PM2.5 heatmap using IDW interpolation.
+    
+    Args:
+        predictions: DataFrame with date, sensor_id, and PM2.5 columns
+        sensor_locations: Dict mapping sensor_id to {longitude, latitude, city, street}
+        forecast_date: Date to generate heatmap for
+        path: Output file path for PNG
+        grid_bounds: Tuple of (min_lon, min_lat, max_lon, max_lat)
+        today: Today's date (for determining if this is day 0)
+        grid_resolution: Grid resolution for interpolation
+        power: IDW power parameter
+    """
+    df_day = predictions[predictions["date"] == forecast_date].copy()
+
+    # Build sensor coordinates and PM2.5 values
+    sensor_coords_list = []
+    pm25_values_list = []
+    
+    # EXPLICIT: Use actual measurements for today (day 0), predictions for future days
+    is_today = forecast_date.date() == today
+    
+    if is_today:
+        # Day 0: Use real sensor measurements (pm25 column)
+        pm25_column = "pm25"
+    else:
+        # Days 1-6: Use model predictions (predicted_pm25 column)
+        pm25_column = "predicted_pm25"
+    
+    if pm25_column not in df_day.columns:
+        raise ValueError(f"Required column '{pm25_column}' not found for {forecast_date}")
+    
+    for sid in df_day["sensor_id"].unique():
+        if sid not in sensor_locations:
+            continue
+            
+        sensor_row = df_day[df_day["sensor_id"] == sid].iloc[0]
+        pm25_val = sensor_row.get(pm25_column)
+        
+        if pd.isna(pm25_val):
+            continue
+            
+        # Convert to float and skip if invalid
+        try:
+            pm25_float = float(pm25_val)
+            if not np.isnan(pm25_float):
+                sensor_coords_list.append([
+                    sensor_locations[sid]["longitude"], 
+                    sensor_locations[sid]["latitude"]
+                ])
+                pm25_values_list.append(pm25_float)
+        except (ValueError, TypeError):
+            continue
+    
+    # Convert to numpy arrays with explicit dtype
+    sensor_coords = np.array(sensor_coords_list, dtype=np.float64)
+    pm25_values = np.array(pm25_values_list, dtype=np.float64)
+    
+    # Safety check: need at least 1 sensor with data
+    if len(sensor_coords) == 0 or len(pm25_values) == 0:
+        raise ValueError(f"No valid sensor data available for {forecast_date}")
+    
+    # Ensure sensor_coords is 2D (required by cdist)
+    if sensor_coords.ndim == 1:
+        sensor_coords = sensor_coords.reshape(1, -1)
+
+    min_lon, min_lat, max_lon, max_lat = grid_bounds
+
+    lon_grid = np.linspace(min_lon, max_lon, grid_resolution)
+    lat_grid = np.linspace(min_lat, max_lat, grid_resolution)
+    lon_mesh, lat_mesh = np.meshgrid(lon_grid, lat_grid)
+    grid_points = np.column_stack([lon_mesh.ravel(), lat_mesh.ravel()])
+
+    idw_result = idw_interpolation(sensor_coords, pm25_values, grid_points, lon_mesh, power=power)
+
+    default_levels = np.array([0, 12, 35, 55, 150, 250, 500])
+    category_colors = ["#00e400", "#7de400", "#ffff00", "#ffb000", "#ff7e00", "#ff4000", "#ff0000", "#c0007f", "#8f3f97", "#7e0023"]
+    vmin, vmax = default_levels[0], 150
+    
+    clipped = np.clip(idw_result, vmin, vmax)
+    
+    fig, ax = plt.subplots(figsize=(10, 10))
+    
+    im = ax.imshow(
+        clipped,
+        extent=(min_lon, max_lon, min_lat, max_lat),
+        origin="lower",
+        cmap=mcolors.LinearSegmentedColormap.from_list("aqi", category_colors, N=512),
+        vmin=vmin,
+        vmax=vmax,
+        alpha=0.5,
+    )
+    ax.set_xlim(min_lon, max_lon)
+    ax.set_ylim(min_lat, max_lat)
+    ax.axis("off")
+
+    fig.savefig(path, dpi=300, bbox_inches="tight", pad_inches=0, transparent=True)
+    plt.close(fig)
