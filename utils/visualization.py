@@ -121,9 +121,19 @@ def plot_pm25_idw_heatmap(
     if is_today:
         # Day 0: Use real sensor measurements (pm25 column)
         pm25_column = "pm25"
+        print(f"\n      DEBUG: Day 0 detected, using '{pm25_column}' column")
     else:
         # Days 1-6: Use model predictions (predicted_pm25 column)
         pm25_column = "predicted_pm25"
+    
+    # DEBUG: Check what columns and data are available
+    if is_today:
+        print(f"      DEBUG: df_day columns: {list(df_day.columns)}")
+        print(f"      DEBUG: df_day shape: {df_day.shape}")
+        print(f"      DEBUG: pm25 null count: {df_day['pm25'].isna().sum()}/{len(df_day)}")
+        if 'predicted_pm25' in df_day.columns:
+            print(f"      DEBUG: predicted_pm25 null count: {df_day['predicted_pm25'].isna().sum()}/{len(df_day)}")
+        print(f"      DEBUG: pm25 sample values: {df_day['pm25'].dropna().head(3).tolist()}")
     
     if pm25_column not in df_day.columns:
         raise ValueError(f"Required column '{pm25_column}' not found for {forecast_date}")
@@ -154,6 +164,13 @@ def plot_pm25_idw_heatmap(
     sensor_coords = np.array(sensor_coords_list, dtype=np.float64)
     pm25_values = np.array(pm25_values_list, dtype=np.float64)
     
+    # DEBUG: Show what data we collected
+    if is_today:
+        print(f"      DEBUG: Collected {len(pm25_values)} sensors with valid data")
+        if len(pm25_values) > 0:
+            print(f"      DEBUG: PM2.5 range: {pm25_values.min():.2f} to {pm25_values.max():.2f}")
+            print(f"      DEBUG: PM2.5 mean: {pm25_values.mean():.2f}")
+    
     # Safety check: need at least 1 sensor with data
     if len(sensor_coords) == 0 or len(pm25_values) == 0:
         raise ValueError(f"No valid sensor data available for {forecast_date}")
@@ -171,11 +188,23 @@ def plot_pm25_idw_heatmap(
 
     idw_result = idw_interpolation(sensor_coords, pm25_values, grid_points, lon_mesh, power=power)
 
+    # DEBUG: Check IDW result
+    if is_today:
+        print(f"      DEBUG: IDW result shape: {idw_result.shape}")
+        print(f"      DEBUG: IDW range: {idw_result.min():.2f} to {idw_result.max():.2f}")
+        print(f"      DEBUG: IDW mean: {idw_result.mean():.2f}")
+        print(f"      DEBUG: IDW has NaN: {np.isnan(idw_result).any()}")
+
     default_levels = np.array([0, 12, 35, 55, 150, 250, 500])
     category_colors = ["#00e400", "#7de400", "#ffff00", "#ffb000", "#ff7e00", "#ff4000", "#ff0000", "#c0007f", "#8f3f97", "#7e0023"]
     vmin, vmax = default_levels[0], 150
     
     clipped = np.clip(idw_result, vmin, vmax)
+    
+    # DEBUG: Check after clipping
+    if is_today:
+        print(f"      DEBUG: Clipped range: {clipped.min():.2f} to {clipped.max():.2f}")
+        print(f"      DEBUG: Clipped mean: {clipped.mean():.2f}")
     
     fig, ax = plt.subplots(figsize=(10, 10))
     
