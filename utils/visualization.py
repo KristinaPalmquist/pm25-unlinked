@@ -205,21 +205,35 @@ def plot_pm25_idw_heatmap(
     if is_today:
         print(f"      DEBUG: Clipped range: {clipped.min():.2f} to {clipped.max():.2f}")
         print(f"      DEBUG: Clipped mean: {clipped.mean():.2f}")
+        print(f"      DEBUG: Unique clipped values (first 10): {np.unique(clipped.flatten())[:10]}")
+    
+    # Clear any existing plots to prevent interference
+    plt.close('all')
     
     fig, ax = plt.subplots(figsize=(10, 10))
+    
+    # Create colormap
+    aqi_cmap = mcolors.LinearSegmentedColormap.from_list("aqi", category_colors, N=512)
     
     im = ax.imshow(
         clipped,
         extent=(min_lon, max_lon, min_lat, max_lat),
         origin="lower",
-        cmap=mcolors.LinearSegmentedColormap.from_list("aqi", category_colors, N=512),
+        cmap=aqi_cmap,
         vmin=vmin,
         vmax=vmax,
         alpha=0.5,
+        interpolation='bilinear',  # Ensure smooth rendering
     )
     ax.set_xlim(min_lon, max_lon)
     ax.set_ylim(min_lat, max_lat)
     ax.axis("off")
+    
+    # DEBUG: Verify colormap is applied
+    if is_today:
+        print(f"      DEBUG: Colormap name: {im.get_cmap().name}")
+        print(f"      DEBUG: Image array shape: {im.get_array().shape}")
+        print(f"      DEBUG: Image array range: {im.get_array().min():.2f} to {im.get_array().max():.2f}")
 
     fig.savefig(path, dpi=300, bbox_inches="tight", pad_inches=0, transparent=True)
     plt.close(fig)
