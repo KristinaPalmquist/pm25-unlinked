@@ -67,8 +67,6 @@ export function removeRasterLayer(map) {
 }
 
 export function buildRasterUrl(day, config) {
-  // config.interpolationBase points to Hopsworks storage
-  // Returns: https://c.app.hopsworks.ai/p/{id}/fs/Resources/airquality/forecast_interpolation_0d.png
   return `${config.interpolationBase}_${day}d.png`;
 }
 
