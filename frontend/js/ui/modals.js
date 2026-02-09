@@ -110,6 +110,7 @@ export function openDetailsModal(sensorId) {
 
   // Forecast + Hindcast Images (conditionally shown)
   ensureDetailsPlotsContainer();
+  today_short = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
   const forecastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
   const hindcastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
