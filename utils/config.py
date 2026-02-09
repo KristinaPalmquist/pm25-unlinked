@@ -63,88 +63,88 @@ class HopsworksSettings(BaseSettings):
     RANKING_MODEL_TYPE: Literal["ranking", "llmranking"] = "ranking"
     CUSTOM_HOPSWORKS_INFERENCE_ENV: str = "custom_env_name"
 
-    def load_hopsworks_secrets_if_missing(self):
-        """Load missing secrets only when running inside a Hopsworks Job."""
+    # def load_hopsworks_secrets_if_missing(self):
+    #     """Load missing secrets only when running inside a Hopsworks Job."""
         
-        # Detect Hopsworks Job runtime
-        if "HOPSWORKS_JOB_ID" not in os.environ:
-            return self  # Do nothing locally or in Jupyter
+    #     # Detect Hopsworks Job runtime
+    #     if "HOPSWORKS_JOB_ID" not in os.environ:
+    #         return self  # Do nothing locally or in Jupyter
 
-        try:
-            secrets_api = hopsworks.get_secrets_api()
-        except Exception:
-            return self
+    #     try:
+    #         secrets_api = hopsworks.get_secrets_api()
+    #     except Exception:
+    #         return self
 
-        def load(name):
-            try:
-                secret = secrets_api.get_secret(name)
-                return secret.value if secret else None
-            except Exception:
-                return None
+    #     def load(name):
+    #         try:
+    #             secret = secrets_api.get_secret(name)
+    #             return secret.value if secret else None
+    #         except Exception:
+    #             return None
 
-        if self.HOPSWORKS_API_KEY is None:
-            val = load("HOPSWORKS_API_KEY")
-            if val:
-                self.HOPSWORKS_API_KEY = SecretStr(val)
+    #     if self.HOPSWORKS_API_KEY is None:
+    #         val = load("HOPSWORKS_API_KEY")
+    #         if val:
+    #             self.HOPSWORKS_API_KEY = SecretStr(val)
 
-        if self.AQICN_API_KEY is None:
-            val = load("AQICN_API_KEY")
-            if val:
-                self.AQICN_API_KEY = SecretStr(val)
+    #     if self.AQICN_API_KEY is None:
+    #         val = load("AQICN_API_KEY")
+    #         if val:
+    #             self.AQICN_API_KEY = SecretStr(val)
 
-        if self.GH_PAT is None:
-            val = load("GH_PAT")
-            if val:
-                self.GH_PAT = SecretStr(val)
+    #     if self.GH_PAT is None:
+    #         val = load("GH_PAT")
+    #         if val:
+    #             self.GH_PAT = SecretStr(val)
 
-        if self.GH_USERNAME is None:
-            val = load("GH_USERNAME")
-            if val:
-                self.GH_USERNAME = SecretStr(val)
+    #     if self.GH_USERNAME is None:
+    #         val = load("GH_USERNAME")
+    #         if val:
+    #             self.GH_USERNAME = SecretStr(val)
 
-        return self
+    #     return self
 
-    def model_post_init(self, __context):
-        """Runs after the model is initialized."""
-        print("HopsworksSettings initialized!")
+    # def model_post_init(self, __context):
+    #     """Runs after the model is initialized."""
+    #     print("HopsworksSettings initialized!")
 
-        # load missing secrets from hopsworks
-        self.load_hopsworks_secrets_if_missing()
+    #     # load missing secrets from hopsworks
+    #     self.load_hopsworks_secrets_if_missing()
 
 
 
-        # # Set environment variables if not already set
-        # if os.getenv("HOPSWORKS_API_KEY") is None:
-        #     if self.HOPSWORKS_API_KEY is not None:
-        #         os.environ['HOPSWORKS_API_KEY'] = self.HOPSWORKS_API_KEY.get_secret_value()
-        # if os.getenv("HOPSWORKS_PROJECT") is None:
-        #     if self.HOPSWORKS_PROJECT is not None:
-        #         os.environ['HOPSWORKS_PROJECT'] = self.HOPSWORKS_PROJECT
-        # if os.getenv("HOPSWORKS_HOST") is None:
-        #     if self.HOPSWORKS_HOST is not None:
-        #         os.environ['HOPSWORKS_HOST'] = self.HOPSWORKS_HOST
+    #     # # Set environment variables if not already set
+    #     # if os.getenv("HOPSWORKS_API_KEY") is None:
+    #     #     if self.HOPSWORKS_API_KEY is not None:
+    #     #         os.environ['HOPSWORKS_API_KEY'] = self.HOPSWORKS_API_KEY.get_secret_value()
+    #     # if os.getenv("HOPSWORKS_PROJECT") is None:
+    #     #     if self.HOPSWORKS_PROJECT is not None:
+    #     #         os.environ['HOPSWORKS_PROJECT'] = self.HOPSWORKS_PROJECT
+    #     # if os.getenv("HOPSWORKS_HOST") is None:
+    #     #     if self.HOPSWORKS_HOST is not None:
+    #     #         os.environ['HOPSWORKS_HOST'] = self.HOPSWORKS_HOST
 
-        # --- Check required .env values ---
-        missing = []
-        # 1. HOPSWORKS_API_KEY
-        api_key = self.HOPSWORKS_API_KEY or os.getenv("HOPSWORKS_API_KEY")
-        if not api_key:
-            missing.append("HOPSWORKS_API_KEY")
-        # 2. AQICN_API_KEY
-        aqicn_api_key = self.AQICN_API_KEY or os.getenv("AQICN_API_KEY")
-        if not aqicn_api_key:
-            missing.append("AQICN_API_KEY")
-        # 3. GITHUB_PAT
-        github_pat = self.GH_PAT or os.getenv("GH_PAT")
-        if not github_pat:
-            missing.append("GH_PAT")
-        # 4. GITHUB_USERNAME
-        github_username = self.GH_USERNAME or os.getenv("GH_USERNAME")
-        if not github_username:
-            missing.append("GH_USERNAME")
+    #     # --- Check required .env values ---
+    #     missing = []
+    #     # 1. HOPSWORKS_API_KEY
+    #     api_key = self.HOPSWORKS_API_KEY or os.getenv("HOPSWORKS_API_KEY")
+    #     if not api_key:
+    #         missing.append("HOPSWORKS_API_KEY")
+    #     # 2. AQICN_API_KEY
+    #     aqicn_api_key = self.AQICN_API_KEY or os.getenv("AQICN_API_KEY")
+    #     if not aqicn_api_key:
+    #         missing.append("AQICN_API_KEY")
+    #     # 3. GITHUB_PAT
+    #     github_pat = self.GH_PAT or os.getenv("GH_PAT")
+    #     if not github_pat:
+    #         missing.append("GH_PAT")
+    #     # 4. GITHUB_USERNAME
+    #     github_username = self.GH_USERNAME or os.getenv("GH_USERNAME")
+    #     if not github_username:
+    #         missing.append("GH_USERNAME")
 
-        if missing:
-            raise ValueError(
-                "The following required settings are missing from your environment (.env or system):\n  " +
-                "\n  ".join(missing)
-            )
+    #     if missing:
+    #         raise ValueError(
+    #             "The following required settings are missing from your environment (.env or system):\n  " +
+    #             "\n  ".join(missing)
+    #         )

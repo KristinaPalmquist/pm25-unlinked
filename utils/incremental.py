@@ -171,103 +171,103 @@ def process_weather_increment(sensor_id, meta, last_ts):
     return _finalize_weather_schema(weather_new, meta["location_id"], meta)
 
 
-def run_incremental_update(sensor_metadata_fg, air_quality_fg, weather_fg, latest_per_sensor, AQICN_API_KEY):
-    """
-    Update all sensors with new data if >1 hour since last update.
-    Each sensor is processed and inserted independently with retry logic.
-    """
-    metadata_df = sensor_metadata_fg.read()
+# def run_incremental_update(sensor_metadata_fg, air_quality_fg, weather_fg, latest_per_sensor, AQICN_API_KEY):
+#     """
+#     Update all sensors with new data if >1 hour since last update.
+#     Each sensor is processed and inserted independently with retry logic.
+#     """
+#     metadata_df = sensor_metadata_fg.read()
 
-    if metadata_df.empty:
-        print("⏭️ No sensors configured — skipping incremental update")
-        return
+#     if metadata_df.empty:
+#         print("⏭️ No sensors configured — skipping incremental update")
+#         return
     
-    metadata_df["sensor_id"] = metadata_df["sensor_id"].astype(int)
-    metadata_indexed = metadata_df.set_index("sensor_id")
+#     metadata_df["sensor_id"] = metadata_df["sensor_id"].astype(int)
+#     metadata_indexed = metadata_df.set_index("sensor_id")
 
-    updated_count = 0
-    skipped_count = 0
-    failed_count = 0
-    failed_sensors = []
+#     updated_count = 0
+#     skipped_count = 0
+#     failed_count = 0
+#     failed_sensors = []
 
-    for sensor_id, meta in metadata_indexed.iterrows():
-        max_retries = 3
+#     for sensor_id, meta in metadata_indexed.iterrows():
+#         max_retries = 3
         
-        for attempt in range(max_retries):
-            try:
-                last_ts = latest_per_sensor.get(sensor_id)
+#         for attempt in range(max_retries):
+#             try:
+#                 last_ts = latest_per_sensor.get(sensor_id)
 
-                aq_new = process_aq_increment(sensor_id, meta, last_ts, AQICN_API_KEY)
-                if aq_new is None or aq_new.empty:
-                    skipped_count += 1
-                    break  # No retry needed, just skip
+#                 aq_new = process_aq_increment(sensor_id, meta, last_ts, AQICN_API_KEY)
+#                 if aq_new is None or aq_new.empty:
+#                     skipped_count += 1
+#                     break  # No retry needed, just skip
                 
-                # Add nearby sensor features for this sensor's data
-                aq_new = feature_engineering.add_nearby_sensor_feature(
-                    aq_new,
-                    metadata_indexed,
-                    n_closest=3
-                )
+#                 # Add nearby sensor features for this sensor's data
+#                 aq_new = feature_engineering.add_nearby_sensor_feature(
+#                     aq_new,
+#                     metadata_indexed,
+#                     n_closest=3
+#                 )
 
-                """ CHECK TYPES """ 
+#                 """ CHECK TYPES """ 
 
-                aq_new["sensor_id"] = aq_new["sensor_id"].astype("int32")
-                aq_new["location_id"] = aq_new["location_id"].astype("int32")
-                aq_new = aq_new.astype({
-                    "sensor_id": "int32",
-                    "location_id": "int32",
-                    "pm25": "float64",
-                    "pm25_lag_1d": "float64",
-                    "pm25_lag_2d": "float64",
-                    "pm25_lag_3d": "float64",
-                    "pm25_rolling_3d": "float64",
-                    "pm25_nearby_avg": "float64",
-                })
+#                 aq_new["sensor_id"] = aq_new["sensor_id"].astype("int32")
+#                 aq_new["location_id"] = aq_new["location_id"].astype("int32")
+#                 aq_new = aq_new.astype({
+#                     "sensor_id": "int32",
+#                     "location_id": "int32",
+#                     "pm25": "float64",
+#                     "pm25_lag_1d": "float64",
+#                     "pm25_lag_2d": "float64",
+#                     "pm25_lag_3d": "float64",
+#                     "pm25_rolling_3d": "float64",
+#                     "pm25_nearby_avg": "float64",
+#                 })
                                 
-                # Insert air quality data immediately
-                air_quality_fg.insert(aq_new)
+#                 # Insert air quality data immediately
+#                 air_quality_fg.insert(aq_new)
                 
-                # Process and insert weather data
-                weather_new = process_weather_increment(sensor_id, meta, last_ts)
+#                 # Process and insert weather data
+#                 weather_new = process_weather_increment(sensor_id, meta, last_ts)
 
 
-                """ CHECK TYPES """ 
+#                 """ CHECK TYPES """ 
 
-                weather_new = weather_new.astype({
-                    "location_id": "int32",
-                    "temperature_2m_mean": "float64",
-                    "precipitation_sum": "float64",
-                    "wind_speed_10m_max": "float64",
-                    "wind_direction_10m_dominant": "float64",
-                })
+#                 weather_new = weather_new.astype({
+#                     "location_id": "int32",
+#                     "temperature_2m_mean": "float64",
+#                     "precipitation_sum": "float64",
+#                     "wind_speed_10m_max": "float64",
+#                     "wind_direction_10m_dominant": "float64",
+#                 })
 
-                if weather_new is not None and not weather_new.empty:
-                    weather_fg.insert(weather_new)
+#                 if weather_new is not None and not weather_new.empty:
+#                     weather_fg.insert(weather_new)
                 
-                updated_count += 1
-                break  # Success, exit retry loop
+#                 updated_count += 1
+#                 break  # Success, exit retry loop
                 
-            except (ConnectionError, TimeoutError, Exception) as e:
-                error_type = type(e).__name__
+#             except (ConnectionError, TimeoutError, Exception) as e:
+#                 error_type = type(e).__name__
                 
-                if attempt < max_retries - 1:
-                    wait_time = (attempt + 1) * 5  # 5s, 10s, 15s
-                    print(f"⚠️  Sensor {sensor_id}: {error_type}, retrying in {wait_time}s... (attempt {attempt + 1}/{max_retries})")
-                    time.sleep(wait_time)
-                else:
-                    # Final attempt failed
-                    failed_count += 1
-                    failed_sensors.append((sensor_id, error_type))
-                    print(f"❌ Sensor {sensor_id}: Failed after {max_retries} attempts - {error_type}")
-                    break
+#                 if attempt < max_retries - 1:
+#                     wait_time = (attempt + 1) * 5  # 5s, 10s, 15s
+#                     print(f"⚠️  Sensor {sensor_id}: {error_type}, retrying in {wait_time}s... (attempt {attempt + 1}/{max_retries})")
+#                     time.sleep(wait_time)
+#                 else:
+#                     # Final attempt failed
+#                     failed_count += 1
+#                     failed_sensors.append((sensor_id, error_type))
+#                     print(f"❌ Sensor {sensor_id}: Failed after {max_retries} attempts - {error_type}")
+#                     break
         
-        # Brief pause between sensors to avoid rate limiting
-        time.sleep(1)
+#         # Brief pause between sensors to avoid rate limiting
+#         time.sleep(1)
 
-    print(f"\n✅ Incremental update complete!")
-    print(f"   Updated: {updated_count}, Skipped: {skipped_count}, Failed: {failed_count}")
+#     print(f"\n✅ Incremental update complete!")
+#     print(f"   Updated: {updated_count}, Skipped: {skipped_count}, Failed: {failed_count}")
     
-    if failed_sensors:
-        print(f"\n⚠️  Failed sensors:")
-        for sid, error in failed_sensors:
-            print(f"   • Sensor {sid}: {error}")
+#     if failed_sensors:
+#         print(f"\n⚠️  Failed sensors:")
+#         for sid, error in failed_sensors:
+#             print(f"   • Sensor {sid}: {error}")

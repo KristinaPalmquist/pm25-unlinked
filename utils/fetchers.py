@@ -25,7 +25,6 @@ def rate_limited_request():
 
 
 """ HTTP request trigger function """
-
 def trigger_request(url:str):
     response = requests.get(url)
     if response.status_code == 200:
@@ -113,95 +112,48 @@ def get_historical_weather(sensor_id, start_date, end_date, latitude, longitude)
     return pd.concat(all_frames, ignore_index=True)
 
 
-# def get_historical_weather(city, start_date, end_date, latitude, longitude):
-#     # latitude, longitude = get_city_coordinates(city)
-
+# def get_hourly_weather_forecast(city, latitude, longitude):
 #     # Setup the Open-Meteo API client with cache and retry on error
-#     cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
+#     cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
 #     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
 #     openmeteo = openmeteo_requests.Client(session = retry_session)
 
 #     # Make sure all required weather variables are listed here
 #     # The order of variables in hourly or daily is important to assign them correctly below
-#     url = "https://archive-api.open-meteo.com/v1/archive"
+#     url = "https://api.open-meteo.com/v1/forecast"
 #     params = {
 #         "latitude": latitude,
 #         "longitude": longitude,
-#         "start_date": start_date,
-#         "end_date": end_date,
-#         "daily": ["temperature_2m_mean", "precipitation_sum", "wind_speed_10m_max", "wind_direction_10m_dominant"]
+#         "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"],
+#         "forecast_days": 7
 #     }
 #     responses = openmeteo.weather_api(url, params=params)
 
 #     # Process first location. Add a for-loop for multiple locations or weather models
 #     response = responses[0]
 
-#     # Process daily data. The order of variables needs to be the same as requested.
-#     daily = response.Daily()
-#     daily_temperature_2m_mean = daily.Variables(0).ValuesAsNumpy()
-#     daily_precipitation_sum = daily.Variables(1).ValuesAsNumpy()
-#     daily_wind_speed_10m_max = daily.Variables(2).ValuesAsNumpy()
-#     daily_wind_direction_10m_dominant = daily.Variables(3).ValuesAsNumpy()
+#     # Process hourly data. The order of variables needs to be the same as requested.
 
-#     daily_data = {"date": pd.date_range(
-#         start = pd.to_datetime(daily.Time(), unit = "s"),
-#         end = pd.to_datetime(daily.TimeEnd(), unit = "s"),
-#         freq = pd.Timedelta(seconds = daily.Interval()),
+#     hourly = response.Hourly()
+#     hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
+#     hourly_precipitation = hourly.Variables(1).ValuesAsNumpy()
+#     hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
+#     hourly_wind_direction_10m = hourly.Variables(3).ValuesAsNumpy()
+
+#     hourly_data = {"date": pd.date_range(
+#         start = pd.to_datetime(hourly.Time(), unit = "s"),
+#         end = pd.to_datetime(hourly.TimeEnd(), unit = "s"),
+#         freq = pd.Timedelta(seconds = hourly.Interval()),
 #         inclusive = "left"
 #     )}
-#     daily_data["temperature_2m_mean"] = daily_temperature_2m_mean
-#     daily_data["precipitation_sum"] = daily_precipitation_sum
-#     daily_data["wind_speed_10m_max"] = daily_wind_speed_10m_max
-#     daily_data["wind_direction_10m_dominant"] = daily_wind_direction_10m_dominant
+#     hourly_data["temperature_2m_mean"] = hourly_temperature_2m
+#     hourly_data["precipitation_sum"] = hourly_precipitation
+#     hourly_data["wind_speed_10m_max"] = hourly_wind_speed_10m
+#     hourly_data["wind_direction_10m_dominant"] = hourly_wind_direction_10m
 
-#     daily_dataframe = pd.DataFrame(data = daily_data)
-#     daily_dataframe = daily_dataframe.dropna()
-#     daily_dataframe['city'] = city
-#     return daily_dataframe
-
-
-def get_hourly_weather_forecast(city, latitude, longitude):
-    # Setup the Open-Meteo API client with cache and retry on error
-    cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
-    retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
-    openmeteo = openmeteo_requests.Client(session = retry_session)
-
-    # Make sure all required weather variables are listed here
-    # The order of variables in hourly or daily is important to assign them correctly below
-    url = "https://api.open-meteo.com/v1/forecast"
-    params = {
-        "latitude": latitude,
-        "longitude": longitude,
-        "hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"],
-        "forecast_days": 7
-    }
-    responses = openmeteo.weather_api(url, params=params)
-
-    # Process first location. Add a for-loop for multiple locations or weather models
-    response = responses[0]
-
-    # Process hourly data. The order of variables needs to be the same as requested.
-
-    hourly = response.Hourly()
-    hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
-    hourly_precipitation = hourly.Variables(1).ValuesAsNumpy()
-    hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
-    hourly_wind_direction_10m = hourly.Variables(3).ValuesAsNumpy()
-
-    hourly_data = {"date": pd.date_range(
-        start = pd.to_datetime(hourly.Time(), unit = "s"),
-        end = pd.to_datetime(hourly.TimeEnd(), unit = "s"),
-        freq = pd.Timedelta(seconds = hourly.Interval()),
-        inclusive = "left"
-    )}
-    hourly_data["temperature_2m_mean"] = hourly_temperature_2m
-    hourly_data["precipitation_sum"] = hourly_precipitation
-    hourly_data["wind_speed_10m_max"] = hourly_wind_speed_10m
-    hourly_data["wind_direction_10m_dominant"] = hourly_wind_direction_10m
-
-    hourly_dataframe = pd.DataFrame(data = hourly_data)
-    hourly_dataframe = hourly_dataframe.dropna()
-    return hourly_dataframe
+#     hourly_dataframe = pd.DataFrame(data = hourly_data)
+#     hourly_dataframe = hourly_dataframe.dropna()
+#     return hourly_dataframe
 
 
 def get_weather_forecast(sensor_id, start_date, end_date, latitude, longitude):
@@ -249,23 +201,23 @@ def get_weather_forecast(sensor_id, start_date, end_date, latitude, longitude):
     return df.dropna()
 
 
-def fetch_data_for_sensor(sensor_id, meta, today, AQICN_API_KEY):
-    """Fetch air quality and weather data for a single sensor."""
-    country = meta["country"]
-    city = meta["city"]
-    street = meta["street"]
-    aqicn_url = meta["aqicn_url"]
-    latitude = meta["latitude"]
-    longitude = meta["longitude"]
+# def fetch_data_for_sensor(sensor_id, meta, today, AQICN_API_KEY):
+#     """Fetch air quality and weather data for a single sensor."""
+#     country = meta["country"]
+#     city = meta["city"]
+#     street = meta["street"]
+#     aqicn_url = meta["aqicn_url"]
+#     latitude = meta["latitude"]
+#     longitude = meta["longitude"]
 
-    # Fetch current air quality
-    aq_today_df = get_pm25(aqicn_url, country, city, street, today, AQICN_API_KEY)
+#     # Fetch current air quality
+#     aq_today_df = get_pm25(aqicn_url, country, city, street, today, AQICN_API_KEY)
     
-    # Fetch weather forecast (7 days forward)
-    end_date = today + timedelta(days=7)
-    weather_df = get_weather_forecast(sensor_id, today, end_date, latitude, longitude)
+#     # Fetch weather forecast (7 days forward)
+#     end_date = today + timedelta(days=7)
+#     weather_df = get_weather_forecast(sensor_id, today, end_date, latitude, longitude)
     
-    return aq_today_df, weather_df, sensor_id
+#     return aq_today_df, weather_df, sensor_id
 
 
 def get_latest_weather(latitude: float, longitude: float, since: datetime):
@@ -365,32 +317,12 @@ def get_working_feed_url(sensor_id, AQICN_API_KEY):
     raise ValueError(f"Failed to resolve feed URL for sensor {sensor_id}. Details: {detailed_errors}")
 
 
-def get_sensor_coordinates(feed_url, sensor_id, AQICN_API_KEY):
-    response = requests.get(f"{feed_url}?token={AQICN_API_KEY}")
-    data = response.json()
-    latitude = data["data"]["city"]["geo"][0]
-    longitude = data["data"]["city"]["geo"][1]
-    return latitude, longitude
 # def get_sensor_coordinates(feed_url, sensor_id, AQICN_API_KEY):
-#     """
-#     Given a sensor_id, return (latitude, longitude, feed_url).
-#     Raises ValueError if coordinates cannot be extracted.
-#     """
-#     try:
-#         response = requests.get(f"{feed_url}?token={AQICN_API_KEY}")
-#         response.raise_for_status()
-#         data = response.json()
-
-#         if "data" not in data or "city" not in data["data"] or "geo" not in data["data"]["city"]:
-#             raise ValueError(f"Invalid response structure for {feed_url}: {data}")
-
-#         latitude = data["data"]["city"]["geo"][0]
-#         longitude = data["data"]["city"]["geo"][1]
-#         return latitude, longitude
-
-#     except Exception as e:
-#         raise ValueError(f"Failed to get coordinates from {feed_url}: {e}")
-    
+#     response = requests.get(f"{feed_url}?token={AQICN_API_KEY}")
+#     data = response.json()
+#     latitude = data["data"]["city"]["geo"][0]
+#     longitude = data["data"]["city"]["geo"][1]
+#     return latitude, longitude
 
     
 def get_pm25(aqicn_url: str, country: str, city: str, street: str, day: datetime.date, AQI_API_KEY: str):

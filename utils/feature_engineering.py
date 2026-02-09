@@ -46,35 +46,35 @@ def build_sensor_location_map(df, metadata):
     raise TypeError("metadata must be a mapping of sensor_id -> {latitude, longitude}")
 
 
-# def build_sensor_location_map(df, metadata):
-#     """Return dict: sensor_id → {latitude, longitude}"""
+def build_sensor_location_map(df, metadata):
+    """Return dict: sensor_id → {latitude, longitude}"""
 
-#     # Case 1: metadata is already a dict of dicts
-#     if isinstance(metadata, Mapping):
-#         cleaned = {}
-#         for sid, meta in metadata.items():
-#             cleaned[sid] = {
-#                 "latitude": float(meta["latitude"]),
-#                 "longitude": float(meta["longitude"])
-#             }
-#         return cleaned
+    # Case 1: metadata is already a dict of dicts
+    if isinstance(metadata, Mapping):
+        cleaned = {}
+        for sid, meta in metadata.items():
+            cleaned[sid] = {
+                "latitude": float(meta["latitude"]),
+                "longitude": float(meta["longitude"])
+            }
+        return cleaned
 
-#     # Case 2: metadata is a DataFrame
-#     if not isinstance(metadata, pd.DataFrame):
-#         raise TypeError("metadata must be a DataFrame or dict")
+    # Case 2: metadata is a DataFrame
+    if not isinstance(metadata, pd.DataFrame):
+        raise TypeError("metadata must be a DataFrame or dict")
 
-#     required = {"sensor_id", "latitude", "longitude"}
-#     if not required.issubset(metadata.columns):
-#         raise ValueError("metadata must contain ['sensor_id', 'latitude', 'longitude']")
+    required = {"sensor_id", "latitude", "longitude"}
+    if not required.issubset(metadata.columns):
+        raise ValueError("metadata must contain ['sensor_id', 'latitude', 'longitude']")
 
-#     sensor_locations = (
-#         metadata[["sensor_id", "latitude", "longitude"]]
-#         .drop_duplicates("sensor_id")
-#         .set_index("sensor_id")
-#         .astype(float)
-#     )
+    sensor_locations = (
+        metadata[["sensor_id", "latitude", "longitude"]]
+        .drop_duplicates("sensor_id")
+        .set_index("sensor_id")
+        .astype(float)
+    )
 
-#     return sensor_locations.to_dict(orient="index")
+    return sensor_locations.to_dict(orient="index")
 
 
 def compute_closest_sensors(locations, n_closest):

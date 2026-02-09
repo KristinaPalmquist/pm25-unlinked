@@ -29,23 +29,23 @@ def delete_feature_views(fs, name):
         print(f"No {name} feature view found")
 
 
-def delete_models(mr, name):
-    models = mr.get_models(name)
-    if not models:
-        print(f"No {name} model found")
-    for model in models:
-        model.delete()
-        print(f"Deleted model {model.name}/{model.version}")
+# def delete_models(mr, name):
+#     models = mr.get_models(name)
+#     if not models:
+#         print(f"No {name} model found")
+#     for model in models:
+#         model.delete()
+#         print(f"Deleted model {model.name}/{model.version}")
 
 
-def delete_secrets(proj, name):
-    secrets = secrets_api(proj.name)
-    try:
-        secret = secrets.get_secret(name)
-        secret.delete()
-        print(f"Deleted secret {name}")
-    except hopsworks.client.exceptions.RestAPIError:
-        print(f"No {name} secret found")
+# def delete_secrets(proj, name):
+#     secrets = secrets_api(proj.name)
+#     try:
+#         secret = secrets.get_secret(name)
+#         secret.delete()
+#         print(f"Deleted secret {name}")
+#     except hopsworks.client.exceptions.RestAPIError:
+#         print(f"No {name} secret found")
 
 
 # # WARNING - this will wipe out all your feature data and models
@@ -236,23 +236,23 @@ def update_weather_description(weather_fg):
     weather_fg.update_feature_description("wind_direction_10m_dominant", "Dominant wind direction over the day in degrees (0-360)")
 
 
-def read_data(fg, max_retries=5):
-    for attempt in range(max_retries):
-        try:
-            return fg.read()
-        except Exception as e:
-            if "flight" in str(e).lower() or "query service" in str(e).lower():
-                if attempt < max_retries - 1:
-                    wait_time = 10 * (attempt + 1)  # 10s, 20s, 30s, 40s, 50s
-                    print(f"⚠️  Hopsworks query service error (attempt {attempt+1}/{max_retries})")
-                    print(f"   Error: {str(e)[:100]}...")
-                    print(f"   Waiting {wait_time}s before retry...")
-                    time.sleep(wait_time)
-                else:
-                    print(f"❌ Failed to read after {max_retries} attempts")
-                    raise
-            else:
-                raise
+# def read_data(fg, max_retries=5):
+#     for attempt in range(max_retries):
+#         try:
+#             return fg.read()
+#         except Exception as e:
+#             if "flight" in str(e).lower() or "query service" in str(e).lower():
+#                 if attempt < max_retries - 1:
+#                     wait_time = 10 * (attempt + 1)  # 10s, 20s, 30s, 40s, 50s
+#                     print(f"⚠️  Hopsworks query service error (attempt {attempt+1}/{max_retries})")
+#                     print(f"   Error: {str(e)[:100]}...")
+#                     print(f"   Waiting {wait_time}s before retry...")
+#                     time.sleep(wait_time)
+#                 else:
+#                     print(f"❌ Failed to read after {max_retries} attempts")
+#                     raise
+#             else:
+#                 raise
 
 
 def save_or_replace_expectation_suite(fg, suite):
@@ -284,28 +284,28 @@ def safe_upload(dataset_api, local_path, remote_path, retries=5):
     return False
 
 
-def is_older_than_30_days(ts_str):
-    ts = datetime.fromisoformat(ts_str)
-    return datetime.now(ts.tzinfo) - ts > timedelta(days=30)
+# def is_older_than_30_days(ts_str):
+#     ts = datetime.fromisoformat(ts_str)
+#     return datetime.now(ts.tzinfo) - ts > timedelta(days=30)
 
 
 
-def get_latest_training_dataset(dataset_api, fv_name):
-    """Return (version, creation_time) or (None, None) if missing."""
-    all_items = dataset_api.list("Training_Datasets")  # top-level folder
+# def get_latest_training_dataset(dataset_api, fv_name):
+#     """Return (version, creation_time) or (None, None) if missing."""
+#     all_items = dataset_api.list("Training_Datasets")  # top-level folder
 
-    candidates = []
-    for item in all_items:
-        if item.name.startswith(fv_name + "_"):
-            candidates.append(item)
+#     candidates = []
+#     for item in all_items:
+#         if item.name.startswith(fv_name + "_"):
+#             candidates.append(item)
 
-    if not candidates:
-        return None, None
+#     if not candidates:
+#         return None, None
 
-    # Sort by version number (suffix after last underscore)
-    def extract_version(name):
-        return int(name.split("_")[-1])
+#     # Sort by version number (suffix after last underscore)
+#     def extract_version(name):
+#         return int(name.split("_")[-1])
 
-    latest = sorted(candidates, key=lambda x: extract_version(x.name))[-1]
+#     latest = sorted(candidates, key=lambda x: extract_version(x.name))[-1]
 
-    return extract_version(latest.name), latest.created
+#     return extract_version(latest.name), latest.created
