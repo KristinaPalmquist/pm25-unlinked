@@ -85,9 +85,11 @@ export function closeImageModal() {
 
 export function openDetailsModal(sensorId) {
   if (!ui.detailsModal) return;
+
   const entry = state.sensorData[sensorId];
   if (!entry || !entry.rows.length) return;
 
+  // Title
   if (ui.detailsModalTitle) {
     const id = entry.sensorId;
     const street = entry.street || '';
@@ -95,34 +97,111 @@ export function openDetailsModal(sensorId) {
     const lat = entry.lat;
     const lon = entry.lon;
 
-    function capitalize(str) {
-      if (!str) return '';
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    const capitalize = (str) =>
+      !str ? '' : str.charAt(0).toUpperCase() + str.slice(1);
 
     ui.detailsModalTitle.innerHTML = `
-      <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${capitalize(street)}, ${capitalize(city)}</h3>
-      <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude ${lon}</p>
+      <h3 class="font-semibold text-lg">
+        Sensor id: ${id}, Location: ${capitalize(street)}, ${capitalize(city)}
+      </h3>
+      <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude: ${lon}</p>
     `;
   }
 
-  /// Forecast + Hindcast Plots
+  // Forecast + Hindcast Images (conditionally shown)
   ensureDetailsPlotsContainer();
-  updateDetailsImage(
-    'details-forecast-card',
-    'details-forecast-thumb',
-    `./models/${sensorId}/images/forecast.png`,
-  );
-  updateDetailsImage(
-    'details-hindcast-card',
-    'details-hindcast-thumb',
-    `./models/${sensorId}/images/hindcast_prediction.png`,
-  );
 
+  const forecastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
+  const hindcastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
+
+  // Helper: check if image exists
+  function imageExists(url) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('HEAD', url, false);
+    xhr.send();
+    return xhr.status >= 200 && xhr.status < 300;
+  }
+
+  const hasForecast = imageExists(forecastPath);
+  const hasHindcast = imageExists(hindcastPath);
+
+  // Update UI based on availability
+  if (hasForecast) {
+    updateDetailsImage(
+      'details-forecast-card',
+      'details-forecast-thumb',
+      forecastPath,
+    );
+    document.getElementById('details-forecast-card').classList.remove('hidden');
+  } else {
+    document.getElementById('details-forecast-card').classList.add('hidden');
+  }
+
+  if (hasHindcast) {
+    updateDetailsImage(
+      'details-hindcast-card',
+      'details-hindcast-thumb',
+      hindcastPath,
+    );
+    document.getElementById('details-hindcast-card').classList.remove('hidden');
+  } else {
+    document.getElementById('details-hindcast-card').classList.add('hidden');
+  }
+
+  // If neither image exists → hide both cards entirely
+  if (!hasForecast && !hasHindcast) {
+    document.getElementById('details-forecast-card').classList.add('hidden');
+    document.getElementById('details-hindcast-card').classList.add('hidden');
+  }
+
+  // Table
   renderDetailsTable(entry);
+
+  // Show modal
   ui.detailsModal.classList.remove('hidden');
   state.modals.details = true;
 }
+
+// export function openDetailsModal(sensorId) {
+//   if (!ui.detailsModal) return;
+//   const entry = state.sensorData[sensorId];
+//   if (!entry || !entry.rows.length) return;
+
+//   if (ui.detailsModalTitle) {
+//     const id = entry.sensorId;
+//     const street = entry.street || '';
+//     const city = entry.city || '';
+//     const lat = entry.lat;
+//     const lon = entry.lon;
+
+//     function capitalize(str) {
+//       if (!str) return '';
+//       return str.charAt(0).toUpperCase() + str.slice(1);
+//     }
+
+//     ui.detailsModalTitle.innerHTML = `
+//       <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${capitalize(street)}, ${capitalize(city)}</h3>
+//       <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude ${lon}</p>
+//     `;
+//   }
+
+//   /// Forecast + Hindcast Plots
+//   ensureDetailsPlotsContainer();
+//   updateDetailsImage(
+//     'details-forecast-card',
+//     'details-forecast-thumb',
+//     `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`,
+//   );
+//   updateDetailsImage(
+//     'details-hindcast-card',
+//     'details-hindcast-thumb',
+//     `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`,
+//   );
+
+//   renderDetailsTable(entry);
+//   ui.detailsModal.classList.remove('hidden');
+//   state.modals.details = true;
+// }
 
 export function closeDetailsModal() {
   if (!ui.detailsModal) return;
