@@ -1,6 +1,74 @@
 import { HIDDEN_COLUMNS } from '../config/mapConfig.js';
 import { state, ui } from './index.js';
 
+function ensureDetailsPlotsContainer() {
+  if (!ui.detailsModal) return null;
+  const content = ui.detailsModal.querySelector('.details-modal-content');
+  if (!content) return null;
+
+  let plotRow = content.querySelector('.details-plot-row');
+  if (!plotRow) {
+    plotRow = document.createElement('div');
+    plotRow.className = 'details-plot-row flex gap-3';
+    plotRow.innerHTML = `
+      <div id="details-forecast-card" class="focus-image-card hidden">
+        <p class="text-sm text-gray-700 font-semibold">Forecast</p>
+        <img
+          id="details-forecast-thumb"
+          class="focus-thumb hidden"
+          alt="Forecast plot"
+        />
+      </div>
+      <div id="details-hindcast-card" class="focus-image-card hidden">
+        <p class="text-sm text-gray-700 font-semibold">Hindcast</p>
+        <img
+          id="details-hindcast-thumb"
+          class="focus-thumb hidden"
+          alt="Hindcast plot"
+        />
+      </div>
+    `;
+
+    const tableWrapper = content.querySelector('.details-table-wrapper');
+    if (tableWrapper) {
+      content.insertBefore(plotRow, tableWrapper);
+    } else {
+      content.appendChild(plotRow);
+    }
+  }
+
+  return plotRow;
+}
+
+function updateDetailsImage(cardId, thumbId, url) {
+  const cardEl = document.getElementById(cardId);
+  const thumbEl = document.getElementById(thumbId);
+  if (!cardEl || !thumbEl) return;
+
+  fetch(url, { method: 'HEAD' })
+    .then((response) => {
+      if (response.ok) {
+        thumbEl.src = url;
+        thumbEl.classList.remove('hidden');
+        cardEl.classList.remove('hidden');
+        thumbEl.onclick = () => openImageModal(url);
+      } else {
+        hideDetailsImage(cardId, thumbId);
+      }
+    })
+    .catch(() => hideDetailsImage(cardId, thumbId));
+}
+
+function hideDetailsImage(cardId, thumbId) {
+  const cardEl = document.getElementById(cardId);
+  const thumbEl = document.getElementById(thumbId);
+  if (!cardEl || !thumbEl) return;
+  thumbEl.src = '';
+  thumbEl.classList.add('hidden');
+  cardEl.classList.add('hidden');
+  thumbEl.onclick = null;
+}
+
 export function openImageModal(src) {
   if (!ui.imageModal || !ui.imageModalImg) return;
   ui.imageModalImg.src = src;
@@ -38,6 +106,19 @@ export function openDetailsModal(sensorId) {
     `;
   }
 
+  /// Forecast + Hindcast Plots
+  ensureDetailsPlotsContainer();
+  updateDetailsImage(
+    'details-forecast-card',
+    'details-forecast-thumb',
+    `./models/${sensorId}/images/forecast.png`,
+  );
+  updateDetailsImage(
+    'details-hindcast-card',
+    'details-hindcast-thumb',
+    `./models/${sensorId}/images/hindcast_prediction.png`,
+  );
+
   renderDetailsTable(entry);
   ui.detailsModal.classList.remove('hidden');
   state.modals.details = true;
@@ -47,6 +128,8 @@ export function closeDetailsModal() {
   if (!ui.detailsModal) return;
   ui.detailsModal.classList.add('hidden');
   state.modals.details = false;
+  hideDetailsImage('details-forecast-card', 'details-forecast-thumb');
+  hideDetailsImage('details-hindcast-card', 'details-hindcast-thumb');
 }
 
 export function renderDetailsTable(entry) {
