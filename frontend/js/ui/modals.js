@@ -1,6 +1,9 @@
 import { HIDDEN_COLUMNS } from '../config/mapConfig.js';
 import { state, ui } from './index.js';
 
+// Global date string for forecast/hindcast filenames
+const today_short = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
 function ensureDetailsPlotsContainer() {
   if (!ui.detailsModal) return null;
   const content = ui.detailsModal.querySelector('.details-modal-content');
@@ -110,7 +113,6 @@ export function openDetailsModal(sensorId) {
 
   // Forecast + Hindcast Images (conditionally shown)
   ensureDetailsPlotsContainer();
-  today_short = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
   const forecastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
   const hindcastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
