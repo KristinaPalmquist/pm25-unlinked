@@ -2,7 +2,7 @@ import { HIDDEN_COLUMNS } from '../config/mapConfig.js';
 import { state, ui } from './index.js';
 
 // Global date string for forecast/hindcast filenames
-const today_short = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+const today_short = new Date().toISOString().slice(0, 10);
 
 function ensureDetailsPlotsContainer() {
   if (!ui.detailsModal) return null;
