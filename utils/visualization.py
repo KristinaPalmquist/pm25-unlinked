@@ -8,7 +8,6 @@ from scipy.spatial.distance import cdist
 from datetime import datetime
 
 
-
 def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_path: str, hindcast=False):
     plt.close('all')
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -59,19 +58,6 @@ def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_pat
 
 
 def idw_interpolation(points, values, grid_points, lon_mesh, power=2):
-    """
-    Inverse Distance Weighting (IDW) interpolation.
-    
-    Args:
-        points: Array of known point coordinates (lon, lat)
-        values: Array of known PM2.5 values at those points
-        grid_points: Array of grid point coordinates to interpolate
-        lon_mesh: Longitude mesh grid for reshaping
-        power: IDW power parameter (default 2)
-    
-    Returns:
-        Interpolated values reshaped to match grid
-    """
     # Compute distances between grid points and known data points 
     distances = cdist(grid_points, points)
     # Replace 0 with a small value to avoid division by zero
