@@ -6,6 +6,7 @@ scipy==1.12.0
 scikit-learn==1.4.2
 xgboost==2.0.3
 hopsworks[python,polars,great-expectations]==4.6.2
+hops-deltalake
 great-expectations==0.18.12
 feldera==0.33.0
 huggingface-hub==0.33.4
