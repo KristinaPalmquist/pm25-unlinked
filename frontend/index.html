@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
     <title>PM 2.5 Air Quality Forecast</title>
     <link
       rel="stylesheet"
@@ -18,13 +21,17 @@
       <!-- Header -->
       <header
         id="app-header"
-        class="absolute top-0 left-0 right-0 z-50 bg-white/50 backdrop-blur-lg px-6 py-6 pb-16 text-4xl font-bold text-center text-gray-900"
+        class="absolute top-0 left-0 right-0 z-50 bg-white/50 backdrop-blur-lg px-6 py-6 pb-16 text-4xl font-normal text-center text-gray-900"
       >
-        PM 2.5 Air Quality Forecast<span id="region-name"></span>
+        PM 2.5 Air Quality Forecast<span
+          id="region-name"
+        ></span>
       </header>
 
       <!-- Toggle Controls -->
-      <nav class="absolute bottom-36 left-16 z-50 flex flex-col gap-3">
+      <nav
+        class="absolute bottom-36 left-16 z-50 flex flex-col gap-3"
+      >
         <button
           id="toggle-sensors"
           class="px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 font-semibold text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white"
@@ -47,29 +54,50 @@
         class="absolute bottom-24 right-4 z-50 bg-white/30 backdrop-blur-lg p-4 rounded-lg shadow-xl border border-white/35 text-gray-900"
         aria-label="Air quality legend"
       >
-        <h3 class="font-semibold mb-2">Air Quality Levels</h3>
+        <h3 class="font-semibold mb-2">
+          Air Quality Levels
+        </h3>
         <ul class="space-y-1 text-sm">
           <li class="flex items-center">
-            <span class="w-4 h-4 mr-2" style="background: #00e400"></span> Good
+            <span
+              class="w-4 h-4 mr-2"
+              style="background: #00e400"
+            ></span>
+            Good
           </li>
           <li class="flex items-center">
-            <span class="w-4 h-4 mr-2" style="background: #ffff00"></span>
+            <span
+              class="w-4 h-4 mr-2"
+              style="background: #ffff00"
+            ></span>
             Moderate
           </li>
           <li class="flex items-center">
-            <span class="w-4 h-4 mr-2" style="background: #ff7e00"></span>
+            <span
+              class="w-4 h-4 mr-2"
+              style="background: #ff7e00"
+            ></span>
             Unhealthy (Sensitive)
           </li>
           <li class="flex items-center">
-            <span class="w-4 h-4 mr-2" style="background: #ff0000"></span>
+            <span
+              class="w-4 h-4 mr-2"
+              style="background: #ff0000"
+            ></span>
             Unhealthy
           </li>
           <li class="flex items-center">
-            <span class="w-4 h-4 mr-2" style="background: #8f3f97"></span> Very
-            Unhealthy
+            <span
+              class="w-4 h-4 mr-2"
+              style="background: #8f3f97"
+            ></span>
+            Very Unhealthy
           </li>
           <li class="flex items-center">
-            <span class="w-4 h-4 mr-2" style="background: #7e0023"></span>
+            <span
+              class="w-4 h-4 mr-2"
+              style="background: #7e0023"
+            ></span>
             Hazardous
           </li>
         </ul>
@@ -129,7 +157,10 @@
     </div>
 
     <div id="image-modal" class="image-modal hidden">
-      <div id="image-modal-backdrop" class="image-modal-backdrop"></div>
+      <div
+        id="image-modal-backdrop"
+        class="image-modal-backdrop"
+      ></div>
       <div class="image-modal-content">
         <button
           id="image-modal-close"
@@ -143,12 +174,20 @@
     </div>
 
     <div id="details-modal" class="details-modal hidden">
-      <div id="details-modal-backdrop" class="details-modal-backdrop"></div>
+      <div
+        id="details-modal-backdrop"
+        class="details-modal-backdrop"
+      ></div>
       <div class="details-modal-content">
-        <header class="flex items-center justify-between gap-4">
+        <header
+          class="flex items-center justify-between gap-4"
+        >
           <div class="flex items-center gap-2">
             <!-- <h3 class="text-base font-semibold">Sensor details:</h3> -->
-            <p id="details-modal-title" class="text-base font-semibold"></p>
+            <p
+              id="details-modal-title"
+              class="text-base font-semibold"
+            ></p>
           </div>
           <button
             id="details-modal-close"
