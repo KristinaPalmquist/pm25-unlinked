@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npx tailwindcss -i ./frontend/styles/styles.css -o ./frontend/styles/output.css && npm run build"
   functions = "netlify/functions"
   publish = "dist"
 
