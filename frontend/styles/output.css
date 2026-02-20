@@ -554,44 +554,6 @@ video {
   display: none;
 }
 
-.container {
-  width: 100%;
-}
-
-@media (min-width: 640px) {
-  .container {
-    max-width: 640px;
-  }
-}
-
-@media (min-width: 768px) {
-  .container {
-    max-width: 768px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    max-width: 1024px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .container {
-    max-width: 1280px;
-  }
-}
-
-@media (min-width: 1536px) {
-  .container {
-    max-width: 1536px;
-  }
-}
-
-.static {
-  position: static;
-}
-
 .absolute {
   position: absolute;
 }
@@ -646,10 +608,6 @@ video {
 
 .mr-2 {
   margin-right: 0.5rem;
-}
-
-.block {
-  display: block;
 }
 
 .flex {
@@ -834,10 +792,6 @@ video {
   font-weight: 600;
 }
 
-.capitalize {
-  text-transform: capitalize;
-}
-
 .leading-tight {
   line-height: 1.25;
 }
@@ -848,11 +802,6 @@ video {
 
 .tracking-tighter {
   letter-spacing: -0.05em;
-}
-
-.text-gray-700 {
-  --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity, 1));
 }
 
 .text-gray-900 {
@@ -870,10 +819,6 @@ video {
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.filter {
-  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
 .backdrop-blur-lg {
@@ -1365,11 +1310,6 @@ button {
   background: #059669;
 }
 
-.hover\:bg-emerald-400:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(52 211 153 / var(--tw-bg-opacity, 1));
-}
-
 .hover\:bg-emerald-300:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(110 231 183 / var(--tw-bg-opacity, 1));
@@ -1386,11 +1326,6 @@ button {
 .hover\:text-gray-900:hover {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
-}
-
-.data-\[active\=true\]\:bg-emerald-dark[data-active="true"] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(16 185 129 / var(--tw-bg-opacity, 1));
 }
 
 .data-\[active\=true\]\:bg-emerald-400[data-active="true"] {

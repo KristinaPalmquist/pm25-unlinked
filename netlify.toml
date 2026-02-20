@@ -1,7 +1,7 @@
 [build]
-  command = "npx tailwindcss -i ./frontend/styles/styles.css -o ./frontend/styles/output.css && npm run build"
+  command = "npx tailwindcss -c ./frontend/tailwind.config.js -i ./frontend/styles/styles.css -o ./frontend/styles/output.css && npm run build"
   functions = "netlify/functions"
-  publish = "dist"
+  publish = "frontend"
 
 [functions]
   # Python runtime for serverless functions
