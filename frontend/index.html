@@ -7,6 +7,21 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>PM 2.5 Air Quality Forecast</title>
+
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap"
+    />
+
     <link
       rel="stylesheet"
       href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css"
@@ -15,86 +30,93 @@
   </head>
   <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
+      <header
+        id="app-header"
+        class="w-full bg-white border-b-2 border-black p-4 md:p-3 flex flex-col md:flex-row justify-between items-baseline font-swiss"
+      >
+        <div class="space-y-0">
+          <h1
+            class="text-[10vw] md:text-[4vw] font-[100] uppercase tracking-[0.2em] mt-4"
+          >
+            PM 2.5 Air Quality Forecast<br />
+            <span
+              id="region-name"
+              class="text-slate-300"
+            ></span>
+          </h1>
+        </div>
+      </header>
+
       <!-- Main Map Area (lowest layer) -->
       <div id="map" class="absolute inset-0"></div>
 
-      <!-- Header -->
-      <header
-        id="app-header"
-        class="absolute top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-6 py-6 pb-16 text-[3.5vw] min-[1500px]:text-6xl text-[clamp(1.5rem, 4vw, 4rem)] font-normal leading-tight tracking-tighter text-left text-gray-900"
-      >
-        PM 2.5 Air Quality Forecast<span
-          id="region-name"
-        ></span>
-      </header>
-
       <!-- Toggle Controls -->
-      <nav
-        class="absolute bottom-36 left-16 z-50 flex flex-col gap-3"
+      <section
+        class="absolute bottom-4 left-0 z-50 flex flex-col items-left text-gray-900"
+        aria-label="Day selection"
       >
-        <button
-          id="toggle-sensors"
-          class="w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
-          data-active="true"
+        <div
+          class="flex flex-wrap gap-0 border-2 border-black inline-flex"
         >
-          Sensors
-        </button>
-        <button
-          id="toggle-overlay"
-          class="w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
-          data-active="true"
-        >
-          Heatmap
-        </button>
-      </nav>
+          <button
+            id="toggle-sensors"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            data-active="true"
+          >
+            Sensors
+          </button>
+
+          <button
+            id="toggle-overlay"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            data-active="true"
+          >
+            Heatmap
+          </button>
+        </div>
+      </section>
 
       <!-- Legend -->
       <aside
         id="legend-area"
-        class="absolute bottom-24 right-4 z-50 bg-white border border-gray-200 p-4 rounded-lg shadow-sm text-gray-900"
+        class="absolute bottom-4 right-0 z-50 flex flex-col items-left bg-white border-2 border-black p-6 font-swiss"
         aria-label="Air quality legend"
       >
-        <h3 class="font-semibold mb-2">
-          Air Quality Levels
+        <h3
+          class="text-[10px] font-black uppercase tracking-[0.3em] mb-4"
+        >
+          Air Quality Index [PM 2.5]
         </h3>
-        <ul class="space-y-1 text-sm">
-          <li class="flex items-center">
-            <span
-              class="w-4 h-4 mr-2 bg-sensor-good"
-            ></span>
-            Good
-          </li>
-          <li class="flex items-center">
-            <span
-              class="w-4 h-4 mr-2 bg-sensor-moderate"
-            ></span>
-            Moderate
-          </li>
-          <li class="flex items-center">
-            <span
-              class="w-4 h-4 mr-2 bg-sensor-unhealthy-sensitive"
-            ></span>
-            Unhealthy (Sensitive)
-          </li>
-          <li class="flex items-center">
-            <span
-              class="w-4 h-4 mr-2 bg-sensor-unhealthy"
-            ></span>
-            Unhealthy
-          </li>
-          <li class="flex items-center">
-            <span
-              class="w-4 h-4 mr-2 bg-sensor-very-unhealthy"
-            ></span>
-            Very Unhealthy
-          </li>
-          <li class="flex items-center">
-            <span
-              class="w-4 h-4 mr-2 bg-sensor-hazardous"
-            ></span>
-            Hazardous
-          </li>
-        </ul>
+        <div class="flex flex-col gap-1 w-64">
+          <div class="flex h-8 w-fullborder-2 border-black">
+            <div
+              class="flex-1 bg-sensor-good border-r border-black"
+              title="Good"
+            ></div>
+            <div
+              class="flex-1 bg-sensor-moderate border-r border-black"
+              title="Moderate"
+            ></div>
+            <div
+              class="flex-1 bg-sensor-sensitive border-r border-black"
+              title="Sensitive"
+            ></div>
+            <div
+              class="flex-1 bg-sensor-unhealthy border-r border-black"
+              title="Unhealthy"
+            ></div>
+            <div
+              class="flex-1 bg-sensor-hazardous border-r border-black"
+              title="hazardous"
+            ></div>
+          </div>
+
+          <div
+            class="flex justify-between text-[9px] font-black uppercase mt-1 italic"
+          >
+            <span>0 / Good</span> <span>500 / Danger</span>
+          </div>
+        </div>
       </aside>
 
       <!-- Day Selector -->
@@ -102,47 +124,50 @@
         class="absolute bottom-4 left-0 right-0 z-50 flex flex-col items-center text-gray-900"
         aria-label="Day selection"
       >
-        <div class="flex gap-2">
+        <div
+          class="flex flex-wrap gap-0 border-2 border-black inline-flex"
+        >
           <button
             data-day="0"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
             data-active="true"
           >
             Today
           </button>
           <button
             data-day="1"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
           >
             Tomorrow
           </button>
           <button
             data-day="2"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
           >
             <span class="weekday-label"></span>
           </button>
+
           <button
             data-day="3"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="4"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="5"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="6"
-            class="day-button w-28 h-12 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-300 hover:text-gray-900 hover:font-semibold hover:-tracking-[0.02em] font-normal tracking-[0.02em] text-lg text-center cursor-pointer transition-all duration-150 data-[active=true]:bg-emerald-400 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:-tracking-[0.02em]"
+            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
           >
             <span class="weekday-label"></span>
           </button>
@@ -199,6 +224,162 @@
         </div>
       </div>
     </div>
+
+    <section
+      class="grid grid-cols-1 md:grid-cols-12 border-t-8 border-black font-swiss bg-white w-full"
+    >
+      <div
+        class="md:col-span-2 p-6 border-b-4 md:border-b-0 md:border-r-4 border-black flex flex-col justify-between bg-white"
+      >
+        <div>
+          <span
+            class="text-[12vw] md:text-[8vw] font-black leading-none tracking-tighter block"
+            >01</span
+          >
+          <h2
+            class="text-3xl font-black uppercase mt-4 leading-none"
+          >
+            The<br />Forecast<br />Model
+          </h2>
+        </div>
+        <p
+          class="text-[10px] font-black uppercase tracking-[0.4em] mt-12 text-slate-400s"
+        >
+          Project / Air Quality
+        </p>
+      </div>
+
+      <div
+        class="md:col-span-7 p-6 border-b-4 md:border-b-0 md:border-r-4 border-black flex-flex-col justify-center"
+      >
+        <h3
+          class="text-xs font-black uppercase mb-8 tracking-[0.2em]"
+        >
+          [ Abstract ]
+        </h3>
+        <p
+          class="text-3xl md:text-4xl font-bold leading-[1.1] tracking-tighter"
+        >
+          We utilize historical sensor data to train a
+          machine learning model that predicts
+          <span class="bg-black text-white px-2"
+            >PM 2.5</span
+          >
+          levels one week into the future. Visualizing
+          invisible health risks through open data
+        </p>
+      </div>
+
+      <div
+        class="md:col-span-3 p-6 bg-black text-white flex flex-col justify-between"
+      >
+        <div>
+          <h3
+            class="text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-slate-500"
+          >
+            Technical Specs
+          </h3>
+
+          <div class="space-4x">
+            <div
+              class="flex justify-between border-b border-zinc-800 pb-2"
+            >
+              <span class="text-[10px] font-bold uppercase"
+                >Algorithm</span
+              >
+              <span
+                class="text-[10px] font-bold uppercase text-slate-400"
+                >XGBooster</span
+              >
+            </div>
+
+            <div
+              class="flex justify-between border-b border-zinc-800 pb-2"
+            >
+              <span class="text-[10px] font-bold uppercase"
+                >Target</span
+              >
+              <span
+                class="text-[10px] font-bold uppercase text-slate-400"
+                >PM 2.5 μg/m³</span
+              >
+            </div>
+            <div
+              class="flex justify-between border-b border-zinc-800 pb-2"
+            >
+              <span class="text-[10px] font-bold uppercase"
+                >Update rate</span
+              >
+              <span
+                class="text-[10px] font-bold uppercase text-slate-400"
+                >every 8 hours</span
+              >
+            </div>
+
+            <div
+              class="flex justify-between border-b border-zinc-800 pb-2"
+            >
+              <span
+                class="block text-[10px] font-black uppercase text-slate-500 mb-1 italic"
+                >Data Source / API</span
+              >
+              <a
+                href="https://aqicn.org/"
+                target="_blank"
+                class="text-[10px] font-bold uppercase hover:text-sensor-good transition-colors italic"
+                >Aqicn.org [World Air Quality]</a
+              >
+            </div>
+
+            <div
+              class="flex justify-between border-b border-zinc-800 pb-2"
+            >
+              <span
+                class="block text-[10px] font-black uppercase text-slate-500 mb-1 italic"
+                >Infrastructure / MLOps</span
+              >
+              <a
+                href="https://hopsworks.ai/"
+                target="_blank"
+                class="text-[10px] font-bold uppercase hover:text-sensor-good transition-colors italic"
+                >Hopsworks</a
+              >
+            </div>
+
+            <div
+              class="flex justify-between border-b border-zinc-800 pb-2"
+            >
+              <span
+                class="block text-[10px] font-black uppercase text-slate-500 mb-1 italic"
+                >Base Architecture / Fork</span
+              >
+              <a
+                href="https://github.com/Tegelstenen/pm25-forecast-openmeteo-aqicn"
+                target="_blank"
+                class="text-[10px] font-bold uppercase hover:text-sensor-good transition-colors italic"
+                >@Tegelstenen [GitHub]</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex items-center gap-4">
+          <div class="relative flex h-3 w-3">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sensor-good opacity-75"
+            >
+            </span>
+            <span
+              class="relative inline-flex rounded-full h-3 w-3 bg-sensor-good"
+            ></span>
+          </div>
+          <span
+            class="text-[10px] font-black uppercase tracking-widest"
+            >Stream: Active</span
+          >
+        </div>
+      </div>
+    </section>
 
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <script type="module" src="./js/main.js"></script>

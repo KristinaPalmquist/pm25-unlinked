@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --font-family: 'Inter', sans-serif;
+  --font-family: "Inter", sans-serif;
   --page-bg: #f4f6fb;
   --text-primary: #0f172a;
   --text-muted: #94a3b8;
@@ -47,90 +47,6 @@ section {
   position: relative;
   z-index: 50 !important;
   pointer-events: auto !important;
-}
-
-body.heatmap-active #app-header {
-  background-color: rgba(221, 221, 221, 0.95) !important;
-}
-
-body.heatmap-active #legend-area {
-  pointer-events: auto !important;
-  padding: 32px;
-  margin: 8px;
-
-  /* White center, gray edges */
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(240, 240, 240, 0) 0%,
-      rgba(240, 240, 240, 0.6) 12%,
-      rgba(255, 255, 255, 1) 50%,
-      rgba(240, 240, 240, 0.6) 88%,
-      rgba(240, 240, 240, 0) 100%
-    ),
-    linear-gradient(
-      to right,
-      rgba(240, 240, 240, 0) 0%,
-      rgba(240, 240, 240, 0.6) 12%,
-      rgba(255, 255, 255, 1) 50%,
-      rgba(240, 240, 240, 0.6) 88%,
-      rgba(240, 240, 240, 0) 100%
-    );
-
-  /* Mask: fade from all four sides inward */
-  -webkit-mask-image:
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      black 12%,
-      black 88%,
-      transparent 100%
-    ),
-    linear-gradient(
-      to right,
-      transparent 0%,
-      black 12%,
-      black 88%,
-      transparent 100%
-    );
-  -webkit-mask-composite: source-in;
-
-  mask-image:
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      black 12%,
-      black 88%,
-      transparent 100%
-    ),
-    linear-gradient(
-      to right,
-      transparent 0%,
-      black 12%,
-      black 88%,
-      transparent 100%
-    );
-  mask-composite: intersect;
-
-  backdrop-filter: blur(16px);
-}
-
-body.heatmap-active .day-button,
-body.heatmap-active #toggle-sensors,
-body.heatmap-active #toggle-overlay {
-  background-color: rgb(255, 255, 255) !important;
-}
-
-body.heatmap-active .day-button:hover,
-body.heatmap-active #toggle-sensors:hover,
-body.heatmap-active #toggle-overlay:hover {
-  background-color: rgb(52, 211, 153) !important; /* emerald-400 */
-}
-
-body.heatmap-active .day-button[data-active='true'],
-body.heatmap-active #toggle-sensors[data-active='true'],
-body.heatmap-active #toggle-overlay[data-active='true'] {
-  background-color: rgb(16, 185, 129) !important; /* emerald-500 */
 }
 
 /* Ensure sensor markers are interactive */
@@ -197,74 +113,13 @@ body.heatmap-active #toggle-overlay[data-active='true'] {
   transition: box-shadow 0.2s ease;
 }
 
-#app-header {
-  pointer-events: auto !important;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.2) 75%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    black 40%,
-    transparent 100%
-  );
-}
-
 /* Ensure all UI controls can receive clicks */
 nav,
 #legend-area,
-section[aria-label='Day selection'],
+section[aria-label="Day selection"],
 .day-button,
 button {
   pointer-events: auto !important;
-}
-
-#legend-area {
-  pointer-events: auto !important;
-  padding: 32px;
-  margin: 8px;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(16px);
-
-  /* Fade only the outer 8–10% of the box */
-  -webkit-mask-image:
-    linear-gradient(
-      to right,
-      transparent 0%,
-      black 10%,
-      black 90%,
-      transparent 100%
-    ),
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      black 10%,
-      black 90%,
-      transparent 100%
-    );
-  -webkit-mask-composite: source-in;
-
-  mask-image:
-    linear-gradient(
-      to right,
-      transparent 0%,
-      black 10%,
-      black 90%,
-      transparent 100%
-    ),
-    linear-gradient(
-      to bottom,
-      transparent 0%,
-      black 10%,
-      black 90%,
-      transparent 100%
-    );
-  mask-composite: intersect;
 }
 
 #focus-panel {
@@ -273,8 +128,8 @@ button {
   pointer-events: none;
 }
 
-#focus-panel[style*='display: flex'],
-#focus-panel[style*='opacity: 1'] {
+#focus-panel[style*="display: flex"],
+#focus-panel[style*="opacity: 1"] {
   pointer-events: auto;
 }
 
@@ -413,7 +268,7 @@ button {
   background: var(--table-stripe);
 }
 
-/* Range Slider Styling */
+/* Range Slider Styling 
 #daySlider {
   -webkit-appearance: none;
   appearance: none;
@@ -461,4 +316,4 @@ button {
 
 #daySlider::-moz-range-thumb:hover {
   background: #059669;
-}
+}*/
