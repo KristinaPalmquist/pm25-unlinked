@@ -1,7 +1,22 @@
 module.exports = {
-  content: ['./index.html', './js/**/*.js'],
+  content: ["./index.html", "./js/**/*.js"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        sensor: {
+          good: "00e400",
+          moderate: "ffff00",
+          unhealthy_sensitive: "ff7e00",
+          unhealthy: "ff0000",
+          very_unhealthy: "8f3f97",
+          hazardous: "7e0023",
+        },
+        dark: "#1a1a1a",
+      },
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };

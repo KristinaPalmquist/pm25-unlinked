@@ -34,14 +34,14 @@
       >
         <button
           id="toggle-sensors"
-          class="px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+          class="w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           data-active="true"
         >
           Sensors
         </button>
         <button
           id="toggle-overlay"
-          class="px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+          class="w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           data-active="true"
         >
           Heatmap
@@ -60,43 +60,37 @@
         <ul class="space-y-1 text-sm">
           <li class="flex items-center">
             <span
-              class="w-4 h-4 mr-2"
-              style="background: #00e400"
+              class="w-4 h-4 mr-2 bg-sensor-good"
             ></span>
             Good
           </li>
           <li class="flex items-center">
             <span
-              class="w-4 h-4 mr-2"
-              style="background: #ffff00"
+              class="w-4 h-4 mr-2 bg-sensor-moderate"
             ></span>
             Moderate
           </li>
           <li class="flex items-center">
             <span
-              class="w-4 h-4 mr-2"
-              style="background: #ff7e00"
+              class="w-4 h-4 mr-2 bg-sensor-unhealthy-sensitive"
             ></span>
             Unhealthy (Sensitive)
           </li>
           <li class="flex items-center">
             <span
-              class="w-4 h-4 mr-2"
-              style="background: #ff0000"
+              class="w-4 h-4 mr-2 bg-sensor-unhealthy"
             ></span>
             Unhealthy
           </li>
           <li class="flex items-center">
             <span
-              class="w-4 h-4 mr-2"
-              style="background: #8f3f97"
+              class="w-4 h-4 mr-2 bg-sensor-very-unhealthy"
             ></span>
             Very Unhealthy
           </li>
           <li class="flex items-center">
             <span
-              class="w-4 h-4 mr-2"
-              style="background: #7e0023"
+              class="w-4 h-4 mr-2 bg-sensor-hazardous"
             ></span>
             Hazardous
           </li>
@@ -111,44 +105,44 @@
         <div class="flex gap-2">
           <button
             data-day="0"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
             data-active="true"
           >
             Today
           </button>
           <button
             data-day="1"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           >
             Tomorrow
           </button>
           <button
             data-day="2"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="3"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="4"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="5"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           >
             <span class="weekday-label"></span>
           </button>
           <button
             data-day="6"
-            class="day-button px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
+            class="day-button w-20 px-4 py-2 bg-white/50 backdrop-blur-lg rounded-lg border border-white/35 shadow hover:bg-emerald-400 hover:text-gray-900 hover:font-semibold font-normal text-sm data-[active=true]:bg-emerald-500 data-[active=true]:text-white data-[active=true]:font-semibold"
           >
             <span class="weekday-label"></span>
           </button>
