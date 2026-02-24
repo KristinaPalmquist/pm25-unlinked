@@ -632,6 +632,10 @@ video {
   right: 1rem;
 }
 
+.top-0 {
+  top: 0px;
+}
+
 .z-50 {
   z-index: 50;
 }
@@ -990,8 +994,17 @@ video {
   padding-bottom: 1rem;
 }
 
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
 .pb-2 {
   padding-bottom: 0.5rem;
+}
+
+.pb-16 {
+  padding-bottom: 4rem;
 }
 
 .text-left {
@@ -1056,6 +1069,10 @@ video {
   font-size: calc(90cqi / 24);
 }
 
+.text-\[3\.5vw\] {
+  font-size: 3.5vw;
+}
+
 .font-\[100\] {
   font-weight: 100;
 }
@@ -1090,6 +1107,10 @@ video {
 
 .leading-none {
   line-height: 1;
+}
+
+.leading-tight {
+  line-height: 1.25;
 }
 
 .tracking-\[0\.02em\] {
@@ -1669,5 +1690,12 @@ button {
 
   .md\:text-\[8vw\] {
     font-size: 8vw;
+  }
+}
+
+@media (min-width: 1500px) {
+  .min-\[1500px\]\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
   }
 }

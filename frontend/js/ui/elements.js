@@ -44,14 +44,14 @@ export function getCardElements(cardId, thumbId) {
 }
 
 export function adjustHeaderText() {
-  regionName.style.transform = "scaleX(1)";
-  const containerWidth = appHeader.offsetWidth;
-  const textWidth = regionName.offsetWidth;
+  ui.regionName.style.transform = "scaleX(1)";
+  const containerWidth = ui.appHeader.offsetWidth;
+  const textWidth = ui.regionName.offsetWidth;
   const scaleFactor = containerWidth / textWidth;
-  regionName.style.transform = "scaleX(${scaleFactor})";
+  ui.regionName.style.transform = `scaleX(${scaleFactor})`;
 }
 
 const observer = new ResizeObserver(adjustHeaderText);
-observer.observe(appHeader);
+observer.observe(ui.appHeader);
 
 adjustHeaderText();

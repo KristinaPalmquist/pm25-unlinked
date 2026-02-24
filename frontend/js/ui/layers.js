@@ -1,10 +1,14 @@
-import { getAQIColor } from '../config/mapConfig.js';
-import { deriveDayDates } from '../utils/index.js';
+import { getAQIColor } from "../config/mapConfig.js";
+import { deriveDayDates } from "../utils/index.js";
 
-export const sourceId = 'pm25-interpolation';
-export const layerId = 'pm25-interpolation-layer';
+export const sourceId = "pm25-interpolation";
+export const layerId = "pm25-interpolation-layer";
 
-export async function loadMarkersFromBackend(map, state, onClick) {
+export async function loadMarkersFromBackend(
+  map,
+  state,
+  onClick,
+) {
   const rows = await fetchLatestBatch();
   rows.forEach((row) => ingestRow(row, state));
   Object.values(state.sensorData).forEach((entry) => {
@@ -24,7 +28,7 @@ export async function loadRaster(map, config, day, state) {
   console.log(`   URL: ${url}`);
 
   map.addSource(sourceId, {
-    type: 'image',
+    type: "image",
     url: url,
     coordinates: [
       [config.mapBounds[0], config.mapBounds[3]],
@@ -35,9 +39,11 @@ export async function loadRaster(map, config, day, state) {
   });
 
   // Listen for source data events to detect load failures
-  map.once('error', (e) => {
+  map.once("error", (e) => {
     if (e.sourceId === sourceId) {
-      console.error(`❌ Failed to load raster image for day ${day}`);
+      console.error(
+        `❌ Failed to load raster image for day ${day}`,
+      );
       console.error(`   URL: ${url}`);
       console.error(`   Error:`, e.error);
     }
@@ -46,14 +52,19 @@ export async function loadRaster(map, config, day, state) {
   // Add raster layer on top of base map but below labels
   // Find the first label or symbol layer to insert before it
   const layers = map.getStyle().layers;
-  const firstSymbolId = layers.find((layer) => layer.type === 'symbol')?.id;
+  const firstSymbolId = layers.find(
+    (layer) => layer.type === "symbol",
+  )?.id;
 
   map.addLayer(
     {
       id: layerId,
-      type: 'raster',
+      type: "raster",
       source: sourceId,
-      paint: { 'raster-opacity': 0.75, 'raster-resampling': 'linear' },
+      paint: {
+        "raster-opacity": 0.75,
+        "raster-resampling": "linear",
+      },
     },
     firstSymbolId, // Insert before labels, or on top if no labels found
   );
@@ -72,12 +83,16 @@ export function buildRasterUrl(day, config) {
 
 export function waitForStyle(map) {
   return new Promise((resolve) =>
-    map.isStyleLoaded() ? resolve() : map.once('styledata', resolve),
+    map.isStyleLoaded()
+      ? resolve()
+      : map.once("styledata", resolve),
   );
 }
 
 export function loadCsvMarkers(rows, state, onClick) {
-  state.csvHeaders = rows.length ? Object.keys(rows[0]) : [];
+  state.csvHeaders = rows.length
+    ? Object.keys(rows[0])
+    : [];
   state.dayDates = deriveDayDates(rows);
 
   state.markers.forEach((m) => m.remove());
@@ -86,22 +101,24 @@ export function loadCsvMarkers(rows, state, onClick) {
 
   rows.forEach((row) => ingestRow(row, state));
 
-  state.markers = Object.values(state.sensorData).map((entry) =>
-    createMarker(entry, onClick),
+  state.markers = Object.values(state.sensorData).map(
+    (entry) => createMarker(entry, onClick),
   );
 }
 
 export function ingestRow(row, state) {
   const sensorId = row.sensor_id || row.sensorId;
   const lat = parseFloat(row.latitude ?? row.lat);
-  const lon = parseFloat(row.longitude ?? row.lon ?? row.lng);
+  const lon = parseFloat(
+    row.longitude ?? row.lon ?? row.lng,
+  );
 
   if (!sensorId || Number.isNaN(lat) || Number.isNaN(lon)) {
     return;
   }
 
-  const street = row.street || row.location || '';
-  const city = row.city_y || row.city_x || row.city || '';
+  const street = row.street || row.location || "";
+  const city = row.city_y || row.city_x || row.city || "";
 
   if (!state.sensorData[sensorId]) {
     state.sensorData[sensorId] = {
@@ -116,7 +133,10 @@ export function ingestRow(row, state) {
   }
 
   const entry = state.sensorData[sensorId];
-  if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lon)) {
+  if (
+    !Number.isFinite(entry.lat) ||
+    !Number.isFinite(entry.lon)
+  ) {
     entry.lat = lat;
     entry.lon = lon;
   }
@@ -124,29 +144,35 @@ export function ingestRow(row, state) {
   if (!entry.city && city) entry.city = city;
   entry.rows.push(row);
 
-  const predicted = parseFloat(row.predicted_pm25 ?? row.predicted ?? 'NaN');
-  const actual = parseFloat(row.pm25 ?? 'NaN');
-  if (Number.isFinite(predicted)) entry.latestValue = predicted;
-  else if (Number.isFinite(actual)) entry.latestValue = actual;
+  const predicted = parseFloat(
+    row.predicted_pm25 ?? row.predicted ?? "NaN",
+  );
+  const actual = parseFloat(row.pm25 ?? "NaN");
+  if (Number.isFinite(predicted))
+    entry.latestValue = predicted;
+  else if (Number.isFinite(actual))
+    entry.latestValue = actual;
 }
 
 export function buildPopupHtml(entry) {
   const sensorId = `Sensor ID: ${entry.sensorId}`;
-  const street = entry.street ? `<br/>${entry.street}` : '';
-  const city = entry.city ? `<br/>${entry.city}` : '';
+  const street = entry.street ? `<br/>${entry.street}` : "";
+  const city = entry.city ? `<br/>${entry.city}` : "";
   const reading = Number.isFinite(entry.latestValue)
     ? `<br/>PM2.5: ${entry.latestValue.toFixed(1)}`
-    : '<br/>No recent value';
+    : "<br/>No recent value";
   return `<strong>${sensorId}</strong>${street}${city}${reading}`;
 }
 
 export function createMarker(entry, onClick) {
-  const element = document.createElement('div');
-  element.className = 'sensor-marker';
-  element.style.background = getAQIColor(entry.latestValue ?? 0);
-  element.style.cursor = 'pointer';
-  element.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.2)';
-  element.addEventListener('click', (e) => {
+  const element = document.createElement("div");
+  element.className = "sensor-marker";
+  element.style.background = getAQIColor(
+    entry.latestValue ?? 0,
+  );
+  element.style.cursor = "pointer";
+  element.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.2)";
+  element.addEventListener("click", (e) => {
     e.stopPropagation();
     onClick(entry.sensorId, element);
   });
@@ -154,8 +180,9 @@ export function createMarker(entry, onClick) {
   return new maplibregl.Marker({ element })
     .setLngLat([entry.lon, entry.lat])
     .setPopup(
-      new maplibregl.Popup({ closeButton: false, offset: 12 }).setHTML(
-        buildPopupHtml(entry),
-      ),
+      new maplibregl.Popup({
+        closeButton: false,
+        offset: 12,
+      }).setHTML(buildPopupHtml(entry)),
     );
 }
