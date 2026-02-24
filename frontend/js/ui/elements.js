@@ -1,21 +1,39 @@
 export const ui = {
-  dayButtons: document.querySelectorAll('.day-button'),
-  sensorToggle: document.getElementById('toggle-sensors'),
-  overlayToggle: document.getElementById('toggle-overlay'),
-  focusPanel: document.getElementById('focus-panel'),
-  focusName: document.getElementById('focus-name'),
-  focusMeta: document.getElementById('focus-meta'),
-  focusDetailsBtn: document.getElementById('focus-details-btn'),
-  imageModal: document.getElementById('image-modal'),
-  imageModalImg: document.getElementById('image-modal-img'),
-  imageModalClose: document.getElementById('image-modal-close'),
-  imageModalBackdrop: document.getElementById('image-modal-backdrop'),
-  detailsModal: document.getElementById('details-modal'),
-  detailsModalTitle: document.getElementById('details-modal-title'),
-  detailsModalClose: document.getElementById('details-modal-close'),
-  detailsModalBackdrop: document.getElementById('details-modal-backdrop'),
-  detailsTableHead: document.getElementById('details-table-head'),
-  detailsTableBody: document.getElementById('details-table-body'),
+  appHeader: document.getElementById("app-header"),
+  regionName: document.getElementById("region-name"),
+  dayButtons: document.querySelectorAll(".day-button"),
+  sensorToggle: document.getElementById("toggle-sensors"),
+  overlayToggle: document.getElementById("toggle-overlay"),
+  focusPanel: document.getElementById("focus-panel"),
+  focusName: document.getElementById("focus-name"),
+  focusMeta: document.getElementById("focus-meta"),
+  focusDetailsBtn: document.getElementById(
+    "focus-details-btn",
+  ),
+  imageModal: document.getElementById("image-modal"),
+  imageModalImg: document.getElementById("image-modal-img"),
+  imageModalClose: document.getElementById(
+    "image-modal-close",
+  ),
+  imageModalBackdrop: document.getElementById(
+    "image-modal-backdrop",
+  ),
+  detailsModal: document.getElementById("details-modal"),
+  detailsModalTitle: document.getElementById(
+    "details-modal-title",
+  ),
+  detailsModalClose: document.getElementById(
+    "details-modal-close",
+  ),
+  detailsModalBackdrop: document.getElementById(
+    "details-modal-backdrop",
+  ),
+  detailsTableHead: document.getElementById(
+    "details-table-head",
+  ),
+  detailsTableBody: document.getElementById(
+    "details-table-body",
+  ),
 };
 
 export function getCardElements(cardId, thumbId) {
@@ -24,3 +42,16 @@ export function getCardElements(cardId, thumbId) {
     thumbEl: document.getElementById(thumbId),
   };
 }
+
+export function adjustHeaderText() {
+  regionName.style.transform = "scaleX(1)";
+  const containerWidth = appHeader.offsetWidth;
+  const textWidth = regionName.offsetWidth;
+  const scaleFactor = containerWidth / textWidth;
+  regionName.style.transform = "scaleX(${scaleFactor})";
+}
+
+const observer = new ResizeObserver(adjustHeaderText);
+observer.observe(appHeader);
+
+adjustHeaderText();

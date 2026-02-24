@@ -31,21 +31,44 @@
   <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
       <header
-        id="app-header"
-        class="w-full bg-white border-b-2 border-black p-4 md:p-3 flex flex-col md:flex-row justify-between items-baseline font-swiss"
+        class="w-full overflow-hidden border-b-2 border-black bg-white py-4"
       >
-        <div class="space-y-0">
+        <div
+          id="header-container"
+          class="w-full overflow-hidden"
+        >
           <h1
-            class="text-[10vw] md:text-[4vw] font-[100] uppercase tracking-[0.2em] mt-4"
+            id="app-header"
+            class="font-sans font-normal uppercase text-left whitespace-nowrap origin-left transition-transform duration-75 inline-block"
           >
-            PM 2.5 Air Quality Forecast<br />
-            <span
-              id="region-name"
-              class="text-slate-300"
-            ></span>
+            PM 2.5 Air Quality Forecast
+            <span id="region-name"></span>
           </h1>
         </div>
       </header>
+
+      <!-- <header
+        id="app-header"
+        class="w-full bg-white border-b-2 border-black p-4 md:p-3 flex flex-col md:flex-row justify-between items-baseline font-swiss"
+      >
+        <div
+          class="container space-y-0"
+          style="container-type: inline-size; width: 100%"
+        >
+          <h1
+            style="
+              font-size: clamp(12px, 4.5cqi, 15vw);
+              white-space: nowrap;
+            "
+          >
+            PM 2.5 Air Quality Forecast
+            <span
+              id="region-name"
+              class="text-slate-700"
+            ></span>
+          </h1>
+        </div>
+      </header> -->
 
       <!-- Main Map Area (lowest layer) -->
       <div id="map" class="absolute inset-0"></div>
@@ -88,25 +111,27 @@
           Air Quality Index [PM 2.5]
         </h3>
         <div class="flex flex-col gap-1 w-64">
-          <div class="flex h-8 w-fullborder-2 border-black">
+          <div
+            class="flex h-8 w-fullborder-2 border-black border-2"
+          >
             <div
-              class="flex-1 bg-sensor-good border-r border-black"
+              class="flex-1 bg-sensor-good"
               title="Good"
             ></div>
             <div
-              class="flex-1 bg-sensor-moderate border-r border-black"
+              class="flex-1 bg-sensor-moderate"
               title="Moderate"
             ></div>
             <div
-              class="flex-1 bg-sensor-sensitive border-r border-black"
+              class="flex-1 bg-sensor-sensitive"
               title="Sensitive"
             ></div>
             <div
-              class="flex-1 bg-sensor-unhealthy border-r border-black"
+              class="flex-1 bg-sensor-unhealthy"
               title="Unhealthy"
             ></div>
             <div
-              class="flex-1 bg-sensor-hazardous border-r border-black"
+              class="flex-1 bg-sensor-hazardous"
               title="hazardous"
             ></div>
           </div>
