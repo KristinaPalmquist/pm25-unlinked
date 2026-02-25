@@ -31,15 +31,12 @@
   <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
       <header
-        class="w-full overflow-hidden border-b-2 border-black bg-white py-4"
+        class="w-full border-b-2 border-black bg-white px-6 py-2"
       >
-        <div
-          id="header-container"
-          class="w-full overflow-hidden"
-        >
+        <div id="header-container" class="w-full">
           <h1
             id="app-header"
-            class="font-sans font-normal uppercase text-left whitespace-nowrap origin-left transition-transform duration-75 inline-block"
+            class="m-0 block whitespace-nowrap font-sans font-normal uppercase"
           >
             PM 2.5 Air Quality Forecast
             <span id="region-name"></span>
@@ -47,157 +44,151 @@
         </div>
       </header>
 
-      <!-- <header
-        id="app-header"
-        class="w-full bg-white border-b-2 border-black p-4 md:p-3 flex flex-col md:flex-row justify-between items-baseline font-swiss"
-      >
-        <div
-          class="container space-y-0"
-          style="container-type: inline-size; width: 100%"
-        >
-          <h1
-            style="
-              font-size: clamp(12px, 4.5cqi, 15vw);
-              white-space: nowrap;
-            "
-          >
-            PM 2.5 Air Quality Forecast
-            <span
-              id="region-name"
-              class="text-slate-700"
-            ></span>
-          </h1>
-        </div>
-      </header> -->
-
-      <!-- Main Map Area (lowest layer) -->
+      <!-- Main Map Area -->
       <div id="map" class="absolute inset-0"></div>
 
-      <!-- Toggle Controls -->
-      <section
-        class="absolute bottom-4 left-0 z-50 flex flex-col items-left text-gray-900"
-        aria-label="Day selection"
+      <!-- Bottom UI -->
+      <div
+        class="absolute bottom-4 left-0 right-0 z-50 pointer-events-none"
       >
-        <div
-          class="flex flex-wrap gap-0 border-2 border-black inline-flex"
+        <!-- Day Selector: vertical left on small, horizontal centered on lg+ -->
+        <section
+          class="absolute bottom-0 left-0 lg:left-1/2 lg:-translate-x-1/2 pointer-events-auto flex flex-col lg:flex-row items-start lg:items-center text-gray-900"
+          aria-label="Day selection"
         >
-          <button
-            id="toggle-sensors"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            data-active="true"
-          >
-            Sensors
-          </button>
-
-          <button
-            id="toggle-overlay"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            data-active="true"
-          >
-            Heatmap
-          </button>
-        </div>
-      </section>
-
-      <!-- Legend -->
-      <aside
-        id="legend-area"
-        class="absolute bottom-4 right-0 z-50 flex flex-col items-left bg-white border-2 border-black p-6 font-swiss"
-        aria-label="Air quality legend"
-      >
-        <h3
-          class="text-[10px] font-black uppercase tracking-[0.3em] mb-4"
-        >
-          Air Quality Index [PM 2.5]
-        </h3>
-        <div class="flex flex-col gap-1 w-64">
           <div
-            class="flex h-8 w-fullborder-2 border-black border-2"
+            class="flex flex-col lg:flex-row border-2 border-black divide-y-2 divide-black lg:divide-y-0 lg:divide-x-2"
           >
-            <div
-              class="flex-1 bg-sensor-good"
-              title="Good"
-            ></div>
-            <div
-              class="flex-1 bg-sensor-moderate"
-              title="Moderate"
-            ></div>
-            <div
-              class="flex-1 bg-sensor-sensitive"
-              title="Sensitive"
-            ></div>
-            <div
-              class="flex-1 bg-sensor-unhealthy"
-              title="Unhealthy"
-            ></div>
-            <div
-              class="flex-1 bg-sensor-hazardous"
-              title="hazardous"
-            ></div>
+            <button
+              data-day="0"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              data-active="true"
+            >
+              Today
+            </button>
+            <button
+              data-day="1"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            >
+              Tomorrow
+            </button>
+            <button
+              data-day="2"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            >
+              <span class="weekday-label"></span>
+            </button>
+            <button
+              data-day="3"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            >
+              <span class="weekday-label"></span>
+            </button>
+            <button
+              data-day="4"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            >
+              <span class="weekday-label"></span>
+            </button>
+            <button
+              data-day="5"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            >
+              <span class="weekday-label"></span>
+            </button>
+            <button
+              data-day="6"
+              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            >
+              <span class="weekday-label"></span>
+            </button>
           </div>
+        </section>
 
-          <div
-            class="flex justify-between text-[9px] font-black uppercase mt-1 italic"
-          >
-            <span>0 / Good</span> <span>500 / Danger</span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Day Selector -->
-      <section
-        class="absolute bottom-4 left-0 right-0 z-50 flex flex-col items-center text-gray-900"
-        aria-label="Day selection"
-      >
+        <!-- Left container: empty by default; receives toggle section on lg+ via JS -->
         <div
-          class="flex flex-wrap gap-0 border-2 border-black inline-flex"
-        >
-          <button
-            data-day="0"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            data-active="true"
-          >
-            Today
-          </button>
-          <button
-            data-day="1"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-          >
-            Tomorrow
-          </button>
-          <button
-            data-day="2"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-          >
-            <span class="weekday-label"></span>
-          </button>
+          id="bottom-left"
+          class="absolute bottom-0 left-0 pointer-events-auto flex flex-col items-start"
+        ></div>
 
-          <button
-            data-day="3"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+        <!-- Right container: toggle section lives here by default (small screens);
+             JS moves toggles to bottom-left on lg+ -->
+        <div
+          id="bottom-right"
+          class="absolute bottom-0 right-0 pointer-events-auto flex flex-col items-end"
+        >
+          <!-- Toggle Controls (default position; moved by JS on lg+) -->
+          <section
+            id="toggle-controls"
+            class="flex flex-col text-gray-900"
+            aria-label="Toggle controls"
           >
-            <span class="weekday-label"></span>
-          </button>
-          <button
-            data-day="4"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+            <div
+              class="flex flex-col lg:flex-row border-2 border-black divide-y-2 divide-black lg:divide-y-0 lg:divide-x-2"
+            >
+              <button
+                id="toggle-sensors"
+                class="bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+                data-active="true"
+              >
+                Sensors
+              </button>
+              <button
+                id="toggle-overlay"
+                class="bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+                data-active="true"
+              >
+                Heatmap
+              </button>
+            </div>
+          </section>
+
+          <!-- Legend -->
+          <aside
+            id="legend-area"
+            class="flex flex-col items-start bg-white border-2 border-black p-6 font-swiss"
+            aria-label="Air quality legend"
           >
-            <span class="weekday-label"></span>
-          </button>
-          <button
-            data-day="5"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-          >
-            <span class="weekday-label"></span>
-          </button>
-          <button
-            data-day="6"
-            class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest border-r-2 border-black last:border-r-2 hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-          >
-            <span class="weekday-label"></span>
-          </button>
+            <h3
+              class="text-[10px] font-black uppercase tracking-[0.3em] mb-4"
+            >
+              Air Quality Index [PM 2.5]
+            </h3>
+            <div class="flex flex-col gap-1 w-64">
+              <div
+                class="flex h-8 w-full border-2 border-black"
+              >
+                <div
+                  class="flex-1 bg-sensor-good"
+                  title="Good"
+                ></div>
+                <div
+                  class="flex-1 bg-sensor-moderate"
+                  title="Moderate"
+                ></div>
+                <div
+                  class="flex-1 bg-sensor-sensitive"
+                  title="Sensitive"
+                ></div>
+                <div
+                  class="flex-1 bg-sensor-unhealthy"
+                  title="Unhealthy"
+                ></div>
+                <div
+                  class="flex-1 bg-sensor-hazardous"
+                  title="hazardous"
+                ></div>
+              </div>
+              <div
+                class="flex justify-between text-[9px] font-black uppercase mt-1 italic"
+              >
+                <span>0 / Good</span>
+                <span>500 / Danger</span>
+              </div>
+            </div>
+          </aside>
         </div>
-      </section>
+      </div>
     </div>
 
     <div id="image-modal" class="image-modal hidden">

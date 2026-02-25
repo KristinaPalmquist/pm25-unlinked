@@ -1,6 +1,9 @@
 export const ui = {
   appHeader: document.getElementById("app-header"),
   regionName: document.getElementById("region-name"),
+  headerContainer: document.getElementById(
+    "header-container",
+  ),
   dayButtons: document.querySelectorAll(".day-button"),
   sensorToggle: document.getElementById("toggle-sensors"),
   overlayToggle: document.getElementById("toggle-overlay"),
@@ -44,14 +47,46 @@ export function getCardElements(cardId, thumbId) {
 }
 
 export function adjustHeaderText() {
-  ui.regionName.style.transform = "scaleX(1)";
-  const containerWidth = ui.appHeader.offsetWidth;
-  const textWidth = ui.regionName.offsetWidth;
-  const scaleFactor = containerWidth / textWidth;
-  ui.regionName.style.transform = `scaleX(${scaleFactor})`;
+  const container = ui.headerContainer;
+  const header = ui.appHeader;
+  if (!container || !header) return;
+
+  // Reset to a known size before measuring
+  header.style.fontSize = "100px";
+  const containerWidth = container.offsetWidth;
+  const padding = 48; // 24px each side
+  const textWidth = header.scrollWidth;
+
+  if (textWidth > 0) {
+    const newSize = 100 * (containerWidth - padding) / textWidth;
+    header.style.fontSize = `${newSize}px`;
+  }
 }
 
-const observer = new ResizeObserver(adjustHeaderText);
-observer.observe(ui.appHeader);
+const observer = new ResizeObserver(() => {
+  adjustHeaderText();
+});
+
+if (ui.headerContainer) {
+  observer.observe(ui.headerContainer);
+}
 
 adjustHeaderText();
+
+// Move toggle controls: bottom-left on lg+, back to bottom-right on small
+function repositionToggles(isLg) {
+  const toggleSection = document.getElementById("toggle-controls");
+  const leftContainer = document.getElementById("bottom-left");
+  const rightContainer = document.getElementById("bottom-right");
+  if (!toggleSection || !leftContainer || !rightContainer) return;
+
+  if (isLg) {
+    leftContainer.appendChild(toggleSection);
+  } else {
+    rightContainer.insertBefore(toggleSection, rightContainer.firstChild);
+  }
+}
+
+const lgQuery = window.matchMedia("(min-width: 1024px)");
+lgQuery.addEventListener("change", (e) => repositionToggles(e.matches));
+repositionToggles(lgQuery.matches);

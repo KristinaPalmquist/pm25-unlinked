@@ -22,6 +22,7 @@ import {
   formatDayLabel,
   loadCoordinates,
 } from "./utils/index.js";
+import { adjustHeaderText } from "./ui/elements.js";
 
 async function main() {
   //  Fetch predictions and coordinates
@@ -36,6 +37,7 @@ async function main() {
   if (regionNameEl && gridBounds.REGION_NAME) {
     regionNameEl.textContent =
       " – " + gridBounds.REGION_NAME;
+    adjustHeaderText();
   }
 
   // Build config
