@@ -36,10 +36,13 @@
         <div id="header-container" class="w-full">
           <h1
             id="app-header"
-            class="m-0 block whitespace-nowrap font-sans font-normal uppercase"
+            class="m-0 block whitespace-nowrap font-sans font-bold uppercase"
           >
             PM 2.5 Air Quality Forecast
-            <span id="region-name"></span>
+            <span
+              id="region-name"
+              class="font-normal"
+            ></span>
           </h1>
         </div>
       </header>
@@ -251,10 +254,10 @@
     </div>
 
     <section
-      class="grid grid-cols-1 md:grid-cols-12 border-t-8 border-black font-swiss bg-white w-full"
+      class="grid grid-cols-1 md:grid-cols-12 border-2 border-black font-swiss bg-white w-full"
     >
       <div
-        class="md:col-span-2 p-6 border-b-4 md:border-b-0 md:border-r-4 border-black flex flex-col justify-between bg-white"
+        class="md:col-span-3 p-6 border-b-2 md:border-b-0 md:border-r-2 border-black flex flex-col justify-between bg-white"
       >
         <div>
           <span
@@ -262,26 +265,26 @@
             >01</span
           >
           <h2
-            class="text-3xl font-black uppercase mt-4 leading-none"
+            class="text-3xl font-bold uppercase mt-4 leading-none"
           >
             The<br />Forecast<br />Model
           </h2>
         </div>
         <p
-          class="text-[10px] font-black uppercase tracking-[0.4em] mt-12 text-slate-400s"
+          class="text-[10px] font-bold uppercase tracking-[0.4em] mt-12 text-slate-400s"
         >
           Project / Air Quality
         </p>
       </div>
 
       <div
-        class="md:col-span-7 p-6 border-b-4 md:border-b-0 md:border-r-4 border-black flex-flex-col justify-center"
+        class="md:col-span-6 p-6 border-b-2 md:border-b-0 md:border-r-2 border-black flex flex-col gap-6"
       >
-        <h3
-          class="text-xs font-black uppercase mb-8 tracking-[0.2em]"
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400 pb-6 border-b border-zinc-200"
         >
-          [ Abstract ]
-        </h3>
+          Abstract
+        </p>
         <p
           class="text-3xl md:text-4xl font-bold leading-[1.1] tracking-tighter"
         >
@@ -291,7 +294,7 @@
             >PM 2.5</span
           >
           levels one week into the future. Visualizing
-          invisible health risks through open data
+          invisible health risks through open data.
         </p>
       </div>
 
@@ -299,108 +302,98 @@
         class="md:col-span-3 p-6 bg-black text-white flex flex-col justify-between"
       >
         <div>
-          <h3
-            class="text-[10px] font-black uppercase tracking-[0.3em] mb-10 text-slate-500"
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-6"
           >
             Technical Specs
-          </h3>
+          </p>
 
-          <div class="space-4x">
-            <div
-              class="flex justify-between border-b border-zinc-800 pb-2"
-            >
-              <span class="text-[10px] font-bold uppercase"
+          <div
+            class="flex flex-col divide-y divide-zinc-800"
+          >
+            <div class="flex flex-col py-3">
+              <span
+                class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1"
                 >Algorithm</span
               >
               <span
-                class="text-[10px] font-bold uppercase text-slate-400"
-                >XGBooster</span
+                class="text-[10px] font-bold uppercase tracking-[0.1em]"
+                >XGBoost</span
               >
             </div>
-
-            <div
-              class="flex justify-between border-b border-zinc-800 pb-2"
-            >
-              <span class="text-[10px] font-bold uppercase"
+            <div class="flex flex-col py-3">
+              <span
+                class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1"
                 >Target</span
               >
               <span
-                class="text-[10px] font-bold uppercase text-slate-400"
+                class="text-[10px] font-bold uppercase tracking-[0.1em]"
                 >PM 2.5 μg/m³</span
               >
             </div>
-            <div
-              class="flex justify-between border-b border-zinc-800 pb-2"
-            >
-              <span class="text-[10px] font-bold uppercase"
-                >Update rate</span
+            <div class="flex flex-col py-3">
+              <span
+                class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1"
+                >Update Rate</span
               >
               <span
-                class="text-[10px] font-bold uppercase text-slate-400"
-                >every 8 hours</span
+                class="text-[10px] font-bold uppercase tracking-[0.1em]"
+                >Every 8 hours</span
               >
             </div>
-
-            <div
-              class="flex justify-between border-b border-zinc-800 pb-2"
-            >
+            <div class="flex flex-col py-3">
               <span
-                class="block text-[10px] font-black uppercase text-slate-500 mb-1 italic"
-                >Data Source / API</span
+                class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1"
+                >Data Source</span
               >
               <a
                 href="https://aqicn.org/"
                 target="_blank"
-                class="text-[10px] font-bold uppercase hover:text-sensor-good transition-colors italic"
-                >Aqicn.org [World Air Quality]</a
+                class="text-[10px] font-bold uppercase tracking-[0.1em] hover:text-sensor-good transition-colors"
+                >Aqicn.org</a
               >
             </div>
-
-            <div
-              class="flex justify-between border-b border-zinc-800 pb-2"
-            >
+            <div class="flex flex-col py-3">
               <span
-                class="block text-[10px] font-black uppercase text-slate-500 mb-1 italic"
-                >Infrastructure / MLOps</span
+                class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1"
+                >MLOps</span
               >
               <a
                 href="https://hopsworks.ai/"
                 target="_blank"
-                class="text-[10px] font-bold uppercase hover:text-sensor-good transition-colors italic"
+                class="text-[10px] font-bold uppercase tracking-[0.1em] hover:text-sensor-good transition-colors"
                 >Hopsworks</a
               >
             </div>
-
-            <div
-              class="flex justify-between border-b border-zinc-800 pb-2"
-            >
+            <div class="flex flex-col py-3">
               <span
-                class="block text-[10px] font-black uppercase text-slate-500 mb-1 italic"
-                >Base Architecture / Fork</span
+                class="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-1"
+                >Base Architecture</span
               >
               <a
                 href="https://github.com/Tegelstenen/pm25-forecast-openmeteo-aqicn"
                 target="_blank"
-                class="text-[10px] font-bold uppercase hover:text-sensor-good transition-colors italic"
-                >@Tegelstenen [GitHub]</a
+                class="text-[10px] font-bold uppercase tracking-[0.1em] hover:text-sensor-good transition-colors"
+                >@Tegelstenen</a
               >
             </div>
           </div>
         </div>
 
-        <div class="mt-8 flex items-center gap-4">
-          <div class="relative flex h-3 w-3">
+        <div
+          class="flex items-center gap-3 pt-6 border-t border-zinc-800"
+        >
+          <div class="relative flex h-2 w-2 shrink-0">
             <span
               class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sensor-good opacity-75"
-            >
-            </span>
+            ></span>
             <span
-              class="relative inline-flex rounded-full h-3 w-3 bg-sensor-good"
+              class="relative inline-flex rounded-full h-2 w-2 bg-sensor-good"
             ></span>
           </div>
           <span
-            class="text-[10px] font-black uppercase tracking-widest"
-            >Stream: Active</span
+            class="text-[10px] uppercase tracking-[0.2em] text-zinc-400"
+            >Stream Active</span
           >
         </div>
       </div>
