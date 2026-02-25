@@ -58,7 +58,8 @@ export function adjustHeaderText() {
   const textWidth = header.scrollWidth;
 
   if (textWidth > 0) {
-    const newSize = 100 * (containerWidth - padding) / textWidth;
+    const newSize =
+      (100 * (containerWidth - padding)) / textWidth;
     header.style.fontSize = `${newSize}px`;
   }
 }
@@ -73,20 +74,51 @@ if (ui.headerContainer) {
 
 adjustHeaderText();
 
-// Move toggle controls: bottom-left on lg+, back to bottom-right on small
-function repositionToggles(isLg) {
-  const toggleSection = document.getElementById("toggle-controls");
-  const leftContainer = document.getElementById("bottom-left");
-  const rightContainer = document.getElementById("bottom-right");
-  if (!toggleSection || !leftContainer || !rightContainer) return;
+// Layout states:
+// < 1100px  : days vertical in bottom-left | toggles vertical above legend in bottom-right
+// 1100-1399px: toggles horizontal (top) + days horizontal (bottom) in bottom-left | legend in bottom-right
+// >= 1400px : toggles in bottom-left | days horizontal in bottom-center | legend in bottom-right
+function updateLayout() {
+  const toggleSection = document.getElementById(
+    "toggle-controls",
+  );
+  const daySection =
+    document.getElementById("day-selector");
+  const leftContainer =
+    document.getElementById("bottom-left");
+  const centerContainer =
+    document.getElementById("bottom-center");
+  const rightContainer =
+    document.getElementById("bottom-right");
+  if (
+    !toggleSection ||
+    !daySection ||
+    !leftContainer ||
+    !centerContainer ||
+    !rightContainer
+  )
+    return;
 
-  if (isLg) {
+  if (xlQuery.matches) {
+    // >= 1400px: toggles left, days center
     leftContainer.appendChild(toggleSection);
+    centerContainer.appendChild(daySection);
+  } else if (mdQuery.matches) {
+    // 900-1279px: toggles above days, both left-aligned
+    leftContainer.appendChild(toggleSection);
+    leftContainer.appendChild(daySection);
   } else {
-    rightContainer.insertBefore(toggleSection, rightContainer.firstChild);
+    // < 1100px: days in left, toggles above legend in right
+    leftContainer.appendChild(daySection);
+    rightContainer.insertBefore(
+      toggleSection,
+      rightContainer.firstChild,
+    );
   }
 }
 
-const lgQuery = window.matchMedia("(min-width: 1024px)");
-lgQuery.addEventListener("change", (e) => repositionToggles(e.matches));
-repositionToggles(lgQuery.matches);
+const mdQuery = window.matchMedia("(min-width: 1100px)");
+const xlQuery = window.matchMedia("(min-width: 1400px)");
+mdQuery.addEventListener("change", updateLayout);
+xlQuery.addEventListener("change", updateLayout);
+updateLayout();

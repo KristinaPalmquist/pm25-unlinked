@@ -31,7 +31,7 @@
   <body class="bg-gray-50 text-gray-900">
     <div class="relative h-screen w-screen overflow-hidden">
       <header
-        class="w-full border-b-2 border-black bg-white px-6 py-2"
+        class="w-full border-2 border-black bg-white px-6 py-2"
       >
         <div id="header-container" class="w-full">
           <h1
@@ -45,86 +45,95 @@
       </header>
 
       <!-- Main Map Area -->
-      <div id="map" class="absolute inset-0"></div>
+      <div
+        id="map"
+        class="absolute inset-0 border-2 border-black"
+      ></div>
 
       <!-- Bottom UI -->
       <div
+        id="bottom-ui"
         class="absolute bottom-4 left-0 right-0 z-50 pointer-events-none"
       >
-        <!-- Day Selector: vertical left on small, horizontal centered on lg+ -->
-        <section
-          class="absolute bottom-0 left-0 lg:left-1/2 lg:-translate-x-1/2 pointer-events-auto flex flex-col lg:flex-row items-start lg:items-center text-gray-900"
-          aria-label="Day selection"
-        >
-          <div
-            class="flex flex-col lg:flex-row border-2 border-black divide-y-2 divide-black lg:divide-y-0 lg:divide-x-2"
-          >
-            <button
-              data-day="0"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-              data-active="true"
-            >
-              Today
-            </button>
-            <button
-              data-day="1"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            >
-              Tomorrow
-            </button>
-            <button
-              data-day="2"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            >
-              <span class="weekday-label"></span>
-            </button>
-            <button
-              data-day="3"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            >
-              <span class="weekday-label"></span>
-            </button>
-            <button
-              data-day="4"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            >
-              <span class="weekday-label"></span>
-            </button>
-            <button
-              data-day="5"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            >
-              <span class="weekday-label"></span>
-            </button>
-            <button
-              data-day="6"
-              class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
-            >
-              <span class="weekday-label"></span>
-            </button>
-          </div>
-        </section>
-
-        <!-- Left container: empty by default; receives toggle section on lg+ via JS -->
+        <!-- Left container: days by default (small); toggles on xl+ -->
         <div
           id="bottom-left"
-          class="absolute bottom-0 left-0 pointer-events-auto flex flex-col items-start"
+          class="absolute bottom-0 left-0 pointer-events-auto flex flex-col items-start gap-4"
+        >
+          <section
+            id="day-selector"
+            class="pointer-events-auto flex flex-col min-[1100px]:flex-row items-start text-gray-900"
+            aria-label="Day selection"
+          >
+            <div
+              class="flex flex-col min-[1100px]:flex-row border-2 border-black divide-y-2 divide-black min-[1100px]:divide-y-0 min-[1100px]:divide-x-2"
+            >
+              <button
+                data-day="0"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+                data-active="true"
+              >
+                Today
+              </button>
+              <button
+                data-day="1"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              >
+                Tomorrow
+              </button>
+              <button
+                data-day="2"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              >
+                <span class="weekday-label"></span>
+              </button>
+              <button
+                data-day="3"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              >
+                <span class="weekday-label"></span>
+              </button>
+              <button
+                data-day="4"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              >
+                <span class="weekday-label"></span>
+              </button>
+              <button
+                data-day="5"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              >
+                <span class="weekday-label"></span>
+              </button>
+              <button
+                data-day="6"
+                class="day-button bg-white text-black px-6 py-3 text-xs font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors data-[active=true]:bg-sensor-good data-[active=true]:text-black"
+              >
+                <span class="weekday-label"></span>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Center container: receives days only on 1400px+; empty below that -->
+        <div
+          id="bottom-center"
+          class="absolute bottom-0 left-1/2 -translate-x-1/2 pointer-events-auto flex flex-col items-center gap-4"
         ></div>
 
-        <!-- Right container: toggle section lives here by default (small screens);
-             JS moves toggles to bottom-left on lg+ -->
+        <!-- Right container: toggles by default (small); legend always -->
         <div
           id="bottom-right"
-          class="absolute bottom-0 right-0 pointer-events-auto flex flex-col items-end"
+          class="absolute bottom-0 right-0 pointer-events-auto flex flex-col items-end gap-4"
         >
-          <!-- Toggle Controls (default position; moved by JS on lg+) -->
+          <!-- Toggle Controls: default position (small screens); JS moves them -->
           <section
             id="toggle-controls"
             class="flex flex-col text-gray-900"
             aria-label="Toggle controls"
           >
             <div
-              class="flex flex-col lg:flex-row border-2 border-black divide-y-2 divide-black lg:divide-y-0 lg:divide-x-2"
+              class="flex flex-col min-[1100px]:flex-row border-2 border-black divide-y-2 divide-black min-[1100px]:divide-y-0 min-[1100px]:divide-x-2"
             >
               <button
                 id="toggle-sensors"
