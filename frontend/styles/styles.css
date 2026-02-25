@@ -188,7 +188,8 @@ button {
 .image-modal-content,
 .details-modal-content {
   position: relative;
-  border-radius: 1rem;
+  /* border-radius: 1rem; */
+  border: 2px solid black;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -236,8 +237,9 @@ button {
 }
 
 .details-table-wrapper {
-  border-radius: 0.75rem;
-  border: 1px solid var(--table-border);
+  /* border-radius: 0.75rem; */
+  border: 2px solid black;
+  /* border: 1px solid var(--table-border); */
   background: rgba(248, 250, 252, 0.7);
   overflow: auto;
   max-height: 70vh;
@@ -267,53 +269,3 @@ button {
 .details-table-wrapper tbody tr:nth-child(odd) {
   background: var(--table-stripe);
 }
-
-/* Range Slider Styling 
-#daySlider {
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-#daySlider::-webkit-slider-track {
-  width: 100%;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-}
-
-#daySlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #10b981;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-#daySlider::-webkit-slider-thumb:hover {
-  background: #059669;
-  transform: scale(1.1);
-}
-
-#daySlider::-moz-range-track {
-  width: 100%;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-}
-
-#daySlider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: #10b981;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-#daySlider::-moz-range-thumb:hover {
-  background: #059669;
-}*/
