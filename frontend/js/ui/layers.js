@@ -62,7 +62,7 @@ export async function loadRaster(map, config, day, state) {
       type: "raster",
       source: sourceId,
       paint: {
-        "raster-opacity": 0.75,
+        "raster-opacity": 0.55,
         "raster-resampling": "linear",
       },
     },
