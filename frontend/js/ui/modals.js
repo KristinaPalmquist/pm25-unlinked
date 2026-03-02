@@ -188,37 +188,93 @@ export function renderDetailsTitle(entry) {
 export function renderDetailsTable(entry) {
   if (!ui.detailsTableHead || !ui.detailsTableBody) return;
   if (!entry.rows || entry.rows.length === 0) return;
+
   const headers = (
     state.csvHeaders.length
       ? state.csvHeaders
       : Object.keys(entry.rows[0] || {})
   ).filter((h) => !HIDDEN_COLUMNS.has(h));
+
   if (!headers.length) return;
 
   ui.detailsTableHead.innerHTML = '';
   ui.detailsTableBody.innerHTML = '';
 
   const headRow = document.createElement('tr');
+  headRow.className = "bg-black text-white uppercase text-[10px] tracking-wider";
+
   headers.forEach((h) => {
     const th = document.createElement('th');
-    th.textContent = h;
+    const cleanHeader = h.replace(/_/g, ' ').replace(/concentration/i, '').trim();
+    th.textContent = cleanHeader;
+    th.className = "px-3 py-2 border-r border-white last:border-r-0 text-left font-bold";
     headRow.appendChild(th);
   });
   ui.detailsTableHead.appendChild(headRow);
 
-  entry.rows.forEach((row) => {
+  entry.rows.forEach((row, idx) => {
     const tr = document.createElement('tr');
+    tr.className = idx % 2 === 0 ? "bg-white" : "bg-gray-50";
+    
     headers.forEach((h) => {
       const td = document.createElement('td');
       const value = row[h] ?? '';
-      const isDateColumn = h.toLowerCase() === 'date';
+      const isDate = h.toLowerCase().includes('date') || h.toLowerCase().includes('time');
       const numValue = parseFloat(value);
-      td.textContent =
-        !isDateColumn && Number.isFinite(numValue)
-          ? numValue.toFixed(3)
-          : value;
+
+      if (!isDate && Number.isFinite(numValue)) {
+        td.textContent = numValue.toFixed(2); 
+        td.className = "px-3 py-1 border-r border-black font-mono text-right"; 
+      } else {
+        td.textContent = value;
+        td.className = "px-3 py-1 border-r border-black text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]";
+      }
+      
+      td.classList.add("last:border-r-0");
       tr.appendChild(td);
     });
     ui.detailsTableBody.appendChild(tr);
   });
+
+  const tableContainer = ui.detailsTableBody.closest('table');
+  if (tableContainer) {
+    tableContainer.className = "w-full border-collapse border-2 border-black text-xs mb-4";
+  }
+
+
+  // if (!ui.detailsTableHead || !ui.detailsTableBody) return;
+  // if (!entry.rows || entry.rows.length === 0) return;
+  // const headers = (
+  //   state.csvHeaders.length
+  //     ? state.csvHeaders
+  //     : Object.keys(entry.rows[0] || {})
+  // ).filter((h) => !HIDDEN_COLUMNS.has(h));
+  // if (!headers.length) return;
+
+  // ui.detailsTableHead.innerHTML = '';
+  // ui.detailsTableBody.innerHTML = '';
+
+  // const headRow = document.createElement('tr');
+  // headers.forEach((h) => {
+  //   const th = document.createElement('th');
+  //   th.textContent = h;
+  //   headRow.appendChild(th);
+  // });
+  // ui.detailsTableHead.appendChild(headRow);
+
+  // entry.rows.forEach((row) => {
+  //   const tr = document.createElement('tr');
+  //   headers.forEach((h) => {
+  //     const td = document.createElement('td');
+  //     const value = row[h] ?? '';
+  //     const isDateColumn = h.toLowerCase() === 'date';
+  //     const numValue = parseFloat(value);
+  //     td.textContent =
+  //       !isDateColumn && Number.isFinite(numValue)
+  //         ? numValue.toFixed(3)
+  //         : value;
+  //     tr.appendChild(td);
+  //   });
+  //   ui.detailsTableBody.appendChild(tr);
+  // });
 }
