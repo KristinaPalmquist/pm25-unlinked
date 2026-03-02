@@ -111,7 +111,6 @@ export function openDetailsModal(sensorId) {
     `;
   }
 
-  // Forecast + Hindcast Images (conditionally shown)
   ensureDetailsPlotsContainer();
 
   const forecastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;

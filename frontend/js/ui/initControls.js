@@ -1,4 +1,4 @@
-import { state, ui } from './index.js';
+import { state, ui } from "./index.js";
 
 export function initControls(
   map,
@@ -15,80 +15,102 @@ export function initControls(
   },
 ) {
   console.log(`🎮 Initializing controls...`);
-  console.log(`   Day buttons found: ${ui.dayButtons.length}`);
-  console.log(`   Overlay toggle: ${ui.overlayToggle ? 'found' : 'NOT FOUND'}`);
-  console.log(`   Overlay active: ${ui.overlayToggle?.dataset.active}`);
+  console.log(
+    `   Day buttons found: ${ui.dayButtons.length}`,
+  );
+  console.log(
+    `   Overlay toggle: ${ui.overlayToggle ? "found" : "NOT FOUND"}`,
+  );
+  console.log(
+    `   Overlay active: ${ui.overlayToggle?.dataset.active}`,
+  );
 
   // Set weekday labels dynamically
   const today = new Date();
   const weekdays = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
   ];
 
-  document.querySelectorAll('.weekday-label').forEach((label, index) => {
-    const dayOffset = index + 2; // Start from day +2
-    const futureDate = new Date(today);
-    futureDate.setDate(today.getDate() + dayOffset);
-    label.textContent = weekdays[futureDate.getDay()];
-  });
+  document
+    .querySelectorAll(".weekday-label")
+    .forEach((label, index) => {
+      const dayOffset = index + 2; // Start from day +2
+      const futureDate = new Date(today);
+      futureDate.setDate(today.getDate() + dayOffset);
+      label.textContent = weekdays[futureDate.getDay()];
+    });
 
   // Initialize day buttons
   ui.dayButtons.forEach((button) => {
-    button.addEventListener('click', async () => {
+    button.addEventListener("click", async () => {
       const day = Number(button.dataset.day);
       state.currentDay = day;
-
-      console.log(`🔘 Day button clicked: ${day}`);
 
       // Update active state for all buttons
       ui.dayButtons.forEach((btn) => {
         const isActive = btn.dataset.day === String(day);
-        btn.dataset.active = isActive ? 'true' : 'false';
+        btn.dataset.active = isActive ? "true" : "false";
       });
 
       // Only load raster if overlay is enabled
-      const overlayEnabled = ui.overlayToggle?.dataset.active === 'true';
+      const overlayEnabled =
+        ui.overlayToggle?.dataset.active === "true";
 
       try {
         await loadRaster(map, config, day, state);
       } catch (err) {
-        console.error(`❌ Failed to load raster for day ${day}:`, err);
+        console.error(
+          `❌ Failed to load raster for day ${day}:`,
+          err,
+        );
       }
 
-      if (state.activeMarkerEl && ui.focusDetailsBtn?.dataset?.sensorId) {
-        updateFocusPanelValue(ui.focusDetailsBtn.dataset.sensorId);
+      if (
+        state.activeMarkerEl &&
+        ui.focusDetailsBtn?.dataset?.sensorId
+      ) {
+        updateFocusPanelValue(
+          ui.focusDetailsBtn.dataset.sensorId,
+        );
       }
     });
   });
 
-  ui.overlayToggle?.addEventListener('click', async () => {
-    const isActive = ui.overlayToggle.dataset.active === 'true';
+  ui.overlayToggle?.addEventListener("click", async () => {
+    const isActive =
+      ui.overlayToggle.dataset.active === "true";
     const newActive = !isActive;
     ui.overlayToggle.dataset.active = String(newActive);
 
     // Toggle heatmap-active class on body for UI styling
     if (newActive) {
-      document.body.classList.add('heatmap-active');
+      document.body.classList.add("heatmap-active");
       try {
-        await loadRaster(map, config, state.currentDay, state);
+        await loadRaster(
+          map,
+          config,
+          state.currentDay,
+          state,
+        );
       } catch (err) {
         // Keep the toggle on but remove the styling class since overlay didn't load
-        document.body.classList.remove('heatmap-active');
+        document.body.classList.remove("heatmap-active");
       }
     } else {
-      document.body.classList.remove('heatmap-active');
+      document.body.classList.remove("heatmap-active");
       removeRasterLayer(map);
     }
   });
 
-  ui.sensorToggle?.addEventListener('click', () => {
-    const isActive = ui.sensorToggle.dataset.active === 'true';
+  ui.sensorToggle?.addEventListener("click", () => {
+    const isActive =
+      ui.sensorToggle.dataset.active === "true";
     const newActive = !isActive;
     ui.sensorToggle.dataset.active = String(newActive);
 
@@ -96,31 +118,49 @@ export function initControls(
     state.markers.forEach((marker) => {
       const element = marker.getElement();
       if (element) {
-        element.style.display = newActive ? 'block' : 'none';
+        element.style.display = newActive
+          ? "block"
+          : "none";
       }
     });
 
     if (!newActive) clearFocus();
   });
 
-  ui.focusDetailsBtn?.addEventListener('click', () => {
+  ui.focusDetailsBtn?.addEventListener("click", () => {
     if (ui.focusDetailsBtn.dataset.sensorId)
       openDetailsModal(ui.focusDetailsBtn.dataset.sensorId);
   });
-  ui.imageModalClose?.addEventListener('click', closeImageModal);
-  ui.imageModalBackdrop?.addEventListener('click', closeImageModal);
-  ui.detailsModalClose?.addEventListener('click', closeDetailsModal);
-  ui.detailsModalBackdrop?.addEventListener('click', closeDetailsModal);
+  ui.imageModalClose?.addEventListener(
+    "click",
+    closeImageModal,
+  );
+  ui.imageModalBackdrop?.addEventListener(
+    "click",
+    closeImageModal,
+  );
+  ui.detailsModalClose?.addEventListener(
+    "click",
+    closeDetailsModal,
+  );
+  ui.detailsModalBackdrop?.addEventListener(
+    "click",
+    closeDetailsModal,
+  );
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
       if (state.modals.image) closeImageModal();
       if (state.modals.details) closeDetailsModal();
     }
   });
 
-  map.on('click', (e) => {
-    if (!e.originalEvent?.target?.classList?.contains('sensor-marker'))
+  map.on("click", (e) => {
+    if (
+      !e.originalEvent?.target?.classList?.contains(
+        "sensor-marker",
+      )
+    )
       clearFocus();
   });
 }
