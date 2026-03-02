@@ -114,48 +114,11 @@ export function openDetailsModal(sensorId) {
   // Forecast + Hindcast Images (conditionally shown)
   ensureDetailsPlotsContainer();
 
-  const forecastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
-  const hindcastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
+  const forecastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
+  const hindcastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
 
-  // Helper: check if image exists
-  function imageExists(url) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('HEAD', url, false);
-    xhr.send();
-    return xhr.status >= 200 && xhr.status < 300;
-  }
-
-  const hasForecast = imageExists(forecastPath);
-  const hasHindcast = imageExists(hindcastPath);
-
-  // Update UI based on availability
-  if (hasForecast) {
-    updateDetailsImage(
-      'details-forecast-card',
-      'details-forecast-thumb',
-      forecastPath,
-    );
-    document.getElementById('details-forecast-card').classList.remove('hidden');
-  } else {
-    document.getElementById('details-forecast-card').classList.add('hidden');
-  }
-
-  if (hasHindcast) {
-    updateDetailsImage(
-      'details-hindcast-card',
-      'details-hindcast-thumb',
-      hindcastPath,
-    );
-    document.getElementById('details-hindcast-card').classList.remove('hidden');
-  } else {
-    document.getElementById('details-hindcast-card').classList.add('hidden');
-  }
-
-  // If neither image exists → hide both cards entirely
-  if (!hasForecast && !hasHindcast) {
-    document.getElementById('details-forecast-card').classList.add('hidden');
-    document.getElementById('details-hindcast-card').classList.add('hidden');
-  }
+  updateDetailsImage('details-forecast-card', 'details-forecast-thumb', forecastPath);
+  updateDetailsImage('details-hindcast-card', 'details-hindcast-thumb', hindcastPath);
 
   // Table
   renderDetailsTable(entry);
