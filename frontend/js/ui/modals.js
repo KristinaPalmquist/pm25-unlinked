@@ -14,22 +14,26 @@ function ensureDetailsPlotsContainer() {
     plotRow = document.createElement('div');
     plotRow.className = 'details-plot-row flex gap-3';
     plotRow.innerHTML = `
-      <div id="details-forecast-card" class="focus-image-card hidden">
-        <p class="text-sm text-gray-700 font-semibold">Forecast</p>
+      <div id="details-forecast-card" class="focus-image-card hidden flex-1 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-2">
+      <p class="text-xs uppercase tracking-widest text-black font-bold mb-2 border-b-2 border-black pb-1">Forecast</p>
+      <div class="overflow-hidden bg-gray-100 border border-gray-200">
         <img
           id="details-forecast-thumb"
-          class="focus-thumb hidden"
+          class="focus-thumb hidden w-full h-auto cursor-pointer hover:scale-[1.02] transition-transform"
           alt="Forecast plot"
         />
       </div>
-      <div id="details-hindcast-card" class="focus-image-card hidden">
-        <p class="text-sm text-gray-700 font-semibold">Hindcast</p>
+    </div>
+    <div id="details-hindcast-card" class="focus-image-card hidden flex-1 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-2">
+      <p class="text-xs uppercase tracking-widest text-black font-bold mb-2 border-b-2 border-black pb-1">Hindcast</p>
+      <div class="overflow-hidden bg-gray-100 border border-gray-200">
         <img
           id="details-hindcast-thumb"
-          class="focus-thumb hidden"
+          class="focus-thumb hidden w-full h-auto cursor-pointer hover:scale-[1.02] transition-transform"
           alt="Hindcast plot"
         />
       </div>
+    </div>
     `;
 
     const tableWrapper = content.querySelector('.details-table-wrapper');
