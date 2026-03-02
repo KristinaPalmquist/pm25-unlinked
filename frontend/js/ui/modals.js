@@ -189,6 +189,19 @@ export function renderDetailsTable(entry) {
   if (!ui.detailsTableHead || !ui.detailsTableBody) return;
   if (!entry.rows || entry.rows.length === 0) return;
 
+  const headerMap = {
+    date: 'Date',
+    predicted_pm25: 'Pred',
+    pm25: 'Actual',
+    days_before_forecast_day: 'Days Out',
+    predicted_pm25_rolling_3d: 'Roll 3d',
+    predicted_pm25_lag_1d: 'Lag 1',
+    predicted_pm25_lag_2d: 'Lag 2',
+    predicted_pm25_lag_3d: 'Lag 3',
+    predicted_pm25_nearby_avg: 'Nb Avg',
+    city: 'City',
+  };
+
   const headers = (
     state.csvHeaders.length
       ? state.csvHeaders
@@ -201,36 +214,44 @@ export function renderDetailsTable(entry) {
   ui.detailsTableBody.innerHTML = '';
 
   const headRow = document.createElement('tr');
-  headRow.className = "bg-black text-white uppercase text-[10px] tracking-wider";
+  headRow.className =
+    'bg-black text-white uppercase text-[10px] tracking-wider';
 
   headers.forEach((h) => {
     const th = document.createElement('th');
-    const cleanHeader = h.replace(/_/g, ' ').replace(/concentration/i, '').trim();
-    th.textContent = cleanHeader;
-    th.className = "px-3 py-2 border-r border-white last:border-r-0 text-left font-bold";
+    const cleanHeader = h
+      .replace(/_/g, ' ')
+      .replace(/concentration/i, '')
+      .trim();
+    th.textContent =
+      headerMap[h.toLowerCase()] || h.replace(/_/g, ' ').substring(0, 10);
+    th.className =
+      'px-2 py-2 border-r border-white last:border-r-0 text-left';
     headRow.appendChild(th);
   });
   ui.detailsTableHead.appendChild(headRow);
 
   entry.rows.forEach((row, idx) => {
     const tr = document.createElement('tr');
-    tr.className = idx % 2 === 0 ? "bg-white" : "bg-gray-50";
-    
+    tr.className = idx % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+
     headers.forEach((h) => {
       const td = document.createElement('td');
       const value = row[h] ?? '';
-      const isDate = h.toLowerCase().includes('date') || h.toLowerCase().includes('time');
+      const isDate =
+        h.toLowerCase().includes('date') || h.toLowerCase().includes('time');
       const numValue = parseFloat(value);
 
       if (!isDate && Number.isFinite(numValue)) {
-        td.textContent = numValue.toFixed(2); 
-        td.className = "px-3 py-1 border-r border-black font-mono text-right"; 
+        td.textContent = numValue.toFixed(2);
+        td.className = 'px-3 py-1 border-r border-black font-mono text-right';
       } else {
         td.textContent = value;
-        td.className = "px-3 py-1 border-r border-black text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]";
+        td.className =
+          'px-3 py-1 border-r border-black text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]';
       }
-      
-      td.classList.add("last:border-r-0");
+
+      td.classList.add('last:border-r-0');
       tr.appendChild(td);
     });
     ui.detailsTableBody.appendChild(tr);
@@ -238,9 +259,9 @@ export function renderDetailsTable(entry) {
 
   const tableContainer = ui.detailsTableBody.closest('table');
   if (tableContainer) {
-    tableContainer.className = "w-full border-collapse border-2 border-black text-xs mb-4";
+    tableContainer.className =
+      'w-full border-collapse border-2 border-black text-xs mb-4';
   }
-
 
   // if (!ui.detailsTableHead || !ui.detailsTableBody) return;
   // if (!entry.rows || entry.rows.length === 0) return;
