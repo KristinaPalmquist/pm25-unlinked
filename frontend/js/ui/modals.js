@@ -46,20 +46,14 @@ function ensureDetailsPlotsContainer() {
 function updateDetailsImage(cardId, thumbId, url) {
   const cardEl = document.getElementById(cardId);
   const thumbEl = document.getElementById(thumbId);
-  if (!cardEl || !thumbEl) return;
+  if (!cardEl || !thumbEl) {
+    return;
+  }
 
-  fetch(url, { method: 'HEAD' })
-    .then((response) => {
-      if (response.ok) {
-        thumbEl.src = url;
-        thumbEl.classList.remove('hidden');
-        cardEl.classList.remove('hidden');
-        thumbEl.onclick = () => openImageModal(url);
-      } else {
-        hideDetailsImage(cardId, thumbId);
-      }
-    })
-    .catch(() => hideDetailsImage(cardId, thumbId));
+  thumbEl.src = url;
+  thumbEl.classList.remove('hidden');
+  cardEl.classList.remove('hidden');
+  thumbEl.onClick = () => openImageModal(url);
 }
 
 function hideDetailsImage(cardId, thumbId) {
@@ -69,7 +63,7 @@ function hideDetailsImage(cardId, thumbId) {
   thumbEl.src = '';
   thumbEl.classList.add('hidden');
   cardEl.classList.add('hidden');
-  thumbEl.onclick = null;
+  thumbEl.onClick = null;
 }
 
 export function openImageModal(src) {
@@ -86,13 +80,88 @@ export function closeImageModal() {
   state.modals.image = false;
 }
 
-export function openDetailsModal(sensorId) {
-  if (!ui.detailsModal) return;
+export async function openDetailsModal(sensorId) {
+  if (!ui.detailsModal) {
+    return;
+  }
 
   const entry = state.sensorData[sensorId];
-  if (!entry || !entry.rows.length) return;
+  if (!entry || !entry.rows.length) {
+    return;
+  }
 
-  // Title
+  renderDetailsTitle(entry);
+
+  const forecastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
+  const hindcastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
+
+  // Helper: check if image exists
+  async function imageExists(url) {
+    try {
+      const res = await fetch(url, { method: 'HEAD' });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  const [hasForecast, hasHindcast] = await Promise.all([
+    imageExists(forecastPath),
+    imageExists(hindcastPath),
+  ]);
+
+  const plotRow = ensureDetailsPlotsContainer();
+  const tableWrapper = ui.detailsModal.querySelector('.details-table-wrapper');
+
+  if (hasForecast || hasHindcast) {
+    // show images, hide table
+    plotRow.classList.remove('hidden');
+    if (tableWrapper) {
+      tableWrapper.classList.add('hidden');
+    }
+
+    if (hasForecast) {
+      updateDetailsImage(
+        'details-forecast-card',
+        'details-forecast-thumb',
+        forecastPath,
+      );
+    } else {
+      hideDetailsImage('details-forecast-card', 'details-forecast-thumb');
+    }
+
+    if (hasHindcast) {
+      updateDetailsImage(
+        'details-hindcast-card',
+        'details-hindcast-thumb',
+        hindcastPath,
+      );
+    } else {
+      hideDetailsImage('details-hindcast-card', 'details-hindcast-thumb');
+    }
+  } else {
+    // hide images, show table
+    plotRow.classList.add('hidden');
+    if (tableWrapper) {
+      tableWrapper.classList.remove('hidden');
+    }
+    renderDetailsTable(entry);
+  }
+
+  // show modal
+  ui.detailsModal.classList.remove('hidden');
+  state.modals.details = true;
+}
+
+export function closeDetailsModal() {
+  if (!ui.detailsModal) return;
+  ui.detailsModal.classList.add('hidden');
+  state.modals.details = false;
+  hideDetailsImage('details-forecast-card', 'details-forecast-thumb');
+  hideDetailsImage('details-hindcast-card', 'details-hindcast-thumb');
+}
+
+export function renderDetailsTitle(entry) {
   if (ui.detailsModalTitle) {
     const id = entry.sensorId;
     const street = entry.street || '';
@@ -110,6 +179,7 @@ export function openDetailsModal(sensorId) {
       <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude: ${lon}</p>
     `;
   }
+<<<<<<< Updated upstream
 
   ensureDetailsPlotsContainer();
 
@@ -174,6 +244,8 @@ export function closeDetailsModal() {
   state.modals.details = false;
   hideDetailsImage('details-forecast-card', 'details-forecast-thumb');
   hideDetailsImage('details-hindcast-card', 'details-hindcast-thumb');
+=======
+>>>>>>> Stashed changes
 }
 
 export function renderDetailsTable(entry) {
