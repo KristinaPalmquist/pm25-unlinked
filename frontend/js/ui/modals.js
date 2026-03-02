@@ -92,8 +92,8 @@ export async function openDetailsModal(sensorId) {
 
   renderDetailsTitle(entry);
 
-  const forecastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
-  const hindcastPath = `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
+  const forecastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
+  const hindcastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
 
   // Helper: check if image exists
   async function imageExists(url) {
@@ -179,73 +179,6 @@ export function renderDetailsTitle(entry) {
       <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude: ${lon}</p>
     `;
   }
-<<<<<<< Updated upstream
-
-  ensureDetailsPlotsContainer();
-
-  const forecastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`;
-  const hindcastPath = `./sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`;
-
-  updateDetailsImage('details-forecast-card', 'details-forecast-thumb', forecastPath);
-  updateDetailsImage('details-hindcast-card', 'details-hindcast-thumb', hindcastPath);
-
-  // Table
-  renderDetailsTable(entry);
-
-  // Show modal
-  ui.detailsModal.classList.remove('hidden');
-  state.modals.details = true;
-}
-
-// export function openDetailsModal(sensorId) {
-//   if (!ui.detailsModal) return;
-//   const entry = state.sensorData[sensorId];
-//   if (!entry || !entry.rows.length) return;
-
-//   if (ui.detailsModalTitle) {
-//     const id = entry.sensorId;
-//     const street = entry.street || '';
-//     const city = entry.city || '';
-//     const lat = entry.lat;
-//     const lon = entry.lon;
-
-//     function capitalize(str) {
-//       if (!str) return '';
-//       return str.charAt(0).toUpperCase() + str.slice(1);
-//     }
-
-//     ui.detailsModalTitle.innerHTML = `
-//       <h3 class="font-semibold text-lg">Sensor id: ${id}, Location: ${capitalize(street)}, ${capitalize(city)}</h3>
-//       <p class="text-sm text-gray-700">Latitude: ${lat}, Longitude ${lon}</p>
-//     `;
-//   }
-
-//   /// Forecast + Hindcast Plots
-//   ensureDetailsPlotsContainer();
-//   updateDetailsImage(
-//     'details-forecast-card',
-//     'details-forecast-thumb',
-//     `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_forecast.png`,
-//   );
-//   updateDetailsImage(
-//     'details-hindcast-card',
-//     'details-hindcast-thumb',
-//     `./frontend/sensor_images/${sensorId}/${sensorId}_${today_short}_hindcast.png`,
-//   );
-
-//   renderDetailsTable(entry);
-//   ui.detailsModal.classList.remove('hidden');
-//   state.modals.details = true;
-// }
-
-export function closeDetailsModal() {
-  if (!ui.detailsModal) return;
-  ui.detailsModal.classList.add('hidden');
-  state.modals.details = false;
-  hideDetailsImage('details-forecast-card', 'details-forecast-thumb');
-  hideDetailsImage('details-hindcast-card', 'details-hindcast-thumb');
-=======
->>>>>>> Stashed changes
 }
 
 export function renderDetailsTable(entry) {
