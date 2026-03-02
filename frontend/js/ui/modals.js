@@ -199,14 +199,13 @@ export function renderDetailsTable(entry) {
     predicted_pm25_lag_2d: 'Lag 2',
     predicted_pm25_lag_3d: 'Lag 3',
     predicted_pm25_nearby_avg: 'Nb Avg',
-    city: 'City',
   };
 
   const headers = (
     state.csvHeaders.length
       ? state.csvHeaders
       : Object.keys(entry.rows[0] || {})
-  ).filter((h) => !HIDDEN_COLUMNS.has(h));
+  ).filter((h) => !HIDDEN_COLUMNS.has(h) && h.toLowerCase() !== 'city');
 
   if (!headers.length) return;
 
@@ -225,8 +224,7 @@ export function renderDetailsTable(entry) {
       .trim();
     th.textContent =
       headerMap[h.toLowerCase()] || h.replace(/_/g, ' ').substring(0, 10);
-    th.className =
-      'px-2 py-2 border-r border-white last:border-r-0 text-left';
+    th.className = 'px-2 py-2 border-r border-white last:border-r-0 text-left';
     headRow.appendChild(th);
   });
   ui.detailsTableHead.appendChild(headRow);
@@ -238,20 +236,23 @@ export function renderDetailsTable(entry) {
     headers.forEach((h) => {
       const td = document.createElement('td');
       const value = row[h] ?? '';
-      const isDate =
-        h.toLowerCase().includes('date') || h.toLowerCase().includes('time');
+      const hLower = h.toLowerCase();
+      const isDate = hLower.includes('date');
       const numValue = parseFloat(value);
 
       if (!isDate && Number.isFinite(numValue)) {
-        td.textContent = numValue.toFixed(2);
-        td.className = 'px-3 py-1 border-r border-black font-mono text-right';
+        if (hLower === 'days_before_forecast_day') {
+          td.textContent = Math.round(numValue);
+        } else {
+          td.textContent = numValue.toFixed(2);
+        }
+        td.className =
+          'px-2 py-1 border-r border-black last:border-r-0 text-right font-mono text-[11px]';
       } else {
         td.textContent = value;
         td.className =
-          'px-3 py-1 border-r border-black text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]';
+          'px-2 py-1 border-r border-black last:border-r-0 text-left font-swiss text-[11px] whitespace-nowrap';
       }
-
-      td.classList.add('last:border-r-0');
       tr.appendChild(td);
     });
     ui.detailsTableBody.appendChild(tr);
